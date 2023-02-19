@@ -181,7 +181,7 @@ C:\git\vcpkg\packages\protobuf_x64-windows-static\include/google/protobuf/stubs/
    constexpr WrappedMutex() {}
 ```
 
-(StackOverflow explanation)[https://stackoverflow.com/questions/69232278/c-protocol-buffer-temporary-of-non-literal-type-googleprotobufinternal]
+[StackOverflow explanation](https://stackoverflow.com/questions/69232278/c-protocol-buffer-temporary-of-non-literal-type-googleprotobufinternal)
 
 
 Solution
