@@ -1,0 +1,172 @@
+syntax = "proto3";
+
+package mgp;
+
+// import "google/api/annotations.proto";
+
+option cc_enable_arenas = true;
+option java_package = "com.commandus.mgp";
+
+// ------------ request & responses -------------
+
+/// Attribute
+/// Searching attribute. Reserved. 
+//  Non-persistent
+message Attribute
+{
+    uint64 id = 1;
+    string name = 2;
+    string value = 3;
+}
+
+/// OperationResponse
+/// setXXX, rmXXX operation response
+message OperationResponse 
+{
+    int32 code = 1;
+    uint64 id = 2;                               ///< identifier of just created object
+}
+
+/// ListRequest 
+/// Optional "paging" for lists
+message ListRequest 
+{
+    uint32 start = 1;                            ///< 0..
+    uint32 size = 2;                             ///< <=0- set limit by app, e.g. 1024
+}
+
+/// SearchRequest
+/// Search smth. Usually you must sent some attribbute in the object to find out.
+/// Refer to implementation for more details.
+/// Attributes reserved.
+message SearchRequest 
+{
+    repeated Attribute attributes = 1;
+    ListRequest listrequest = 2;
+}
+
+// ------------ Authentication -------------
+
+/// Not in use in this version
+
+message Credentials
+{
+    uint64 id = 1;                               ///< Record identifier
+    uint32 start = 2;                            ///< date of issue, Unix epoch
+    uint32 finish = 3;                           ///< expiration date, Unix epoch (always 0)
+    uint32 lastlogin = 4;                        ///< date of last login, Unix epoch. Helps remove never used credentials
+    string mk = 5;                               ///< magic key
+    string mv =  6;                              ///< magic value
+}
+
+/// User
+//  Persistent
+message User
+{
+    uint64 id = 1;                               ///< 
+    string cn = 2;                               ///< user name
+    Credentials credentials = 3;                 ///< Credentials
+    uint32 role = 4;                             ///< Role number. 0- ordinal user, 10- admin. Reserved
+}
+
+// ------------ Model -------------
+
+/// Photo, audio or video file attached to Label/User
+//  non persistent
+message MediaFile
+{
+    uint64 id = 1;                               ///< 
+    string content_type = 2;                     ///< e.g. image/png
+    string uri = 3;                              ///< null is recommended. Use data instead.
+    uint64 content_length = 4;                   ///< >0 if data is not null
+    bytes data = 5;                              ///< not null if uri is null
+    uint32 tag = 6;                              ///< reserved for internal processing
+}
+
+/// Person
+/// for employees only
+//  Persistent
+message Person
+{
+    uint64 id = 1;                               ///< Identifier
+    string first_name = 2;                       ///< Imya
+    string last_name = 3;                        ///< Familia
+    string middle_name = 4;                      ///< Otchestvo
+    string prefix = 5;                           ///< e.g. doctor
+    uint32 birthday = 6;                         ///< date of birth ()
+    string document_type = 7;                    ///< N- none, P- domestic passport, ..
+    string document = 8;                         ///< document number, issuer, dates: issue, expiration
+    string phone_mobile = 9;                     ///< E.164 phone number e.g. 74112123456
+    string email = 10;                           ///< without "mailto:" e.g. willie@acme.com
+    uint32 gender = 11;                          ///< 0- unknown, 1- male, 2- female
+    uint32 tag = 12;                             ///< reserved for internal processing
+    repeated MediaFile medias = 13;              ///< photo, audio, video
+}
+
+/// Employee
+//  Persistent
+message Employee
+{
+    uint64 id = 1;                               ///< Identifier
+    uint32 role_number = 2;                      ///< 0- unknown, 1- staff, 10- manager
+    string name = 3;                             ///< position or special nick name
+    Person person = 4;                           ///< personal data
+    User user = 5;                               ///< user name and credentials if exists
+    repeated MediaFile medias = 6;               ///< photo, audio, video
+}
+
+/// Org
+//  Persistent
+message Org
+{
+    uint64 id = 1;                               ///< Identifier
+    string name = 2;                             ///< nickname, some special signs
+    Employee manager = 3;                        ///< Organization contact person
+    repeated MediaFile medias = 4;               ///< photo, audio, video
+}
+
+/// Vehicle
+//  Persistent
+message Inventory
+{
+    uint64 id = 1;                               ///< Identifier 
+    Org org = 2;                                 ///< Owner
+    uint64 inventory_number = 3;                 ///< Number
+    string name = 4;                             ///< nickname, some special signs 
+    repeated MediaFile medias = 5;               ///< photo, audio, video
+}
+
+// ------------ Requests && Responses -------
+//  All responses are non persistent
+
+/// InventoryListRequest
+message InventoryListRequest
+{
+    Inventory inventory = 1;                     ///< search criteria
+    ListRequest listrequest = 2;                 ///< reserved
+}
+
+/// InventoryListResponse
+message InventoryListResponse
+{
+    OperationResponse response = 1;
+    repeated Inventory inventory = 2;            ///< Inventory array
+}
+
+// ------------ RPC -------------
+
+service Mgp
+{
+    // user manipulation
+    rpc getUser(User) returns (User) {}
+    rpc addUser(User) returns (User) {}
+    rpc rmUser(User) returns (OperationResponse) {}
+    rpc setUser(User) returns (OperationResponse) {}
+    // List inventory on given route
+    rpc lsInventory(InventoryListRequest) returns (InventoryListResponse) {
+//        option (google.api.http) = {
+//          post: "/invemtory"
+//          body: "*"
+//        };
+    }
+}
