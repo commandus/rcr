@@ -255,7 +255,7 @@ namespace odb
     // start_
     //
     {
-      // From pragmas.pgsql.hxx:97:32
+      // From pragmas.pgsql.hxx:97:3
       ::google::protobuf::uint32 const& v =
         o.start ();
 
@@ -270,7 +270,7 @@ namespace odb
     // finish_
     //
     {
-      // From pragmas.pgsql.hxx:98:33
+      // From pragmas.pgsql.hxx:98:3
       ::google::protobuf::uint32 const& v =
         o.finish ();
 
@@ -285,7 +285,7 @@ namespace odb
     // lastlogin_
     //
     {
-      // From pragmas.pgsql.hxx:99:36
+      // From pragmas.pgsql.hxx:99:3
       ::google::protobuf::uint32 const& v =
         o.lastlogin ();
 
@@ -300,7 +300,7 @@ namespace odb
     // mk
     //
     {
-      // From pragmas.pgsql.hxx:100:49
+      // From pragmas.pgsql.hxx:100:3
       ::std::string const& v =
         o.mk ();
 
@@ -322,7 +322,7 @@ namespace odb
     // mv
     //
     {
-      // From pragmas.pgsql.hxx:101:49
+      // From pragmas.pgsql.hxx:101:3
       ::std::string const& v =
         o.mv ();
 
@@ -356,7 +356,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:96:37
+      // From pragmas.pgsql.hxx:96:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -366,14 +366,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:96:37
+      // From pragmas.pgsql.hxx:96:2
       o.set_id (v);
     }
 
     // start_
     //
     {
-      // From pragmas.pgsql.hxx:97:43
+      // From pragmas.pgsql.hxx:97:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -383,14 +383,14 @@ namespace odb
         i.start_value,
         i.start_null);
 
-      // From pragmas.pgsql.hxx:97:43
+      // From pragmas.pgsql.hxx:97:3
       o.set_start (v);
     }
 
     // finish_
     //
     {
-      // From pragmas.pgsql.hxx:98:45
+      // From pragmas.pgsql.hxx:98:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -400,14 +400,14 @@ namespace odb
         i.finish_value,
         i.finish_null);
 
-      // From pragmas.pgsql.hxx:98:45
+      // From pragmas.pgsql.hxx:98:3
       o.set_finish (v);
     }
 
     // lastlogin_
     //
     {
-      // From pragmas.pgsql.hxx:99:51
+      // From pragmas.pgsql.hxx:99:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -417,14 +417,14 @@ namespace odb
         i.lastlogin_value,
         i.lastlogin_null);
 
-      // From pragmas.pgsql.hxx:99:51
+      // From pragmas.pgsql.hxx:99:3
       o.set_lastlogin (v);
     }
 
     // mk
     //
     {
-      // From pragmas.pgsql.hxx:100:57
+      // From pragmas.pgsql.hxx:100:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -435,14 +435,14 @@ namespace odb
         i.mk_size,
         i.mk_null);
 
-      // From pragmas.pgsql.hxx:100:57
+      // From pragmas.pgsql.hxx:100:3
       o._internal_set_mk (v);
     }
 
     // mv
     //
     {
-      // From pragmas.pgsql.hxx:101:57
+      // From pragmas.pgsql.hxx:101:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -453,7 +453,7 @@ namespace odb
         i.mv_size,
         i.mv_null);
 
-      // From pragmas.pgsql.hxx:101:57
+      // From pragmas.pgsql.hxx:101:3
       o._internal_set_mv (v);
     }
   }
@@ -569,7 +569,7 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:96:37
+    // From pragmas.pgsql.hxx:96:2
     obj.set_id (id (sts.id_image ()));
 
     callback (db,
@@ -592,7 +592,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:96:29
+    // From pragmas.pgsql.hxx:96:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -769,7 +769,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:96:29
+    // From pragmas.pgsql.hxx:96:2
     const id_type& id  (
       obj.id ());
 
@@ -1126,7 +1126,7 @@ namespace odb
     // credentials_
     //
     {
-      // From pragmas.pgsql.hxx:106:31
+      // From pragmas.pgsql.hxx:106:3
       ::mgp::Credentials* const& v =
         o.credentials_;
 
@@ -1152,7 +1152,7 @@ namespace odb
     // role_
     //
     {
-      // From pragmas.pgsql.hxx:107:24
+      // From pragmas.pgsql.hxx:107:3
       ::google::protobuf::uint32 const& v =
         o.role ();
 
@@ -1167,7 +1167,7 @@ namespace odb
     // cn
     //
     {
-      // From pragmas.pgsql.hxx:105:42
+      // From pragmas.pgsql.hxx:105:3
       ::std::string const& v =
         o.cn ();
 
@@ -1201,7 +1201,7 @@ namespace odb
     // credentials_
     //
     {
-      // From pragmas.pgsql.hxx:106:31
+      // From pragmas.pgsql.hxx:106:3
       ::mgp::Credentials*& v =
         o.credentials_;
 
@@ -1233,7 +1233,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:104:30
+      // From pragmas.pgsql.hxx:104:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -1243,14 +1243,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:104:30
+      // From pragmas.pgsql.hxx:104:2
       o.set_id (v);
     }
 
     // role_
     //
     {
-      // From pragmas.pgsql.hxx:107:34
+      // From pragmas.pgsql.hxx:107:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -1260,14 +1260,14 @@ namespace odb
         i.role_value,
         i.role_null);
 
-      // From pragmas.pgsql.hxx:107:34
+      // From pragmas.pgsql.hxx:107:3
       o.set_role (v);
     }
 
     // cn
     //
     {
-      // From pragmas.pgsql.hxx:105:50
+      // From pragmas.pgsql.hxx:105:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -1278,7 +1278,7 @@ namespace odb
         i.cn_size,
         i.cn_null);
 
-      // From pragmas.pgsql.hxx:105:50
+      // From pragmas.pgsql.hxx:105:3
       o._internal_set_cn (v);
     }
   }
@@ -1387,7 +1387,7 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:104:30
+    // From pragmas.pgsql.hxx:104:2
     obj.set_id (id (sts.id_image ()));
 
     callback (db,
@@ -1410,7 +1410,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:104:22
+    // From pragmas.pgsql.hxx:104:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -1587,7 +1587,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:104:22
+    // From pragmas.pgsql.hxx:104:2
     const id_type& id  (
       obj.id ());
 
@@ -1883,7 +1883,7 @@ namespace odb
     // content_length_
     //
     {
-      // From pragmas.pgsql.hxx:113:39
+      // From pragmas.pgsql.hxx:113:3
       ::google::protobuf::uint64 const& v =
         o.content_length ();
 
@@ -1898,7 +1898,7 @@ namespace odb
     // tag_
     //
     {
-      // From pragmas.pgsql.hxx:115:28
+      // From pragmas.pgsql.hxx:115:3
       ::google::protobuf::uint32 const& v =
         o.tag ();
 
@@ -1913,7 +1913,7 @@ namespace odb
     // content_type
     //
     {
-      // From pragmas.pgsql.hxx:111:57
+      // From pragmas.pgsql.hxx:111:3
       ::std::string const& v =
         o.content_type ();
 
@@ -1935,7 +1935,7 @@ namespace odb
     // uri
     //
     {
-      // From pragmas.pgsql.hxx:112:48
+      // From pragmas.pgsql.hxx:112:3
       ::std::string const& v =
         o.uri ();
 
@@ -1957,7 +1957,7 @@ namespace odb
     // data
     //
     {
-      // From pragmas.pgsql.hxx:114:49
+      // From pragmas.pgsql.hxx:114:3
       ::std::string const& v =
         o.data ();
 
@@ -2005,7 +2005,7 @@ namespace odb
     // content_length_
     //
     {
-      // From pragmas.pgsql.hxx:113:59
+      // From pragmas.pgsql.hxx:113:3
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -2015,14 +2015,14 @@ namespace odb
         i.content_length_value,
         i.content_length_null);
 
-      // From pragmas.pgsql.hxx:113:59
+      // From pragmas.pgsql.hxx:113:3
       o.set_content_length (v);
     }
 
     // tag_
     //
     {
-      // From pragmas.pgsql.hxx:115:37
+      // From pragmas.pgsql.hxx:115:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -2032,14 +2032,14 @@ namespace odb
         i.tag_value,
         i.tag_null);
 
-      // From pragmas.pgsql.hxx:115:37
+      // From pragmas.pgsql.hxx:115:3
       o.set_tag (v);
     }
 
     // content_type
     //
     {
-      // From pragmas.pgsql.hxx:111:75
+      // From pragmas.pgsql.hxx:111:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -2050,14 +2050,14 @@ namespace odb
         i.content_type_size,
         i.content_type_null);
 
-      // From pragmas.pgsql.hxx:111:75
+      // From pragmas.pgsql.hxx:111:3
       o._internal_set_content_type (v);
     }
 
     // uri
     //
     {
-      // From pragmas.pgsql.hxx:112:57
+      // From pragmas.pgsql.hxx:112:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -2068,14 +2068,14 @@ namespace odb
         i.uri_size,
         i.uri_null);
 
-      // From pragmas.pgsql.hxx:112:57
+      // From pragmas.pgsql.hxx:112:3
       o._internal_set_uri (v);
     }
 
     // data
     //
     {
-      // From pragmas.pgsql.hxx:114:59
+      // From pragmas.pgsql.hxx:114:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -2086,7 +2086,7 @@ namespace odb
         i.data_size,
         i.data_null);
 
-      // From pragmas.pgsql.hxx:114:59
+      // From pragmas.pgsql.hxx:114:3
       o._internal_set_data (v);
     }
   }
@@ -2747,7 +2747,7 @@ namespace odb
     // birthday_
     //
     {
-      // From pragmas.pgsql.hxx:123:30
+      // From pragmas.pgsql.hxx:123:3
       ::google::protobuf::uint32 const& v =
         o.birthday ();
 
@@ -2762,7 +2762,7 @@ namespace odb
     // gender_
     //
     {
-      // From pragmas.pgsql.hxx:128:28
+      // From pragmas.pgsql.hxx:128:3
       ::google::protobuf::uint32 const& v =
         o.gender ();
 
@@ -2777,7 +2777,7 @@ namespace odb
     // tag_
     //
     {
-      // From pragmas.pgsql.hxx:129:25
+      // From pragmas.pgsql.hxx:129:3
       ::google::protobuf::uint32 const& v =
         o.tag ();
 
@@ -2792,7 +2792,7 @@ namespace odb
     // first_name
     //
     {
-      // From pragmas.pgsql.hxx:119:52
+      // From pragmas.pgsql.hxx:119:3
       ::std::string const& v =
         o.first_name ();
 
@@ -2814,7 +2814,7 @@ namespace odb
     // last_name
     //
     {
-      // From pragmas.pgsql.hxx:120:51
+      // From pragmas.pgsql.hxx:120:3
       ::std::string const& v =
         o.last_name ();
 
@@ -2836,7 +2836,7 @@ namespace odb
     // middle_name
     //
     {
-      // From pragmas.pgsql.hxx:121:53
+      // From pragmas.pgsql.hxx:121:3
       ::std::string const& v =
         o.middle_name ();
 
@@ -2858,7 +2858,7 @@ namespace odb
     // prefix
     //
     {
-      // From pragmas.pgsql.hxx:122:48
+      // From pragmas.pgsql.hxx:122:3
       ::std::string const& v =
         o.prefix ();
 
@@ -2880,7 +2880,7 @@ namespace odb
     // document_type
     //
     {
-      // From pragmas.pgsql.hxx:124:55
+      // From pragmas.pgsql.hxx:124:3
       ::std::string const& v =
         o.document_type ();
 
@@ -2902,7 +2902,7 @@ namespace odb
     // document
     //
     {
-      // From pragmas.pgsql.hxx:125:50
+      // From pragmas.pgsql.hxx:125:3
       ::std::string const& v =
         o.document ();
 
@@ -2924,7 +2924,7 @@ namespace odb
     // phone_mobile
     //
     {
-      // From pragmas.pgsql.hxx:126:54
+      // From pragmas.pgsql.hxx:126:3
       ::std::string const& v =
         o.phone_mobile ();
 
@@ -2946,7 +2946,7 @@ namespace odb
     // email
     //
     {
-      // From pragmas.pgsql.hxx:127:47
+      // From pragmas.pgsql.hxx:127:3
       ::std::string const& v =
         o.email ();
 
@@ -2980,7 +2980,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:118:32
+      // From pragmas.pgsql.hxx:118:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -2990,14 +2990,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:118:32
+      // From pragmas.pgsql.hxx:118:2
       o.set_id (v);
     }
 
     // birthday_
     //
     {
-      // From pragmas.pgsql.hxx:123:44
+      // From pragmas.pgsql.hxx:123:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -3007,14 +3007,14 @@ namespace odb
         i.birthday_value,
         i.birthday_null);
 
-      // From pragmas.pgsql.hxx:123:44
+      // From pragmas.pgsql.hxx:123:3
       o.set_birthday (v);
     }
 
     // gender_
     //
     {
-      // From pragmas.pgsql.hxx:128:40
+      // From pragmas.pgsql.hxx:128:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -3024,14 +3024,14 @@ namespace odb
         i.gender_value,
         i.gender_null);
 
-      // From pragmas.pgsql.hxx:128:40
+      // From pragmas.pgsql.hxx:128:3
       o.set_gender (v);
     }
 
     // tag_
     //
     {
-      // From pragmas.pgsql.hxx:129:34
+      // From pragmas.pgsql.hxx:129:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -3041,14 +3041,14 @@ namespace odb
         i.tag_value,
         i.tag_null);
 
-      // From pragmas.pgsql.hxx:129:34
+      // From pragmas.pgsql.hxx:129:3
       o.set_tag (v);
     }
 
     // first_name
     //
     {
-      // From pragmas.pgsql.hxx:119:68
+      // From pragmas.pgsql.hxx:119:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3059,14 +3059,14 @@ namespace odb
         i.first_name_size,
         i.first_name_null);
 
-      // From pragmas.pgsql.hxx:119:68
+      // From pragmas.pgsql.hxx:119:3
       o._internal_set_first_name (v);
     }
 
     // last_name
     //
     {
-      // From pragmas.pgsql.hxx:120:66
+      // From pragmas.pgsql.hxx:120:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3077,14 +3077,14 @@ namespace odb
         i.last_name_size,
         i.last_name_null);
 
-      // From pragmas.pgsql.hxx:120:66
+      // From pragmas.pgsql.hxx:120:3
       o._internal_set_last_name (v);
     }
 
     // middle_name
     //
     {
-      // From pragmas.pgsql.hxx:121:70
+      // From pragmas.pgsql.hxx:121:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3095,14 +3095,14 @@ namespace odb
         i.middle_name_size,
         i.middle_name_null);
 
-      // From pragmas.pgsql.hxx:121:70
+      // From pragmas.pgsql.hxx:121:3
       o._internal_set_middle_name (v);
     }
 
     // prefix
     //
     {
-      // From pragmas.pgsql.hxx:122:60
+      // From pragmas.pgsql.hxx:122:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3113,14 +3113,14 @@ namespace odb
         i.prefix_size,
         i.prefix_null);
 
-      // From pragmas.pgsql.hxx:122:60
+      // From pragmas.pgsql.hxx:122:3
       o._internal_set_prefix (v);
     }
 
     // document_type
     //
     {
-      // From pragmas.pgsql.hxx:124:74
+      // From pragmas.pgsql.hxx:124:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3131,14 +3131,14 @@ namespace odb
         i.document_type_size,
         i.document_type_null);
 
-      // From pragmas.pgsql.hxx:124:74
+      // From pragmas.pgsql.hxx:124:3
       o._internal_set_document_type (v);
     }
 
     // document
     //
     {
-      // From pragmas.pgsql.hxx:125:64
+      // From pragmas.pgsql.hxx:125:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3149,14 +3149,14 @@ namespace odb
         i.document_size,
         i.document_null);
 
-      // From pragmas.pgsql.hxx:125:64
+      // From pragmas.pgsql.hxx:125:3
       o._internal_set_document (v);
     }
 
     // phone_mobile
     //
     {
-      // From pragmas.pgsql.hxx:126:72
+      // From pragmas.pgsql.hxx:126:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3167,14 +3167,14 @@ namespace odb
         i.phone_mobile_size,
         i.phone_mobile_null);
 
-      // From pragmas.pgsql.hxx:126:72
+      // From pragmas.pgsql.hxx:126:3
       o._internal_set_phone_mobile (v);
     }
 
     // email
     //
     {
-      // From pragmas.pgsql.hxx:127:58
+      // From pragmas.pgsql.hxx:127:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -3185,7 +3185,7 @@ namespace odb
         i.email_size,
         i.email_null);
 
-      // From pragmas.pgsql.hxx:127:58
+      // From pragmas.pgsql.hxx:127:3
       o._internal_set_email (v);
     }
   }
@@ -3325,11 +3325,11 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:118:32
+    // From pragmas.pgsql.hxx:118:2
     obj.set_id (id (sts.id_image ()));
 
     id_image_type& i (sts.id_image ());
-    // From pragmas.pgsql.hxx:118:24
+    // From pragmas.pgsql.hxx:118:2
     init (i, obj.id ());
 
     binding& idb (sts.id_image_binding ());
@@ -3373,7 +3373,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:118:24
+    // From pragmas.pgsql.hxx:118:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -3570,7 +3570,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:118:24
+    // From pragmas.pgsql.hxx:118:2
     const id_type& id  (
       obj.id ());
 
@@ -4276,7 +4276,7 @@ namespace odb
     // person_
     //
     {
-      // From pragmas.pgsql.hxx:136:30
+      // From pragmas.pgsql.hxx:136:3
       ::mgp::Person* const& v =
         o.person_;
 
@@ -4302,7 +4302,7 @@ namespace odb
     // user_
     //
     {
-      // From pragmas.pgsql.hxx:137:28
+      // From pragmas.pgsql.hxx:137:3
       ::mgp::User* const& v =
         o.user_;
 
@@ -4328,7 +4328,7 @@ namespace odb
     // role_number_
     //
     {
-      // From pragmas.pgsql.hxx:134:35
+      // From pragmas.pgsql.hxx:134:3
       ::google::protobuf::uint32 const& v =
         o.role_number ();
 
@@ -4343,7 +4343,7 @@ namespace odb
     // name
     //
     {
-      // From pragmas.pgsql.hxx:135:48
+      // From pragmas.pgsql.hxx:135:3
       ::std::string const& v =
         o.name ();
 
@@ -4377,7 +4377,7 @@ namespace odb
     // person_
     //
     {
-      // From pragmas.pgsql.hxx:136:30
+      // From pragmas.pgsql.hxx:136:3
       ::mgp::Person*& v =
         o.person_;
 
@@ -4409,7 +4409,7 @@ namespace odb
     // user_
     //
     {
-      // From pragmas.pgsql.hxx:137:28
+      // From pragmas.pgsql.hxx:137:3
       ::mgp::User*& v =
         o.user_;
 
@@ -4441,7 +4441,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:133:34
+      // From pragmas.pgsql.hxx:133:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -4451,14 +4451,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:133:34
+      // From pragmas.pgsql.hxx:133:2
       o.set_id (v);
     }
 
     // role_number_
     //
     {
-      // From pragmas.pgsql.hxx:134:52
+      // From pragmas.pgsql.hxx:134:3
       ::google::protobuf::uint32 v;
 
       pgsql::value_traits<
@@ -4468,14 +4468,14 @@ namespace odb
         i.role_number_value,
         i.role_number_null);
 
-      // From pragmas.pgsql.hxx:134:52
+      // From pragmas.pgsql.hxx:134:3
       o.set_role_number (v);
     }
 
     // name
     //
     {
-      // From pragmas.pgsql.hxx:135:58
+      // From pragmas.pgsql.hxx:135:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -4486,7 +4486,7 @@ namespace odb
         i.name_size,
         i.name_null);
 
-      // From pragmas.pgsql.hxx:135:58
+      // From pragmas.pgsql.hxx:135:3
       o._internal_set_name (v);
     }
   }
@@ -4600,11 +4600,11 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:133:34
+    // From pragmas.pgsql.hxx:133:2
     obj.set_id (id (sts.id_image ()));
 
     id_image_type& i (sts.id_image ());
-    // From pragmas.pgsql.hxx:133:26
+    // From pragmas.pgsql.hxx:133:2
     init (i, obj.id ());
 
     binding& idb (sts.id_image_binding ());
@@ -4648,7 +4648,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:133:26
+    // From pragmas.pgsql.hxx:133:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -4845,7 +4845,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:133:26
+    // From pragmas.pgsql.hxx:133:2
     const id_type& id  (
       obj.id ());
 
@@ -5520,7 +5520,7 @@ namespace odb
     // manager_
     //
     {
-      // From pragmas.pgsql.hxx:143:26
+      // From pragmas.pgsql.hxx:143:3
       ::mgp::Employee* const& v =
         o.manager_;
 
@@ -5546,7 +5546,7 @@ namespace odb
     // name
     //
     {
-      // From pragmas.pgsql.hxx:142:43
+      // From pragmas.pgsql.hxx:142:3
       ::std::string const& v =
         o.name ();
 
@@ -5580,7 +5580,7 @@ namespace odb
     // manager_
     //
     {
-      // From pragmas.pgsql.hxx:143:26
+      // From pragmas.pgsql.hxx:143:3
       ::mgp::Employee*& v =
         o.manager_;
 
@@ -5612,7 +5612,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:141:29
+      // From pragmas.pgsql.hxx:141:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -5622,14 +5622,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:141:29
+      // From pragmas.pgsql.hxx:141:2
       o.set_id (v);
     }
 
     // name
     //
     {
-      // From pragmas.pgsql.hxx:142:53
+      // From pragmas.pgsql.hxx:142:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -5640,7 +5640,7 @@ namespace odb
         i.name_size,
         i.name_null);
 
-      // From pragmas.pgsql.hxx:142:53
+      // From pragmas.pgsql.hxx:142:3
       o._internal_set_name (v);
     }
   }
@@ -5745,11 +5745,11 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:141:29
+    // From pragmas.pgsql.hxx:141:2
     obj.set_id (id (sts.id_image ()));
 
     id_image_type& i (sts.id_image ());
-    // From pragmas.pgsql.hxx:141:21
+    // From pragmas.pgsql.hxx:141:2
     init (i, obj.id ());
 
     binding& idb (sts.id_image_binding ());
@@ -5793,7 +5793,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:141:21
+    // From pragmas.pgsql.hxx:141:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -5990,7 +5990,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:141:21
+    // From pragmas.pgsql.hxx:141:2
     const id_type& id  (
       obj.id ());
 
@@ -6678,7 +6678,7 @@ namespace odb
     // org_
     //
     {
-      // From pragmas.pgsql.hxx:148:28
+      // From pragmas.pgsql.hxx:148:3
       ::mgp::Org* const& v =
         o.org_;
 
@@ -6704,7 +6704,7 @@ namespace odb
     // inventory_number_
     //
     {
-      // From pragmas.pgsql.hxx:149:41
+      // From pragmas.pgsql.hxx:149:3
       ::google::protobuf::uint64 const& v =
         o.inventory_number ();
 
@@ -6719,7 +6719,7 @@ namespace odb
     // name
     //
     {
-      // From pragmas.pgsql.hxx:150:49
+      // From pragmas.pgsql.hxx:150:3
       ::std::string const& v =
         o.name ();
 
@@ -6753,7 +6753,7 @@ namespace odb
     // org_
     //
     {
-      // From pragmas.pgsql.hxx:148:28
+      // From pragmas.pgsql.hxx:148:3
       ::mgp::Org*& v =
         o.org_;
 
@@ -6785,7 +6785,7 @@ namespace odb
     // id_
     //
     {
-      // From pragmas.pgsql.hxx:147:35
+      // From pragmas.pgsql.hxx:147:2
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -6795,14 +6795,14 @@ namespace odb
         i.id_value,
         i.id_null);
 
-      // From pragmas.pgsql.hxx:147:35
+      // From pragmas.pgsql.hxx:147:2
       o.set_id (v);
     }
 
     // inventory_number_
     //
     {
-      // From pragmas.pgsql.hxx:149:63
+      // From pragmas.pgsql.hxx:149:3
       ::google::protobuf::uint64 v;
 
       pgsql::value_traits<
@@ -6812,14 +6812,14 @@ namespace odb
         i.inventory_number_value,
         i.inventory_number_null);
 
-      // From pragmas.pgsql.hxx:149:63
+      // From pragmas.pgsql.hxx:149:3
       o.set_inventory_number (v);
     }
 
     // name
     //
     {
-      // From pragmas.pgsql.hxx:150:59
+      // From pragmas.pgsql.hxx:150:3
       ::std::string v;
 
       pgsql::value_traits<
@@ -6830,7 +6830,7 @@ namespace odb
         i.name_size,
         i.name_null);
 
-      // From pragmas.pgsql.hxx:150:59
+      // From pragmas.pgsql.hxx:150:3
       o._internal_set_name (v);
     }
   }
@@ -6939,11 +6939,11 @@ namespace odb
     if (!st.execute ())
       throw object_already_persistent ();
 
-    // From pragmas.pgsql.hxx:147:35
+    // From pragmas.pgsql.hxx:147:2
     obj.set_id (id (sts.id_image ()));
 
     id_image_type& i (sts.id_image ());
-    // From pragmas.pgsql.hxx:147:27
+    // From pragmas.pgsql.hxx:147:2
     init (i, obj.id ());
 
     binding& idb (sts.id_image_binding ());
@@ -6987,7 +6987,7 @@ namespace odb
     statements_type& sts (
       conn.statement_cache ().find_object<object_type> ());
 
-    // From pragmas.pgsql.hxx:147:27
+    // From pragmas.pgsql.hxx:147:2
     const id_type& id (
       obj.id ());
     id_image_type& idi (sts.id_image ());
@@ -7184,7 +7184,7 @@ namespace odb
 
     statements_type::auto_lock l (sts);
 
-    // From pragmas.pgsql.hxx:147:27
+    // From pragmas.pgsql.hxx:147:2
     const id_type& id  (
       obj.id ());
 

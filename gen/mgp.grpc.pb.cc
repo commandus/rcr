@@ -5,18 +5,12 @@
 #include "mgp.pb.h"
 #include "mgp.grpc.pb.h"
 
-#include <functional>
 #include <grpcpp/impl/codegen/async_stream.h>
 #include <grpcpp/impl/codegen/async_unary_call.h>
 #include <grpcpp/impl/codegen/channel_interface.h>
 #include <grpcpp/impl/codegen/client_unary_call.h>
-#include <grpcpp/impl/codegen/client_callback.h>
-#include <grpcpp/impl/codegen/message_allocator.h>
-#include <grpcpp/impl/codegen/method_handler.h>
+#include <grpcpp/impl/codegen/method_handler_impl.h>
 #include <grpcpp/impl/codegen/rpc_service_method.h>
-#include <grpcpp/impl/codegen/server_callback.h>
-#include <grpcpp/impl/codegen/server_callback_handlers.h>
-#include <grpcpp/impl/codegen/server_context.h>
 #include <grpcpp/impl/codegen/service_type.h>
 #include <grpcpp/impl/codegen/sync_stream.h>
 namespace mgp {
@@ -31,184 +25,104 @@ static const char* Mgp_method_names[] = {
 
 std::unique_ptr< Mgp::Stub> Mgp::NewStub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options) {
   (void)options;
-  std::unique_ptr< Mgp::Stub> stub(new Mgp::Stub(channel, options));
+  std::unique_ptr< Mgp::Stub> stub(new Mgp::Stub(channel));
   return stub;
 }
 
-Mgp::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel, const ::grpc::StubOptions& options)
-  : channel_(channel), rpcmethod_getUser_(Mgp_method_names[0], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_addUser_(Mgp_method_names[1], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_rmUser_(Mgp_method_names[2], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_setUser_(Mgp_method_names[3], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
-  , rpcmethod_lsInventory_(Mgp_method_names[4], options.suffix_for_stats(),::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+Mgp::Stub::Stub(const std::shared_ptr< ::grpc::ChannelInterface>& channel)
+  : channel_(channel), rpcmethod_getUser_(Mgp_method_names[0], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_addUser_(Mgp_method_names[1], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_rmUser_(Mgp_method_names[2], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_setUser_(Mgp_method_names[3], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
+  , rpcmethod_lsInventory_(Mgp_method_names[4], ::grpc::internal::RpcMethod::NORMAL_RPC, channel)
   {}
 
 ::grpc::Status Mgp::Stub::getUser(::grpc::ClientContext* context, const ::mgp::User& request, ::mgp::User* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_getUser_, context, request, response);
-}
-
-void Mgp::Stub::async::getUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::User* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_getUser_, context, request, response, std::move(f));
-}
-
-void Mgp::Stub::async::getUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::User* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_getUser_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::PrepareAsyncgetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_getUser_, context, request);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_getUser_, context, request, response);
 }
 
 ::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::AsyncgetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncgetUserRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::User>::Create(channel_.get(), cq, rpcmethod_getUser_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::PrepareAsyncgetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::User>::Create(channel_.get(), cq, rpcmethod_getUser_, context, request, false);
 }
 
 ::grpc::Status Mgp::Stub::addUser(::grpc::ClientContext* context, const ::mgp::User& request, ::mgp::User* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_addUser_, context, request, response);
-}
-
-void Mgp::Stub::async::addUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::User* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_addUser_, context, request, response, std::move(f));
-}
-
-void Mgp::Stub::async::addUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::User* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_addUser_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::PrepareAsyncaddUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_addUser_, context, request);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_addUser_, context, request, response);
 }
 
 ::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::AsyncaddUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncaddUserRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::User>::Create(channel_.get(), cq, rpcmethod_addUser_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::mgp::User>* Mgp::Stub::PrepareAsyncaddUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::User>::Create(channel_.get(), cq, rpcmethod_addUser_, context, request, false);
 }
 
 ::grpc::Status Mgp::Stub::rmUser(::grpc::ClientContext* context, const ::mgp::User& request, ::mgp::OperationResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_rmUser_, context, request, response);
-}
-
-void Mgp::Stub::async::rmUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::OperationResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_rmUser_, context, request, response, std::move(f));
-}
-
-void Mgp::Stub::async::rmUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::OperationResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_rmUser_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::PrepareAsyncrmUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::mgp::OperationResponse, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_rmUser_, context, request);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_rmUser_, context, request, response);
 }
 
 ::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::AsyncrmUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncrmUserRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::OperationResponse>::Create(channel_.get(), cq, rpcmethod_rmUser_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::PrepareAsyncrmUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::OperationResponse>::Create(channel_.get(), cq, rpcmethod_rmUser_, context, request, false);
 }
 
 ::grpc::Status Mgp::Stub::setUser(::grpc::ClientContext* context, const ::mgp::User& request, ::mgp::OperationResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_setUser_, context, request, response);
-}
-
-void Mgp::Stub::async::setUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::OperationResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_setUser_, context, request, response, std::move(f));
-}
-
-void Mgp::Stub::async::setUser(::grpc::ClientContext* context, const ::mgp::User* request, ::mgp::OperationResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_setUser_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::PrepareAsyncsetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::mgp::OperationResponse, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_setUser_, context, request);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_setUser_, context, request, response);
 }
 
 ::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::AsyncsetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsyncsetUserRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::OperationResponse>::Create(channel_.get(), cq, rpcmethod_setUser_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::mgp::OperationResponse>* Mgp::Stub::PrepareAsyncsetUserRaw(::grpc::ClientContext* context, const ::mgp::User& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::OperationResponse>::Create(channel_.get(), cq, rpcmethod_setUser_, context, request, false);
 }
 
 ::grpc::Status Mgp::Stub::lsInventory(::grpc::ClientContext* context, const ::mgp::InventoryListRequest& request, ::mgp::InventoryListResponse* response) {
-  return ::grpc::internal::BlockingUnaryCall< ::mgp::InventoryListRequest, ::mgp::InventoryListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), rpcmethod_lsInventory_, context, request, response);
-}
-
-void Mgp::Stub::async::lsInventory(::grpc::ClientContext* context, const ::mgp::InventoryListRequest* request, ::mgp::InventoryListResponse* response, std::function<void(::grpc::Status)> f) {
-  ::grpc::internal::CallbackUnaryCall< ::mgp::InventoryListRequest, ::mgp::InventoryListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_lsInventory_, context, request, response, std::move(f));
-}
-
-void Mgp::Stub::async::lsInventory(::grpc::ClientContext* context, const ::mgp::InventoryListRequest* request, ::mgp::InventoryListResponse* response, ::grpc::ClientUnaryReactor* reactor) {
-  ::grpc::internal::ClientCallbackUnaryFactory::Create< ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(stub_->channel_.get(), stub_->rpcmethod_lsInventory_, context, request, response, reactor);
-}
-
-::grpc::ClientAsyncResponseReader< ::mgp::InventoryListResponse>* Mgp::Stub::PrepareAsynclsInventoryRaw(::grpc::ClientContext* context, const ::mgp::InventoryListRequest& request, ::grpc::CompletionQueue* cq) {
-  return ::grpc::internal::ClientAsyncResponseReaderHelper::Create< ::mgp::InventoryListResponse, ::mgp::InventoryListRequest, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(channel_.get(), cq, rpcmethod_lsInventory_, context, request);
+  return ::grpc::internal::BlockingUnaryCall(channel_.get(), rpcmethod_lsInventory_, context, request, response);
 }
 
 ::grpc::ClientAsyncResponseReader< ::mgp::InventoryListResponse>* Mgp::Stub::AsynclsInventoryRaw(::grpc::ClientContext* context, const ::mgp::InventoryListRequest& request, ::grpc::CompletionQueue* cq) {
-  auto* result =
-    this->PrepareAsynclsInventoryRaw(context, request, cq);
-  result->StartCall();
-  return result;
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::InventoryListResponse>::Create(channel_.get(), cq, rpcmethod_lsInventory_, context, request, true);
+}
+
+::grpc::ClientAsyncResponseReader< ::mgp::InventoryListResponse>* Mgp::Stub::PrepareAsynclsInventoryRaw(::grpc::ClientContext* context, const ::mgp::InventoryListRequest& request, ::grpc::CompletionQueue* cq) {
+  return ::grpc::internal::ClientAsyncResponseReaderFactory< ::mgp::InventoryListResponse>::Create(channel_.get(), cq, rpcmethod_lsInventory_, context, request, false);
 }
 
 Mgp::Service::Service() {
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Mgp_method_names[0],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](Mgp::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::mgp::User* req,
-             ::mgp::User* resp) {
-               return service->getUser(ctx, req, resp);
-             }, this)));
+      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::User>(
+          std::mem_fn(&Mgp::Service::getUser), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Mgp_method_names[1],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::User, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](Mgp::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::mgp::User* req,
-             ::mgp::User* resp) {
-               return service->addUser(ctx, req, resp);
-             }, this)));
+      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::User>(
+          std::mem_fn(&Mgp::Service::addUser), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Mgp_method_names[2],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](Mgp::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::mgp::User* req,
-             ::mgp::OperationResponse* resp) {
-               return service->rmUser(ctx, req, resp);
-             }, this)));
+      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::OperationResponse>(
+          std::mem_fn(&Mgp::Service::rmUser), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Mgp_method_names[3],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::OperationResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](Mgp::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::mgp::User* req,
-             ::mgp::OperationResponse* resp) {
-               return service->setUser(ctx, req, resp);
-             }, this)));
+      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::User, ::mgp::OperationResponse>(
+          std::mem_fn(&Mgp::Service::setUser), this)));
   AddMethod(new ::grpc::internal::RpcServiceMethod(
       Mgp_method_names[4],
       ::grpc::internal::RpcMethod::NORMAL_RPC,
-      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::InventoryListRequest, ::mgp::InventoryListResponse, ::grpc::protobuf::MessageLite, ::grpc::protobuf::MessageLite>(
-          [](Mgp::Service* service,
-             ::grpc::ServerContext* ctx,
-             const ::mgp::InventoryListRequest* req,
-             ::mgp::InventoryListResponse* resp) {
-               return service->lsInventory(ctx, req, resp);
-             }, this)));
+      new ::grpc::internal::RpcMethodHandler< Mgp::Service, ::mgp::InventoryListRequest, ::mgp::InventoryListResponse>(
+          std::mem_fn(&Mgp::Service::lsInventory), this)));
 }
 
 Mgp::Service::~Service() {

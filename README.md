@@ -78,6 +78,35 @@ Add C:\p\odb\bin to %PATH%
 
 #### Install odb
 
+Linux:
+
+[Install unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)
+
+```
+sudo apt install odb libodb-pgsql-2.4
+```
+
+Check odb version
+
+```
+odb --version
+ODB object-relational mapping (ORM) compiler for C++ 2.4.0
+```
+
+If it prints error
+
+```
+g++-10: error: No such file or directory
+```
+
+then install g++-10
+
+```
+sudo apt install g++-10
+```
+
+Windows:
+
 ```
 vcpkg install libodb:x64-windows-static
 ```
@@ -107,6 +136,21 @@ upgrade solution from 10 to 14 and build release
 
 #### Install grpc & protobuf
 
+##### Linux
+
+Check grpc_cpp_plugin is installed
+```
+which grpc_cpp_plugin
+```
+
+If not, add grpc_cpp_plugin to the $PATH
+
+```
+cd ~/src-old/third_party/grpc/bins/opt
+sudo cp grpc_cpp_plugin  grpc_node_plugin  grpc_objective_c_plugin  grpc_php_plugin  grpc_python_plugin  grpc_ruby_plugin /usr/local/bin
+```
+
+##### Windows
 ```
 vcpkg install grpc:x64-windows-static protobuf:x64-windows-static
 ```

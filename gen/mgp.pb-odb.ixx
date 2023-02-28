@@ -12,7 +12,7 @@ namespace odb
   access::object_traits< ::mgp::Credentials >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:96:29
+    // From pragmas.pgsql.hxx:96:2
     return o.id ();
   }
 
@@ -42,7 +42,7 @@ namespace odb
   access::object_traits< ::mgp::User >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:104:22
+    // From pragmas.pgsql.hxx:104:2
     return o.id ();
   }
 
@@ -72,7 +72,7 @@ namespace odb
   access::object_traits< ::mgp::Person >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:118:24
+    // From pragmas.pgsql.hxx:118:2
     return o.id ();
   }
 
@@ -102,7 +102,7 @@ namespace odb
   access::object_traits< ::mgp::Employee >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:133:26
+    // From pragmas.pgsql.hxx:133:2
     return o.id ();
   }
 
@@ -132,7 +132,7 @@ namespace odb
   access::object_traits< ::mgp::Org >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:141:21
+    // From pragmas.pgsql.hxx:141:2
     return o.id ();
   }
 
@@ -162,7 +162,7 @@ namespace odb
   access::object_traits< ::mgp::Inventory >::
   id (const object_type& o)
   {
-    // From pragmas.pgsql.hxx:147:27
+    // From pragmas.pgsql.hxx:147:2
     return o.id ();
   }
 
