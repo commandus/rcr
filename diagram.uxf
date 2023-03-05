@@ -1,28 +1,29 @@
-<diagram program="umletino" version="15.0.0"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>400</x><y>530</y><w>210</w><h>100</h></coordinates><panel_attributes>Package
+<diagram program="umletino" version="15.0.0"><zoom_level>10</zoom_level><help_text>Space for diagram notes</help_text><element><id>UMLClass</id><coordinates><x>360</x><y>440</y><w>210</w><h>100</h></coordinates><panel_attributes>Package
 --
 card: Card
-box: Long
+box: array[Long]
 qty: Long
-description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>50</y><w>210</w><h>70</h></coordinates><panel_attributes>Operation
+description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>20</x><y>0</y><w>210</w><h>70</h></coordinates><panel_attributes>Operation
 --
 symbol: String
-description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>400</x><y>260</y><w>210</w><h>70</h></coordinates><panel_attributes>Component
+description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>170</y><w>210</w><h>70</h></coordinates><panel_attributes>Component
 --
 symbol: String
-name: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>460</y><w>50</w><h>90</h></coordinates><panel_attributes>lt=&lt;-
-m1=0..n</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>530</y><w>210</w><h>70</h></coordinates><panel_attributes>PropertyType
+name: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>450</x><y>380</y><w>50</w><h>80</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..n</panel_attributes><additional_attributes>10;60;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>90</x><y>430</y><w>210</w><h>70</h></coordinates><panel_attributes>PropertyType
 --
 key: String
-description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>400</x><y>400</y><w>210</w><h>70</h></coordinates><panel_attributes>Card
+description: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>290</y><w>210</w><h>100</h></coordinates><panel_attributes>Card
 --
+name: String
 component: Component
 description: String
 nominal: Long
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>400</y><w>210</w><h>70</h></coordinates><panel_attributes>Property
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>90</x><y>290</y><w>210</w><h>70</h></coordinates><panel_attributes>Property
 --
 typ: PropertyType
-value: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>260</x><y>430</y><w>160</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
-m1=0..n</panel_attributes><additional_attributes>10;10;140;10</additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>320</y><w>30</w><h>100</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;80</additional_attributes></element><element><id>Relation</id><coordinates><x>150</x><y>460</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>60</x><y>190</y><w>210</w><h>140</h></coordinates><panel_attributes>Journal
+value: String</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>290</x><y>320</y><w>90</w><h>40</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..n</panel_attributes><additional_attributes>10;10;70;10</additional_attributes></element><element><id>Relation</id><coordinates><x>450</x><y>230</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>Relation</id><coordinates><x>180</x><y>350</y><w>30</w><h>100</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>20</x><y>140</y><w>210</w><h>140</h></coordinates><panel_attributes>Journal
 
 --
 id: Long
@@ -31,10 +32,10 @@ user: String
 package: Package
 operation: Operation
 value: Long
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>160</x><y>110</y><w>50</w><h>100</h></coordinates><panel_attributes>lt=&lt;-
-m1=0..n</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>400</x><y>110</y><w>210</w><h>70</h></coordinates><panel_attributes>Symbol
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>120</x><y>60</y><w>50</w><h>100</h></coordinates><panel_attributes>lt=&lt;-
+m1=0..n</panel_attributes><additional_attributes>10;80;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>360</x><y>60</y><w>210</w><h>70</h></coordinates><panel_attributes>Symbol
 --
 symbol: String
 unit: String
 pow10: Int
-</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>490</x><y>170</y><w>30</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element></diagram>
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>450</x><y>120</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element></diagram>
