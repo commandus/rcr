@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+// Radio components registry
+
+package rcr;
+
+// import "google/api/annotations.proto";
+
+option cc_enable_arenas = true;
+option java_package = "com.commandus.rcr";
+
+// symbols: +, -, =
+message Operation
+{
+    uint64 id = 1;
+    string symbol = 2;
+    string description = 3;
+}
+
+message Symbol 
+{
+    uint64 id = 1;
+    string sym = 2;
+    string unit = 3;
+    int32 pow10 = 4;                            ///< power of 10
+}
+
+message Component
+{
+    uint64 id = 1;
+    Symbol symbol = 2;
+    string name = 3;
+}
+
+message PropertyType
+{
+    uint64 id = 1;
+    string key = 2;
+    string description = 3;
+}
+
+message Property
+{
+    uint64 id = 1;
+    PropertyType typ = 2;
+    string value = 3;
+}
+
+message Card
+{
+    uint64 id = 1;
+    string name = 2;
+    Component component = 3;
+    uint64 nominal = 4;
+    repeated Property properties = 5;
+    repeated Package packages = 6;
+}
+
+message Package
+{
+    uint64 id = 1;
+    Card card = 2;
+    uint64 boxes = 3;                          ///< 4 * 2 bytes
+    uint64 qty = 4;
+}
+
+message Cards
+{
+    repeated Card cards = 1;
+}
+
+message Packages
+{
+    repeated Package package = 1;
+}
+
+// Operation log
+message JournalEntry
+{
+    uint64 id = 1;                              ///< identifier
+    uint64 dt = 2;                              ///< modification date & time
+    string user = 3;                            ///< user name
+    Package package = 4;                        ///< user name
+    Operation operation = 5;                    ///< user name
+    int64 value = 6;                            ///< amount
+}
+
+// Operation log
+message Journal 
+{
+    repeated JournalEntry entries = 1;          ///< record
+}
+
+// Requests
+
+message ListRequest
+{
+    uint64 offset = 1;                           ///< 0..
+    uint64 size = 2;                             ///< e.g. 100
+}
+
+message SearchCriteria
+{
+    string compareSign = 1;                      ///< =- equal, >=- greatr or equal,..
+    Card card = 2;                               ///< e.g. 100
+}
+
+// Search Requests
+
+message AdvancedSearchRequest 
+{
+    repeated SearchCriteria searchCriterias = 1;    ///< all "AND"
+    ListRequest listrequest = 2;
+}
+
+// equals
+message EqualSearchRequest 
+{
+    string value = 1;                           ///<
+    ListRequest listrequest = 2;
+}
+
+// >= and <=
+message RangeSearchRequest 
+{
+    string first = 1;                           ///<
+    string last = 2;                            ///<
+    ListRequest listrequest = 3;
+}
+
+// Responses
+message CardResponse 
+{
+    uint64 count = 1;                           ///< dataset size
+    ListRequest listrequest = 2;                ///< return request's offset and size
+    repeated Card cards = 3;                    ///< dataset
+}
+
+// ------------ RPC -------------
+
+service Rcr
+{
+    // user manipulation
+    rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
+}

@@ -4,14 +4,14 @@ $DEST = "."
 $GEN = "gen"
 $ODB_OPT_DIR = "odb"
 $DT = Get-Date -F "yyyy-MM-dd hh:mm"
-$GEN_HDR_PB = "$GEN/mgp.pb.h"
-$GEN_HDR_GRPC = "GEN/mgp.grpc.pb.h"
+$GEN_HDR_PB = "$GEN/rcr.pb.h"
+$GEN_HDR_GRPC = "GEN/rcr.grpc.pb.h"
 $GEN_HDR = "$GEN_HDR_PB $GEN_HDR_GRPC"
-$GEN_SRC="$GEN/mgp.pb.cc $GEN/mgp.grpc.pb.cc"
+$GEN_SRC="$GEN/rcr.pb.cc $GEN/rcr.grpc.pb.cc"
 $GEN_FILES="$GEN_HDR $GEN_SRC"
 $PROTO_DIR = "proto"
-$PROTO = "$PROTO_DIR/mgp.proto"
-$H = "$GEN/mgp.pb.h"
+$PROTO = "$PROTO_DIR/rcr.proto"
+$H = "$GEN/rcr.pb.h"
 $HVIEWS = "$DEST/odb-views.h"
 
 function Add-Proto {
@@ -91,9 +91,9 @@ Add-Proto -OutputDir $GEN -IncludeDir $PROTO_DIR -ProtoFile $PROTO -PluginFile $
 Add-Odb -HeadefFile $GEN_HDR_PB -AdditionalComment $DT
 
 # repeated members like Add-Vector -OwnerClass Person -MemberClass MediaFile -MemberName medias
-# Add-Vector -OwnerClass Person -MemberClass MediaFile -MemberName medias -NameSpace mgp
-# Add-Vector -OwnerClass Employee -MemberClass MediaFile -MemberName medias -NameSpace mgp
-# Add-Vector -OwnerClass Org -MemberClass MediaFile -MemberName medias -NameSpace mgp
+# Add-Vector -OwnerClass Person -MemberClass MediaFile -MemberName medias -NameSpace rcr
+# Add-Vector -OwnerClass Employee -MemberClass MediaFile -MemberName medias -NameSpace rcr
+# Add-Vector -OwnerClass Org -MemberClass MediaFile -MemberName medias -NameSpace rcr
 
 # generate ODB ORM
 Odb-Postgres -OutDir $GEN -SetDef "-DGEN_ODB" -HeaderFile $GEN_HDR_PB

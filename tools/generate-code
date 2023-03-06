@@ -8,11 +8,12 @@
 
 DT=`date --rfc-2822`
 SRC=.
-H="$SRC/gen/mgp.pb.h"
+PROTO=rcr.proto
+H="$SRC/gen/rcr.pb.h"
 # Seriaization
-protoc -I $SRC/proto --cpp_out=$SRC/gen $SRC/proto/mgp.proto
+protoc -I $SRC/proto --cpp_out=$SRC/gen $PROTO
 # gRPC
-protoc -I $SRC/proto --grpc_out=$SRC/gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $SRC/proto/mgp.proto
+protoc -I $SRC/proto --grpc_out=$SRC/gen --plugin=protoc-gen-grpc=`which grpc_cpp_plugin` $PROTO
 
 PRECLASS=' private:\
   friend class odb::access;\
