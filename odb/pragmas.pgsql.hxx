@@ -90,63 +90,39 @@
     _Pragma(STRINGIFY(db member(c::m ## _) ))
 
 
-namespace mgp
+namespace rcr
 {
-	// Credentials
-	ODB_TABLE(Credentials)
-		ODB_NUMBER(Credentials, start)
-		ODB_NUMBER(Credentials, finish)
-		ODB_NUMBER(Credentials, lastlogin)
-		ODB_STRING(Credentials, mk)
-		ODB_STRING(Credentials, mv)
+	ODB_TABLE(Operation)
+		ODB_STRING(Operation, symbol)
+		ODB_STRING(Operation, description)
 
-	// User
-	ODB_TABLE(User)
-		ODB_STRING(User, cn)
-		ODB_OBJECT(User, credentials, user, credentials)
-		ODB_NUMBER(User, role)
+	ODB_TABLE(Symbol)
+		ODB_STRING(Symbol, sym)
+		ODB_STRING(Symbol, unit)
+		ODB_NUMBER(Symbol, pow10)
 
-	// MediaFile
-	ODB_VALUE(MediaFile)
-		ODB_STRING(MediaFile, content_type)
-		ODB_STRING(MediaFile, uri)
-		ODB_NUMBER(MediaFile, content_length)
-		ODB_TEXT(MediaFile, data)
-		ODB_NUMBER(MediaFile, tag)
+	ODB_TABLE(Component)
+		ODB_OBJECT(Component, symbol, component, symbol)
+		ODB_STRING(Component, name)
 
-	// Person
-	ODB_TABLE(Person)
-		ODB_STRING(Person, first_name)
-		ODB_STRING(Person, last_name)
-		ODB_STRING(Person, middle_name)
-		ODB_STRING(Person, prefix)
-		ODB_NUMBER(Person, birthday)
-		ODB_STRING(Person, document_type)
-		ODB_STRING(Person, document)
-		ODB_STRING(Person, phone_mobile)
-		ODB_STRING(Person, email)
-		ODB_NUMBER(Person, gender)
-		ODB_NUMBER(Person, tag)
-		ODB_ARRAY(Person, medias)
+	ODB_TABLE(PropertyType)
+		ODB_STRING(PropertyType, key)
+		ODB_STRING(PropertyType, description)
 
-	// Employee
-	ODB_TABLE(Employee)
-		ODB_NUMBER(Employee, role_number)
-		ODB_STRING(Employee, name)
-		ODB_OBJECT(Employee, person, employee, person)
-		ODB_OBJECT(Employee, user, employee, user)
-		ODB_ARRAY(Employee, medias)
+	ODB_TABLE(Property)
+		ODB_OBJECT(Property, typ, property, typ)
+		ODB_STRING(Property, value)
 
-	// Org
-	ODB_TABLE(Org)
-		ODB_STRING(Org, name)
-		ODB_OBJECT(Org, manager, org, manager)
-		ODB_ARRAY(Org, medias)
+	ODB_TABLE(Card)
+		ODB_STRING(Card, name)
+		ODB_OBJECT(Card, component, card, component)
+		ODB_NUMBER(Card, nominal)
+		ODB_ARRAY(Card, properties)
+		ODB_ARRAY(Card, packages)
 
-	// Inventory
-	ODB_TABLE(Inventory)
-		ODB_OBJECT(Inventory, org, inventory, org)
-		ODB_NUMBER(Inventory, inventory_number)
-		ODB_STRING(Inventory, name)
-		ODB_ARRAY(Inventory, medias)
+	ODB_TABLE(Package)
+		ODB_OBJECT(Package, card, package, card)
+		ODB_NUMBER(Package, boxes)
+		ODB_NUMBER(Package, qty)
+
 }
