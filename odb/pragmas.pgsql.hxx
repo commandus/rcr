@@ -109,20 +109,22 @@ namespace rcr
 		ODB_STRING(PropertyType, key)
 		ODB_STRING(PropertyType, description)
 
+	// #pragma db object(Property)
 	ODB_TABLE(Property)
 		ODB_OBJECT(Property, typ, property, typ)
 		ODB_STRING(Property, value)
 
+	ODB_TABLE(Package)
+		ODB_NUMBER(Package, cardid)
+		ODB_NUMBER(Package, boxes)
+		ODB_NUMBER(Package, qty)
+
+	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
 		ODB_OBJECT(Card, component, card, component)
 		ODB_NUMBER(Card, nominal)
-		ODB_ARRAY(Card, properties)
-		ODB_ARRAY(Card, packages)
-
-	ODB_TABLE(Package)
-		ODB_OBJECT(Package, card, package, card)
-		ODB_NUMBER(Package, boxes)
-		ODB_NUMBER(Package, qty)
-
+ 		#pragma db member(Card::properties_) transient
+		#pragma db member(Card::packages_) transient
+	
 }
