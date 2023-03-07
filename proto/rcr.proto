@@ -46,6 +46,14 @@ message Property
     string value = 3;
 }
 
+message Package
+{
+    uint64 id = 1;
+    uint64 cardid = 2;
+    uint64 boxes = 3;                          ///< 4 * 2 bytes
+    uint64 qty = 4;
+}
+
 message Card
 {
     uint64 id = 1;
@@ -54,14 +62,6 @@ message Card
     uint64 nominal = 4;
     repeated Property properties = 5;
     repeated Package packages = 6;
-}
-
-message Package
-{
-    uint64 id = 1;
-    Card card = 2;
-    uint64 boxes = 3;                          ///< 4 * 2 bytes
-    uint64 qty = 4;
 }
 
 message Cards
