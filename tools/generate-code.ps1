@@ -86,6 +86,8 @@ function Odb-Postgres {
     # odb -o $DEST -d pgsql -x '-w' --fkeys-deferrable-mode not_deferrable --generate-query %ODBINC% %ODBDEFS% %HVIEWS%
 }
 
+New-Item -ItemType Directory -Force -Path $GEN | Out-Null
+
 # generate protobuf and gRPC
 Add-Proto -OutputDir $GEN -IncludeDir $PROTO_DIR -ProtoFile $PROTO -PluginFile $GRPC_PLUGIN
 Add-Odb -HeadefFile $GEN_HDR_PB -AdditionalComment $DT
