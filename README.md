@@ -420,6 +420,17 @@ Then call ./tools/generate-code.ps1
 - generate serialziation & protocol support classes
 - generate object relation mapping (ORM) classes
 
+### Dependencies
+
+
+tools/install-grpc.sh installs libgrpc++.so.1.24.3
+
+
+gRPC depends on c-ares
+```
+sudo apt install libc-ares-dev
+```
+
 ### Serialzation & protocol support classes
 
 Generate in the gen/ subdirectory protobuf serialization classes  (.pb.cc, .pb.h),
