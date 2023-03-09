@@ -40,60 +40,7 @@ int parseCmd
 	struct arg_file *a_fnpemkey = arg_file0("k", "keyfile", "<file name>", "Optional client private key PEM file. Default client.key");
 	struct arg_file *a_fnpemcertificate = arg_file0("c", "certificate", "<file name>", "Client certificate PEM file. Default client.crt");
 	struct arg_file *a_fnpemcacertificate = arg_file0("r", "rootca", "<file name>", "CA certificates PEM file. Force client SSL certificate validation. Default ca.crt.");
-	// commands
-	// struct arg_file *a_niceclassfn = arg_file0(NULL, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_getuser = arg_str0(NULL, "getuser", "<phone>", "get user name.");
-	struct arg_str *a_adduser = arg_str0(NULL, "adduser", "<common name>", "register a new user. Use --phone --gcmid");
-	struct arg_lit *a_rmuser = arg_lit0(NULL, "rmuser", "remove user");
-	struct arg_str *a_setuser = arg_str0(NULL, "setuser", "<common name>", "change user, see --phone, -gcmid.");
 
-	struct arg_str *a_find = arg_str0(NULL, "find", "<object>", "object: routetag|org|employee|vehiclemodel|vehicle|rate|route|trip|ticket|passenger");
-	struct arg_str *a_add = arg_str0(NULL, "add", "<object>", "object: routetag|org|employee|vehiclemodel|vehicle|rate|route|trip|ticket|passenger");
-	struct arg_str *a_rm = arg_str0(NULL, "rm", "<object>", "object: routetag|org|employee|vehiclemodel|vehicle|rate|route|trip|ticket|passenger");
-	struct arg_str *a_set = arg_str0(NULL, "set", "<object>", "object: routetag|org|employee|vehiclemodel|vehicle|rate|route|trip|ticket|passenger");
-
-	struct arg_str *a_jsonspar = arg_str0(NULL, NULL, "<JSON>", "find org {\"id\":1}");
-	struct arg_file *a_filejsonspar = arg_file0("f", "file", "<JSON file name>", "find org my_org.json");
-
-	struct arg_lit *a_lsroutetag = arg_lit0(NULL, "lsroutetag", "route tag list");
-	struct arg_lit *a_lsroutepoint = arg_lit0(NULL, "lsroutepoint", "route point (bus stop) list");
-	struct arg_int *a_lstrip = arg_int0(NULL, "lstrip", "<route id>", "trip list. if trip id = 0, show all. Options --start --finish limit departure time");
-	struct arg_int *a_lsavailableseats = arg_int0(NULL, "lsavailableseats", "<trip id>", "available seats");
-	struct arg_int *a_lsoccupiedseats = arg_int0(NULL, "lsoccupiedseats", "<trip id>", "occupied seats");
-	struct arg_int *a_rmexpired = arg_int0(NULL, "rmexpired", "<route tag id>", "free reserved tickets for 30'");
-
-	struct arg_int *a_booking_ticket = arg_int0(NULL, "bookingticket", "<trip id>", "-p <from> -p <to> --seat <name> [--discount <number>]");
-	struct arg_int *a_pay = arg_int0(NULL, "pay", "<ticket id>", "Provide payment: {json} or -f file.json");
-	struct arg_int *a_cancel_payment = arg_int0(NULL, "cancelpayment", "<ticket id>", "Ticket must paid");
-	struct arg_str *a_point = arg_strn("p", "point", "<name>", 0, 2, "point name e.g. \"Springfield\"");
-	struct arg_str *a_seat = arg_strn(NULL, "seat", "<name>", 0, 300, "seat name e.g. \"1A\"");
-	struct arg_int *a_discount = arg_int0(NULL, "discount", "<discount id>", "discount request");
-
-	struct arg_int *a_route_tag = arg_int0(NULL, "route_tag", "<number>", "Default 1");
-	struct arg_str *a_phonenumber = arg_str0(NULL, "phone", "<number>", "with --setuser");
-	struct arg_str *a_gcmid = arg_str0(NULL, "gcmid", "<id>", "with --setuser");
-	struct arg_dbl *a_lat = arg_dbl0(NULL, "lat", "<D.D>", "Default 62.0244231");
-	struct arg_dbl *a_lon = arg_dbl0(NULL, "lon", "<D.D>", "Default 129.7237866");
-
-	struct arg_str *a_start = arg_str0(NULL, "start", "<local time>", "e.g. 2017-01-01T00:00:00 or 1483196400 (Unix seconds) with --lstrip");
-	struct arg_str *a_finish = arg_str0(NULL, "finish", "<local time>", "e.g. 2017-01-31T23:59:59 or 1485874799 with --lstrip");
-
-	// assign a new trip
-	struct arg_int *a_set_trip_seats = arg_int0(NULL, "settripseats", "<route id>", "Set trip seats. --vehicle --rate --start --driver --gate --seat --stage");
-	struct arg_int *a_vehicle = arg_int0(NULL, "vehicle", "<id>", "Vehicle identifier");
-	struct arg_int *a_rate = arg_int0(NULL, "rate", "<id>", "Rate identifier");
-	struct arg_int *a_driver = arg_int0(NULL, "driver", "<id>", "Driver identifier");
-	struct arg_int *a_gate = arg_int0(NULL, "gate", "<id>", "Gate number");
-	struct arg_int *a_stage = arg_int0(NULL, "stage", "<number>", "Default stage 4- online sale.");
-
-	// GTFS https://developers.google.com/transit/gtfs/reference/?csw=1
-	struct arg_file *a_gtfs_folder = arg_file0("G", "gtfs-folder", "<GTFS folder>", "Default " DEF_GTFS_FOLDER);
-	struct arg_lit *a_gtfs_check = arg_lit0(NULL, "gtfs-check", "");
-	struct arg_lit *a_gtfs_commit = arg_lit0(NULL, "gtfs-commit", "Required --start. --finish");
-	struct arg_int *a_gtfs_print = arg_int0(NULL, "gtfs-print", "<number>", "0- internal format, 1- GTFS JSON (first bus stop only), 2- 1- GTFS JSON all stops. Required --start. --finish");
-	struct arg_int *a_time_zone_offset = arg_int0(NULL, "tzo", "<seconds>", "Time zone for GTFS. 32400 for Asia/Yakutsk. Default- your time zone");
-
-	struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
 
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
