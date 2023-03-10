@@ -71,7 +71,7 @@ std::string MeasureUnit::unit(MEASURE measure)
     return unitNamesRU[measure];
 }
 
-int pow10(MEASURE measure)
+int MeasureUnit::pow10(MEASURE measure)
 {
     return measurePow10[measure];
 }
@@ -79,24 +79,22 @@ int pow10(MEASURE measure)
 std::string val1000(uint64_t value, int initialPow10) {
     uint64_t v = value;
     int initialPowIdx = initialPow10 / 3;
-    for (auto i = 1; i < MAX_POW10; i++) {
-        v /= 1000;
+    for (auto i = 0; i < MAX_POW10; i++) {
         if (v < 1000) {
-            int idx = i - initialPowIdx;
+            int idx = i + initialPowIdx;
             if (idx >= 0)
-                return std::to_string(v) + prefixes[idx];
+                return std::to_string(v) + ' ' + prefixes[idx];
             else
-                return std::to_string(v) + prefixesPart[-idx];
+                return std::to_string(v) + ' ' + prefixesPart[-idx];
         }
+        v /= 1000;
     }
+    return "";
 }
 
 std::string MeasureUnit::value(MEASURE measure, uint64_t value)
 {
-    int p = measurePow10[measure];
-    if (p == 0)
-        return val1000(value);
-    return "";
+    return val1000(value, measurePow10[measure]) + unit(measure);
 }
 
 double MeasureUnit::val(MEASURE measure, uint64_t value)

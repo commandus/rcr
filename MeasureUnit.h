@@ -8,21 +8,20 @@
 #include <string>
 
 typedef enum {
-    M_R = 1,
-    M_C = 2,
-    M_L = 3
+    M_R = 0,
+    M_C = 1,
+    M_L = 2
 } MEASURE;
 
 class MeasureUnit {
 public:
     MeasureUnit();
     virtual ~MeasureUnit();
-    std::string sym(MEASURE measure);
-    std::string unit(MEASURE measure);
-    int pow10(MEASURE measure);
-    std::string value(MEASURE measure, uint64_t value);
-    double val(MEASURE measure, uint64_t value);
+    static std::string sym(MEASURE measure);
+    static std::string unit(MEASURE measure);
+    static int pow10(MEASURE measure);
+    static std::string value(MEASURE measure, uint64_t value);
+    static double val(MEASURE measure, uint64_t value);
 };
-
 
 #endif //RCR_MEASUREUNIT_H
