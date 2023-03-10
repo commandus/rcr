@@ -36,8 +36,8 @@ static const std::string prefixesPart[MAX_POW10] {
 
 static int measurePow10[] {
     0,
-    -9,
-    -9
+    -12,
+    -12
 };
 
 static const std::string symNamesRU[] {
@@ -85,7 +85,7 @@ std::string val1000(uint64_t value, int initialPow10) {
             if (idx >= 0)
                 return std::to_string(v) + ' ' + prefixes[idx];
             else
-                return std::to_string(v) + ' ' + prefixesPart[-idx];
+                return std::to_string(v) + ' ' + prefixesPart[ - idx ];
         }
         v /= 1000;
     }
