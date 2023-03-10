@@ -67,7 +67,7 @@ set(GEN ${CMAKE_CURRENT_SOURCE_DIR}/gen)
 set(GEN_SRC ${GEN}/rcr.grpc.pb.cc ${GEN}/rcr.pb.cc ${GEN}/rcr.pb-odb.cxx)
 set(GEN_HDR ${GEN}/rcr.grpc.pb.h ${GEN}/rcr.pb.h ${GEN}/rcr.pb-odb.hxx)
 
-include_directories("third-party" "odb" ".")
+include_directories("third-party" "odb" "." "gtests/lib")
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# avoid Error LNK2038 mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease'
@@ -86,7 +86,7 @@ set(MKDB_SRC
 		MeasureUnit.cpp MeasureUnit.h)
 add_executable(mkdb ${MKDB_SRC})
 target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES} ${ODB_LIBODB_LIBRARIES}
-		${ODB_SQLITE_LIBRARIES} gRPC::grpc++)
+		${ODB_SQLITE_LIBRARIES} gRPC::grpc++ gtest gtest_main)
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
@@ -124,4 +124,4 @@ include(CPack)
 #
 # Tests
 #
-add_subdirectory(google-tests)
+add_subdirectory(gtests)
