@@ -2,9 +2,14 @@
 #
 #	Usage:
 #	./generate-code
+#	./generate-code SOURCE-PATH
 #
 # HOME_GRPC=/home/andrei/src-old/third_party/grpc/include
 # ODBINC+=-I$HOME_GRPC
+
+if [ -n "$1" ]; then
+    cd $1
+fi
 
 DT=`date --rfc-2822`
 SRC=.
@@ -59,5 +64,7 @@ ODBDEFS="-DGEN_ODB -D__x86_64__ -D__LP64__"
 # PostgreSQL
 # odb -o $SRC/gen -d pgsql -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema $ODBINC $ODBDEFS $H
 
-# Sqlite3
-odb -o $SRC/gen -d sqlite -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema $ODBINC $ODBDEFS $H
+# Sqlite3 --schema-format embeded other values are sql, separate
+odb -o $SRC/gen -d sqlite -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable \
+    --generate-query --generate-schema --schema-format sql \
+    $ODBINC $ODBDEFS $H

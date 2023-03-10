@@ -29,10 +29,18 @@ find_package(Threads REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
 
+if(ENABLE_SQLITE)
+	find_package(ODB REQUIRED OPTIONAL_COMPONENTS sqlite)
+endif()
+
+if(ENABLE_PG)
+	find_package(ODB REQUIRED OPTIONAL_COMPONENTS pg)
+endif()
+
 set (ARGTABLE "third-party/argtable3/argtable3.c")
 
 if(ENABLE_SQLITE)
-	set(DEFS ENABLE_SQLITE)
+	set(DEFS "ENABLE_SQLITE")
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		find_package(unofficial-sqlite3 CONFIG REQUIRED)
 		set(BACKEND_DB_LIB unofficial::sqlite3::sqlite3)
@@ -44,7 +52,7 @@ if(ENABLE_SQLITE)
 endif ()
 
 if(ENABLE_PG)
-	set(DEFS ENABLE_PG)
+	set(DEFS "ENABLE_PG")
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		find_package(unofficial-postgresql CONFIG REQUIRED)
 		set(BACKEND_DB_LIB unofficial::PostgreSQL::PostgreSQL)
@@ -55,7 +63,9 @@ if(ENABLE_PG)
 	endif ()
 endif ()
 
-set(GEN_SRC gen/rcr.grpc.pb.cc gen/rcr.pb.cc gen/rcr.pb-odb.cxx)
+set(GEN ${CMAKE_CURRENT_SOURCE_DIR}/gen)
+set(GEN_SRC ${GEN}/rcr.grpc.pb.cc ${GEN}/rcr.pb.cc ${GEN}/rcr.pb-odb.cxx)
+set(GEN_HDR ${GEN}/rcr.grpc.pb.h ${GEN}/rcr.pb.h ${GEN}/rcr.pb-odb.hxx)
 
 include_directories("third-party" "odb" ".")
 
@@ -73,19 +83,26 @@ set(MKDB_SRC
 	cli/mkdb.cpp
 	${GEN_SRC}
 	${ARGTABLE}
-)
-
+		MeasureUnit.cpp MeasureUnit.h)
 add_executable(mkdb ${MKDB_SRC})
-target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS})
-target_compile_definitions(mkdb PRIVATE ${DEFS} ${BACKEND_DB_INC})
+target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES} ${ODB_LIBODB_LIBRARIES}
+		${ODB_SQLITE_LIBRARIES} gRPC::grpc++)
+target_compile_definitions(mkdb PRIVATE ${DEFS})
+target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
 #
 # Generate Protobuf and GRPC code
 #
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	add_custom_command(TARGET mkdb PRE_BUILD COMMAND tools/generate-code.ps1)
+	add_custom_command(
+		OUTPUT ${GEN_SRC} ${GEN_HDR}
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/generate-code.ps1 ${CMAKE_CURRENT_SOURCE_DIR}
+	)
 else()
-	add_custom_command(TARGET mkdb PRE_BUILD COMMAND tools/generate-code)
+	add_custom_command(
+		OUTPUT ${GEN_SRC} ${GEN_HDR}
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/generate-code ${CMAKE_CURRENT_SOURCE_DIR}
+	)
 endif()
 
 #
@@ -103,3 +120,8 @@ set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
 set(CPACK_PACKAGE_VERSION_MINOR "1")
 include(CPack)
+
+#
+# Tests
+#
+add_subdirectory(google-tests)
