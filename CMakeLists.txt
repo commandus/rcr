@@ -85,12 +85,19 @@ set(MKDB_SRC
 	cli/mkdb.cpp
 	${GEN_SRC}
 	${ARGTABLE}
-		MeasureUnit.cpp MeasureUnit.h)
+	MeasureUnit.cpp MeasureUnit.h
+)
 add_executable(mkdb ${MKDB_SRC})
-target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES} ${ODB_LIBODB_LIBRARIES}
-		${ODB_SQLITE_LIBRARIES} gRPC::grpc++ gtest gtest_main)
+target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES} 
+	${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} gRPC::grpc++
+)
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
+
+
+#
+# gtest gtest_main
+#
 
 #
 # Generate Protobuf and GRPC code
@@ -126,4 +133,6 @@ include(CPack)
 #
 # Tests
 #
-add_subdirectory(gtests)
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	add_subdirectory(gtests)
+endif()

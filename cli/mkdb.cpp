@@ -10,7 +10,6 @@
 #include <third-party/argtable3/argtable3.h>
 #include "gen/rcr.pb.h"
 #include "gen/rcr.pb-odb.hxx"
-#include "gen/rcr.grpc.pb.h"
 
 #include <odb/query.hxx>
 #include <odb/schema-catalog.hxx>
