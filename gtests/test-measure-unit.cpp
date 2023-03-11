@@ -27,4 +27,9 @@ TEST(MesureUnit, Resistor) {
     ASSERT_EQ(u.value(M_C, 23456789012), "23 mФ");
     ASSERT_EQ(u.value(M_C, 345678901234), "345 mФ");
     ASSERT_EQ(u.value(M_C, 5678901234567), "5 Ф");
+
+    ASSERT_DOUBLE_EQ(u.val(M_C, 5678901234567), 5.678901234567);
+    ASSERT_DOUBLE_EQ(u.val(M_R, 5678901234567), 5678901234567);
+
+
 }

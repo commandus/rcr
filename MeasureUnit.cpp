@@ -97,7 +97,14 @@ std::string MeasureUnit::value(MEASURE measure, uint64_t value)
     return val1000(value, measurePow10[measure]) + unit(measure);
 }
 
+
 double MeasureUnit::val(MEASURE measure, uint64_t value)
 {
-    return 0;
+    static uint64_t pow10[13] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
+        100000000, 1000000000, 10000000000L, 100000000000L, 1000000000000L };
+    int p = measurePow10[measure];
+    if (p < 0)
+        return 1.0 * value / pow10[-p];
+    else
+        return 1.0 * value * pow10[p];
 }
