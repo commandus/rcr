@@ -30,44 +30,28 @@ using grpc::CallCredentials;
 using grpc::CompositeChannelCredentials;
 using grpc::MetadataCredentialsPlugin;
 
-#define DEBUG_MEMORY_USAGE() \
-		// std::cout << getCurrentRSS() / 1024 << " KB" << std::endl;
 
-OneWayTicketClient::OneWayTicketClient(
-		const std::string &intface,
-		int port,
-		const std::string &username,
-		const std::string &password,
-		bool sslOn,
-		const std::string &keypem,
-		const std::string &certificatepem,
-		const std::string &rootCAlistpem,
-		int arepeats)
+RcrClient::RcrClient(
+    const std::string &interface,
+    int port,
+    bool sslOn,
+    int arepeats
+)
 {
 	// target host name and port
 	std::stringstream ss;
-	ss << intface << ":" << port;
+	ss << interface << ":" << port;
 	std::string target(ss.str());
-
 	repeats = arepeats;
 
 	std::shared_ptr<Channel> channel;
-	if (sslOn)
-	{
+	if (sslOn) {
 		SslCredentialsOptions sslOpts;
-		if (keypem.length())
-			sslOpts.pem_private_key = keypem;
-		if (certificatepem.length()) {
-			sslOpts.pem_cert_chain = certificatepem;
-			cn = getCertificateCNAsInt(certificatepem);
-		}
 		// Server use self-signed certificate, so client must trust CA, issued server certificate
-		if (rootCAlistpem.length())
-			sslOpts.pem_root_certs = rootCAlistpem;
-		std::shared_ptr<ChannelCredentials> channelCredentials = SslCredentials(sslOpts);
+		std::shared_ptr<ChannelCredentials> channelCredentials = grpc::SslCredentials(sslOpts);
 		std::shared_ptr<CallCredentials> callCredentials = MetadataCredentialsFromPlugin(std::unique_ptr<MetadataCredentialsPlugin>(
 			new TicketMetadataCredentialsPlugin(username, password)));
-		std::shared_ptr<ChannelCredentials> compositeChannelCredentials = CompositeChannelCredentials(channelCredentials, callCredentials);
+		std::shared_ptr<ChannelCredentials> compositeChannelCredentials = grpc::CompositeChannelCredentials(channelCredentials, callCredentials);
 		channel = grpc::CreateChannel(target, compositeChannelCredentials);
 	}
 	else
