@@ -514,6 +514,15 @@ sudo apt install g++-10
 Windows:
 
 ```
+cd \git\vcpkg
+vcpkg install libodb:x64-windows libodb-pgsql:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows
+cd \src\mgp
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+```
+
+```
 vcpkg install libodb:x64-windows-static
 ```
 
@@ -619,6 +628,13 @@ In the PowerShell execute:
 .\tools\clean-code.ps1
 ```
 
+## CMake
+
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake
+```
 
 ## Bugs
 

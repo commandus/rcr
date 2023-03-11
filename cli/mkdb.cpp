@@ -8,11 +8,15 @@
 #include <fstream>
 
 #include <third-party/argtable3/argtable3.h>
+#include "gen/rcr.pb.h"
+#include "gen/rcr.pb-odb.hxx"
+
+#include <odb/query.hxx>
 #include <odb/schema-catalog.hxx>
 #include <odb/sqlite/database.hxx>
 
-#include "gen/rcr.pb-odb.hxx"
 #include "MeasureUnit.h"
+
 
 const char* progname = "mkdb";
 const char* DEF_CONNECTION = "rcr.db";
