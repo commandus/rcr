@@ -1,3 +1,6 @@
+$WORK_DIR = $($args[0])
+$ODB_DATABASE_NAME = $($args[1])
+
 $GRPC_PLUGIN = "c:\bin\grpc_cpp_plugin.exe"
 $PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows-static\include"
 $DEST = "."
@@ -13,6 +16,14 @@ $PROTO_DIR = "proto"
 $PROTO = "$PROTO_DIR/rcr.proto"
 $H = "$GEN/rcr.pb.h"
 $HVIEWS = "$DEST/odb-views.h"
+
+if ($null -ne $WORK_DIR) {
+    cd $WORK_DIR
+}
+
+if ($null -eq $ODB_DATABASE_NAME) {
+    $ODB_DATABASE_NAME = "sqlite"
+}
 
 function Add-Proto {
     param (
@@ -78,12 +89,11 @@ function Add-Odb {
         "  // @@protoc_insertion_point(--class_scope:`$1.`$2)`r`n$PRECLASS" | Set-Content $HeadefFile
 }
 
-function Odb-Postgres {
+function Odb-Db {
     param (
-        $OutDir, $SetDef, $HeaderFile
+        $Driver, $OutDir, $SetDef, $HeaderFile
     )
-    odb -o $OutDir -d pgsql -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile
-    # odb -o $DEST -d pgsql -x '-w' --fkeys-deferrable-mode not_deferrable --generate-query %ODBINC% %ODBDEFS% %HVIEWS%
+    odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile
 }
 
 New-Item -ItemType Directory -Force -Path $GEN | Out-Null
@@ -98,7 +108,7 @@ Add-Odb -HeadefFile $GEN_HDR_PB -AdditionalComment $DT
 # Add-Vector -OwnerClass Org -MemberClass MediaFile -MemberName medias -NameSpace rcr
 
 # generate ODB ORM
-Odb-Postgres -OutDir $GEN -SetDef "-DGEN_ODB" -HeaderFile $GEN_HDR_PB
+Odb-Db -Driver $ODB_DATABASE_NAME -OutDir $GEN -SetDef "-DGEN_ODB" -HeaderFile $GEN_HDR_PB
 
 # sed -i "s//" $F
 # SET ODBINC="-I/usr/include/x86_64-linux-gnu -I/usr/local/include -I%DEST%/odb"

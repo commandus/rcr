@@ -40,6 +40,7 @@ endif()
 set (ARGTABLE "third-party/argtable3/argtable3.c")
 
 if(ENABLE_SQLITE)
+	set(ODB_DATABASE "sqlite")
 	set(DEFS "ENABLE_SQLITE")
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		find_package(unofficial-sqlite3 CONFIG REQUIRED)
@@ -52,6 +53,7 @@ if(ENABLE_SQLITE)
 endif ()
 
 if(ENABLE_PG)
+	set(ODB_DATABASE "pgsql")
 	set(DEFS "ENABLE_PG")
 	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 		find_package(unofficial-postgresql CONFIG REQUIRED)
@@ -72,7 +74,7 @@ include_directories("third-party" "odb" "." "gtests/lib")
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# avoid Error LNK2038 mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease'
 	# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
-	set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+	# set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 	set (OS_SPECIFIC_LIBS wsock32 ws2_32 Userenv)
 endif()
 
@@ -96,7 +98,7 @@ target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIR
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_custom_command(
 		OUTPUT ${GEN_SRC} ${GEN_HDR}
-		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/generate-code.ps1 ${CMAKE_CURRENT_SOURCE_DIR}
+		COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/tools/generate-code.ps1 ${CMAKE_CURRENT_SOURCE_DIR} ${ODB_DATABASE}
 	)
 else()
 	add_custom_command(
