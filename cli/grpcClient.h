@@ -17,7 +17,6 @@ using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
-
 class RcrClient
 {
 private:
@@ -28,10 +27,15 @@ public:
 		const std::string &interface,
 		int port, 
 		bool sslOn,
-		int repeats
+        const std::string &username,
+        const std::string &password,
+        int repeats
 	);
 	virtual ~RcrClient();
 	// method wrappers
+    int32_t addPropertyType(
+            const rcr::PropertyType &value
+    );
 };
 
 #endif /* GRPCCLIENT_H_ */
