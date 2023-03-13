@@ -98,12 +98,11 @@ target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Proto
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
-
 #
 # Download lexy
 #
 include(FetchContent)
-FetchContent_Declare(lexy URL https://lexy.foonathan.net/download/lexy-src.zip)
+FetchContent_Declare(lexy URL https://lexy.foonathan.net/download/lexy-src.zip DOWNLOAD_EXTRACT_TIMESTAMP true)
 FetchContent_MakeAvailable(lexy)
 
 #
@@ -128,7 +127,6 @@ target_link_libraries(rcrq PRIVATE
 #
 # rcrql library depends on lexy
 #
-
 set(LIB_RCRQL_SRC 
 	rcrql/rcrql.cpp
 	MeasureUnit.cpp
@@ -142,7 +140,6 @@ target_compile_definitions(rcrql PRIVATE ${DEFS})
 target_compile_features(rcrql PRIVATE cxx_std_17)
 target_link_libraries(rcrql PRIVATE foonathan::lexy)
 
-
 #
 # Just for test
 #
@@ -151,6 +148,25 @@ add_executable(rcrql-example
 )
 target_compile_features(rcrql-example PRIVATE cxx_std_17)
 target_link_libraries(rcrql-example PRIVATE foonathan::lexy)
+
+#
+# rcr-cli
+#
+set(RCR_CLI_SRC
+	cli/rcr-cli.cpp
+	${GEN_GRPC_SRC}
+	${ARGTABLE}
+	cli/grpcClient.cpp
+	RcrCredentials.cpp
+	MeasureUnit.cpp
+		RCQuery.cpp RCQuery.h)
+add_executable(rcr-cli ${RCR_CLI_SRC})
+target_link_libraries(rcr-cli PRIVATE  ${OS_SPECIFIC_LIBS}
+	${Protobuf_LIBRARIES} gRPC::grpc++
+	gtest gtest_main
+)
+target_compile_definitions(rcr-cli PRIVATE ${DEFS})
+target_include_directories(rcr-cli PRIVATE ${Protobuf_INCLUDE_DIRS} )
 
 #if(WIN32)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

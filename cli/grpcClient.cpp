@@ -72,19 +72,19 @@ int32_t RcrClient::addPropertyType(
 	uint32_t r = 0;
 	for (int i = 0; i < repeats; i++) {
 		ClientContext context;
-		rcr::Operation response;
-		Status status = mStub->chPropertyType(&context, gtfs_trips, &response);
-		if (!status.ok())
-		{
+		rcr::OperationResponse *response;
+        rcr::ChPropertyTypeRequest request;
+		Status status = mStub->chPropertyType(&context, request, response);
+		if (!status.ok()) {
 			std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
 			return -1;
 		}
-		for (int i = 0; i < response.codes_size(); i++)
-		{
-			if (response.codes(i))
-				r++;
-		}
-		DEBUG_MEMORY_USAGE();
+        int32_t c = response->code();
+		if (c) {
+            std::string d = response->description();
+            std::cerr << "Error: " << c << " " << d << std::endl;
+            return c;
+        }
 	}
 	return r;
 }

@@ -10,7 +10,6 @@
 #include <string>
 #include <grpc++/grpc++.h>
 
-#include "gen/rcr.pb-odb.hxx"
 #include "gen/rcr.grpc.pb.h"
 
 using grpc::Channel;

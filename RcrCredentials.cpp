@@ -4,10 +4,8 @@
 
 #include <iostream>
 #include <sstream>
-#include <glog/logging.h>
-
-#include "utilstring.h"
-#include "TicketCredentials.h"
+#include <grpcpp/security/server_credentials.h>
+#include "RcrCredentials.h"
 
 using grpc::SslServerCredentialsOptions;
 
@@ -129,4 +127,3 @@ Status RcrAuthMetadataProcessor::Process(
 	// LOG(INFO) << "Process: " << s;
 	return Status::OK;
 }
-

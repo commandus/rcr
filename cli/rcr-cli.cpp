@@ -18,8 +18,6 @@
 #include "argtable3/argtable3.h"
 #include <grpc++/grpc++.h>
 
-#include "gen/rcr.grpc.pb.h"
-
 #include "grpcClient.h"
 
 using grpc::Channel;

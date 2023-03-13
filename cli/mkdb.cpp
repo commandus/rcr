@@ -20,11 +20,13 @@
 
 const char* progname = "mkdb";
 const char* DEF_CONNECTION = "rcr.db";
+const MEASURE_LOCALE DEF_LOCALE = ML_RU;
 
 class ClientConfig {
 public:
     int verbosity;                ///< verbose level: 0- error only, 1- warning, 2- info, 3- debug
     std::string connection;
+    MEASURE_LOCALE locale;
 };
 
 /**
@@ -41,11 +43,13 @@ int parseCmd(
 {
 	struct arg_str *a_connection = arg_str0("c", "connection", "<connection-string>",
             "Set database connection string");
-	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
+    struct arg_str *a_locale = arg_str0("l", "locale", "intl|ru",
+                                            "Set locale. Default ru");
+    struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
 	struct arg_end *a_end = arg_end(20);
 
-	void* argtable[] = { a_connection, a_verbose, a_help, a_end };
+	void* argtable[] = { a_connection, a_locale, a_verbose, a_help, a_end };
 	int nerrors;
 
 	// verify the argtable[] entries were allocated successfully
@@ -71,6 +75,10 @@ int parseCmd(
 		value->connection = *a_connection->sval;
 	else
 		value->connection = DEF_CONNECTION;
+    if (a_locale->count)
+        value->locale = pchar2MEASURE_LOCALE(*a_locale->sval);
+    else
+        value->connection = DEF_LOCALE;
 	value->verbosity = a_verbose->count;
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 	return 0;
@@ -90,22 +98,22 @@ std::ifstream *openUtf8BOM(const std::string &fn)
 	return ret;
 }
 
-static bool sqliteFillOutDatabase(odb::sqlite::database &db)
+static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &db)
 {
     bool r;
     try {
         MeasureUnit unit;
         rcr::Symbol symbol;
-        symbol.set_sym(unit.sym(M_R));
-        symbol.set_unit(unit.unit(M_R));
+        symbol.set_sym(unit.sym(locale, M_R));
+        symbol.set_unit(unit.unit(locale, M_R));
         symbol.set_pow10(unit.pow10(M_R));
         db.persist(symbol);
-        symbol.set_sym(unit.sym(M_C));
-        symbol.set_unit(unit.unit(M_C));
+        symbol.set_sym(unit.sym(locale, M_C));
+        symbol.set_unit(unit.unit(locale, M_C));
         symbol.set_pow10(unit.pow10(M_C));
         db.persist(symbol);
-        symbol.set_sym(unit.sym(M_R));
-        symbol.set_unit(unit.unit(M_C));
+        symbol.set_sym(unit.sym(locale, M_R));
+        symbol.set_unit(unit.unit(locale, M_C));
         symbol.set_pow10(unit.pow10(M_L));
         db.persist(symbol);
 
@@ -147,7 +155,7 @@ static bool sqliteCreateSchemaIfExists(ClientConfig &config)
     if (!exists) {
         try {
             odb::schema_catalog::create_schema(*db);
-            created = sqliteFillOutDatabase(*db);
+            created = sqliteFillOutDatabase(config.locale, *db);
         } catch (odb::exception &ignored) {
         }
     }

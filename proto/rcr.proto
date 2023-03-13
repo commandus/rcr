@@ -136,7 +136,7 @@ message CardResponse
     repeated Card cards = 3;                    ///< dataset
 }
 
-message ChResponse
+message OperationResponse
 {
     int32 code = 1;
     uint64 id = 2;
@@ -155,5 +155,5 @@ service Rcr
 {
     // user manipulation
     rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
-    rpc chPropertyType(ChPropertyTypeRequest) returns (ChResponse) {}
+    rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
 }
