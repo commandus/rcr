@@ -1,5 +1,17 @@
 #include "gtest/gtest.h"
 #include "MeasureUnit.h"
+#include "StockOperation.h"
+
+TEST(StockOperation, List) {
+    StockOperation so1("1 +12345");
+    ASSERT_EQ(so1.code, SO_ADD);
+    ASSERT_EQ(so1.boxBlocks, 1);
+    ASSERT_EQ(so1.count, 12345);
+    StockOperation so2("1-2 +1");
+    StockOperation so3("1-2-3 +1");
+    StockOperation so4("1-2-3-4 +1");
+    StockOperation so5("1-2-3-4-5 +1");
+}
 
 TEST(MeasureUnit, ParseC) {
     size_t position;

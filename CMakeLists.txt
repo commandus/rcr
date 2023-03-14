@@ -93,7 +93,7 @@ set(MKDB_SRC
 	${GEN_SRC}
 	${ARGTABLE}
 	MeasureUnit.cpp string-helper.cpp
-)
+		StockOperation.cpp StockOperation.h)
 add_executable(mkdb ${MKDB_SRC})
 target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES}
 	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} gRPC::grpc++

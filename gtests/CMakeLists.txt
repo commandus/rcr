@@ -12,6 +12,8 @@ set(ICU_LIBS ICU::uc ICU::i18n)
 # 'test1.cpp tests2.cpp' are source files with tests
 add_executable(Google_Tests_run test-measure-unit.cpp
     ../MeasureUnit.cpp
+    ../StockOperation.cpp
+    ../RCQuery.cpp
     ../string-helper.cpp
 )
 target_link_libraries(Google_Tests_run gtest gtest_main ${ICU_LIBS})
