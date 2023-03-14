@@ -3,13 +3,15 @@
 //
 
 #include <cstring>
+
 #include "MeasureUnit.h"
+#include "string-helper.h"
 
 #define MAX_POW10 11
 #define LOCALES 2
 static const std::string prefixes[LOCALES][MAX_POW10] {
     "",
-    "k",    // kilo
+    "k",    // kilo - start here
     "M",    // mega
     "G",    // giga
     "Т",    // tera
@@ -21,7 +23,7 @@ static const std::string prefixes[LOCALES][MAX_POW10] {
     "Q",
 
     "",
-    "к",    // kilo
+    "к",    // kilo - start here
     "М",    // mega
     "Г",    // giga
     "Т",    // tera
@@ -37,7 +39,7 @@ static const std::string prefixes[LOCALES][MAX_POW10] {
 static const std::string prefixesPart[LOCALES][MAX_POW10] {
 "",
 "m",    // milli
-"µ",    // micro
+"µ",    // micro - start here
 "n",    // nano
 "p",    // pico
 "f",    // femto
@@ -49,7 +51,7 @@ static const std::string prefixesPart[LOCALES][MAX_POW10] {
 
 "",
 "м",    // milli
-"мк",   // micro
+"мк",   // micro - start here
 "н",    // nano
 "п",    // pico
 "ф",    // femto
@@ -89,6 +91,18 @@ static const std::string unitNames[LOCALES][4] {
     "Ф",
     "Гн",
     ""
+};
+
+static const std::string unitNamesUpperCase[LOCALES][4] {
+        "OHM",
+        "F",
+        "G",
+        "",
+
+        "ОМ",
+        "Ф",
+        "ГН",
+        ""
 };
 
 std::string MeasureUnit::sym(MEASURE_LOCALE locale, MEASURE measure) {
@@ -148,8 +162,10 @@ int MeasureUnit::parse(
 )
 {
     size_t start = position;
-    size_t finish;
     size_t eolp = value.length();
+    size_t finish = eolp;
+
+    std::string valueUpperCase = toUpperCase(locale, value);
 
     // skip spaces if exists
     for (auto p = start; p < eolp; p++) {
@@ -166,6 +182,10 @@ int MeasureUnit::parse(
             break;
         }
     }
+
+    nominal = 0;
+    retname = "";
+
     bool hasNominal = finish > start;
 
     if (hasNominal) {
@@ -197,16 +217,16 @@ int MeasureUnit::parse(
             }
         }
 
-        int pow10 = 0;
+        int pow10Index = 0;
         bool hasPrefix = finish > start;
         if (hasPrefix) {
-            pow10 = idx;
+            pow10Index = idx;
         } else {
             // try to find out prefixPart
-            for (auto pf = 1; pf < MAX_POW10; pf++) {
+            for (auto pf = 2; pf < MAX_POW10; pf++) {
                 if (value.find(prefixesPart[locale][pf], start) == start) {
                     // found prefix
-                    finish = start + prefixes[locale][pf].length();
+                    finish = start + prefixesPart[locale][pf].length();
                     idx = pf;
                     break;
                 }
@@ -214,21 +234,23 @@ int MeasureUnit::parse(
         }
         bool hasPrefixPart = !hasPrefix && (finish > start);
         if (hasPrefixPart) {
-            pow10 = - idx;
+            pow10Index = - idx;
         }
 
         // try to find out unit
         start = finish;
         idx = -1;
         for (auto ui = 0; ui < 3; ui++) {
-            if (value.find(unitNames[locale][ui], start) == start) {
+            if (valueUpperCase.find(unitNamesUpperCase[locale][ui], start) == start) {
                 // found unit name
                 finish = start + unitNames[locale][ui].length();
-                int dp = pow10 - measurePow10[ui];
+                // 100пФ -12                -4 * 3
+                // 10кОм 1                  1 * 3
+                int dp = - measurePow10[ui] + pow10Index * 3;
                 if (dp < 0)
-                    nominal /= pow10table[- dp * 3];
+                    nominal /= pow10table[- dp];
                 else
-                    nominal *= pow10table[dp * 3];
+                    nominal *= pow10table[dp];
                 idx = ui;
                 break;
             }
@@ -236,7 +258,7 @@ int MeasureUnit::parse(
         bool hasMeasureUnit = finish > start;
         if (hasMeasureUnit) {
             measure = (MEASURE) idx;
-            retname = "";
+            position = finish;
             return 0;
         }
     }
@@ -252,6 +274,7 @@ int MeasureUnit::parse(
         }
     }
     // find out end of IC name (spaces)
+    finish = eolp; // by default end of string
     for (auto p = start; p < eolp; p++) {
         if (std::isspace(value[p])) {
             finish = p;
@@ -259,15 +282,9 @@ int MeasureUnit::parse(
         }
     }
 
-    start = position;
-    // try read nominal
-    for (auto p = position; p < eolp; p++) {
-        if (!isdigit(value[p])) {
-            finish = p;
-            break;
-        }
-    }
-    retname = value.substr(start, finish - start);
+    if (start < finish)
+        retname = value.substr(start, finish - start);
+    position = finish;
     return 0;
 }
 

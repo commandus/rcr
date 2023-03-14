@@ -1,15 +1,65 @@
 #include "gtest/gtest.h"
 #include "MeasureUnit.h"
 
-TEST(MeasureUnit, ParseR) {
-    size_t position = 0;
+TEST(MeasureUnit, ParseC) {
+    size_t position;
     uint64_t nominal;
     MEASURE measure;
     std::string ic;
 
+    position = 0;
+    MeasureUnit::parse(ML_RU, "100 пФ", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 100);
+    ASSERT_EQ(measure, M_C);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "100 мкФ", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 100000000);
+    ASSERT_EQ(measure, M_C);
+}
+
+TEST(MeasureUnit, ParseR) {
+    size_t position;
+    uint64_t nominal;
+    MEASURE measure;
+    std::string ic;
+
+    position = 0;
     MeasureUnit::parse(ML_RU, "100 кОм", position, nominal, measure, ic);
     ASSERT_EQ(nominal, 100000);
     ASSERT_EQ(measure, M_R);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "1000 ком", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 1000000);
+    ASSERT_EQ(measure, M_R);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "100 ом", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 100);
+    ASSERT_EQ(measure, M_R);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "1 ом", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 1);
+    ASSERT_EQ(measure, M_R);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "0 ом", position, nominal, measure, ic);
+    ASSERT_EQ(nominal, 0);
+    ASSERT_EQ(measure, M_R);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, " ом", position, nominal, measure, ic);
+    ASSERT_EQ(ic, "ом");
+    ASSERT_EQ(nominal, 0);
+    ASSERT_EQ(measure, M_U);
+
+    position = 0;
+    MeasureUnit::parse(ML_RU, "К155ЛА5", position, nominal, measure, ic);
+    ASSERT_EQ(ic, "К155ЛА5");
+    ASSERT_EQ(nominal, 0);
+    ASSERT_EQ(measure, M_U);
 }
 
 TEST(MesureUnit, Resistor) {
