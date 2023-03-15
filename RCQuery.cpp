@@ -19,5 +19,14 @@ int RCQuery::parse(
     size_t &position
 )
 {
-    return 0;
+    int r = MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName);
+    if (r)
+        return r;
+    r = QueryProperties::parse(value, position, properties);
+    if (r)
+        return r;
+    r = StockOperation::parse(value, position, code, boxBlocks, boxes, count);
+    if (r)
+        return r;
+    return r;
 }

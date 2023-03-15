@@ -9,7 +9,89 @@ StockOperation::StockOperation(
 )
 {
     size_t position = 0;
-    parse(value, position);
+    parseString(value, position);
+}
+
+int StockOperation::parse(
+    const std::string &value,
+    size_t &position,
+    STOCK_OPERATION_CODE &retCode,
+    int &retBoxBlocks,
+    uint64_t &retBoxes,
+    size_t &retCount
+)
+{
+    // set default
+    retCode = SO_LIST;
+    retCount = 0;
+
+    size_t start = position;
+    size_t eolp = value.length();
+    size_t finish = eolp;
+
+    // skip spaces if exists
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(value[p])) {
+            start = p;
+            break;
+        }
+    }
+
+    // try read retBoxes first
+    for (auto p = start; p < eolp; p++) {
+        if (!(isdigit(value[p]) || (std::ispunct(value[p])))) {
+            finish = p;
+            break;
+        }
+    }
+
+    bool hasFirstPart = (finish > start);
+
+    size_t startSecond = finish;
+    size_t finishSecond = eolp;
+    // skip spaces if exists
+    for (auto p = startSecond; p < eolp; p++) {
+        if (!std::isspace(value[p])) {
+            startSecond = p;
+            break;
+        }
+    }
+    bool hasSecondPart = (finishSecond > startSecond);
+
+    if (hasSecondPart) {
+        if (hasFirstPart) {
+            retBoxBlocks = parseBoxes(retBoxes, value, start, finish);
+            if (retBoxBlocks == 0) {
+                return -1;
+            }
+        } else {
+            retBoxBlocks = 0;
+            retBoxes = 0;
+        }
+        retCode = parseCommand(retCount, value, startSecond, finishSecond);
+        if (retCode == SO_NONE)
+            retCode = SO_LIST;
+    } else {
+        retCode = parseCommand(retCount, value, start, finish);
+        // return SO_NONE- invalid command
+        if (retCode == SO_NONE) {
+            retBoxBlocks = parseBoxes(retBoxes, value, start, finish);
+            if (retBoxBlocks == 0) {
+                // invalid retBoxes, invalid command
+                retCode = SO_LIST_NO_BOX;
+            } else
+                retCode = SO_LIST;
+        } else {
+            retBoxBlocks = 0;
+            retBoxes = 0;
+            if (retCode == SO_COUNT || retCode == SO_SUM || retCode == SO_RM) {
+                // list, sum, rerCount, rm are valid commands without retBoxes
+            } else {
+                retCode = SO_NONE; // invalid command
+            }
+        }
+    }
+    return 0;
 }
 
 /**
@@ -29,7 +111,7 @@ StockOperation::StockOperation(
  * @param position
  * @return 0- success
  */
-int StockOperation::parse(
+int StockOperation::parseString(
     const std::string &value,
     size_t &position
 )
@@ -52,7 +134,7 @@ int StockOperation::parse(
 
     // try read boxes first
     for (auto p = start; p < eolp; p++) {
-        if (!isdigit(value[p])) {
+        if (!(isdigit(value[p]) || (std::ispunct(value[p])))) {
             finish = p;
             break;
         }
@@ -72,18 +154,18 @@ int StockOperation::parse(
     bool hasSecondPart = (finishSecond > startSecond);
 
     if (hasSecondPart) {
-        boxBlocks = parseBoxes(value, start, finish);
+        boxBlocks = parseBoxes(boxes, value, start, finish);
         if (boxBlocks == 0) {
             return -1;
         }
-        code = parseCommand(value, startSecond, finishSecond);
+        code = parseCommand(count, value, startSecond, finishSecond);
         if (code == SO_NONE)
             code = SO_LIST;
     } else {
-        code = parseCommand(value, start, finish);
+        code = parseCommand(count, value, start, finish);
         // return SO_NONE- invalid command
         if (code == SO_NONE) {
-            boxBlocks = parseBoxes(value, start, finish);
+            boxBlocks = parseBoxes(boxes, value, start, finish);
             if (boxBlocks == 0) {
                 // invalid boxes, invalid command
                 return -2;
@@ -112,12 +194,13 @@ int StockOperation::parse(
  * @return blocks count: 0..4
  */
 int StockOperation::parseBoxes(
+    uint64_t &retBoxes,
     const std::string &value,
     size_t start,
     size_t finish
 )
 {
-    boxes = 0;
+    retBoxes = 0;
     // skip spaces if exists
     size_t s = start;
 
@@ -144,7 +227,7 @@ int StockOperation::parseBoxes(
         // has box number, try to read
         try {
             uint64_t b = std::stoull(value.substr(s, f - s));
-            boxes |= (b & 0xffff) << ((3 - block) * 16);
+            retBoxes |= (b & 0xffff) << ((3 - block) * 16);
             blocks++;
         } catch (std::exception &e) {
 
@@ -162,6 +245,7 @@ int StockOperation::parseBoxes(
  * @return
  */
 STOCK_OPERATION_CODE StockOperation::parseCommand(
+    size_t &retCount,
     const std::string &value,
     size_t start,
     size_t finish
@@ -200,9 +284,9 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
         // try to read number
         start++;    // command takes 1 byte
         try {
-            count = std::stoull(value.substr(start, finish - start));
+            retCount = std::stoull(value.substr(start, finish - start));
         } catch (std::exception &e) {
-            count = 0;
+            retCount = 0;
             r = SO_NONE;    // invalid command
         }
     }

@@ -18,6 +18,9 @@ project(${PROJECT_NAME} VERSION 1.0)
 set(MQTTAPP_CMAKE_DIR ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${MQTTAPP_CMAKE_DIR} ${CMAKE_MODULE_PATH})
 
+#
+# Unicode toUpper()
+#
 find_package(ICU 61.0 COMPONENTS uc i18n REQUIRED)
 set(ICU_LIBS ICU::uc ICU::i18n)
 
@@ -92,8 +95,8 @@ set(MKDB_SRC
 	cli/mkdb.cpp
 	${GEN_SRC}
 	${ARGTABLE}
-	MeasureUnit.cpp string-helper.cpp
-		StockOperation.cpp StockOperation.h)
+	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
+)
 add_executable(mkdb ${MKDB_SRC})
 target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES}
 	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} gRPC::grpc++

@@ -21,15 +21,13 @@ typedef enum {
 
 class MeasureUnit {
 public:
-    MeasureUnit() = default;
-    virtual ~MeasureUnit() = default;
     static std::string sym(MEASURE_LOCALE locale, MEASURE measure);
     static std::string unit(MEASURE_LOCALE locale, MEASURE measure);
     static int pow10(MEASURE measure);
     static std::string value(MEASURE_LOCALE locale, MEASURE measure, uint64_t val);
     static double val(MEASURE measure, uint64_t value);
     static int parse(MEASURE_LOCALE locale, const std::string &value,
-                     size_t &position, uint64_t &nominal, MEASURE &measure, std::string &retname);
+        size_t &position, uint64_t &nominal, MEASURE &measure, std::string &retname);
 };
 
 // Helper functions
