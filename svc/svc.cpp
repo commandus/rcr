@@ -72,7 +72,7 @@ void runSSL()
 {
 	std::stringstream ss;
 	ss << config.address << ":" << config.port;
-	OneWayTicketImpl service(&config);
+	RcrImpl service(&config);
 
 	ServerBuilder builder;
 	builder.SetMaxMessageSize(2147483647);
@@ -108,7 +108,7 @@ void run()
 {
 	std::stringstream ss;
 	ss << config.address << ":" << config.port;
-	OneWayTicketImpl service(&config);
+	RcrImpl service(&config);
 
 	ServerBuilder builder;
 	builder.SetMaxMessageSize(2147483647);
@@ -232,7 +232,7 @@ int parseCmd
 
 #ifdef ENABLE_SQLITE
     // database
-	value->sqliteDbName = *a_a_sqliteDbName->sval;
+	value->sqliteDbName = *a_sqliteDbName->sval;
 	if (a_sqliteDbName->count)
 		value->sqliteDbName = *a_sqliteDbName->sval;
 	else

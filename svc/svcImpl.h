@@ -50,7 +50,6 @@ protected:
 	static const grpc::Status& STATUS_NO_GRANTS;
 	/// return to client status: method not implemented yet
 	static const grpc::Status& STATUS_NOT_IMPLEMENTED;
-
     template <class T>
     std::unique_ptr<T> load(uint64_t id);
 public:

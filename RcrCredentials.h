@@ -8,7 +8,7 @@
 #ifndef OTPCREDENTIALSAUTHENTIFICATOR_H_
 #define OTPCREDENTIALSAUTHENTIFICATOR_H_
 
-#define GRPC_OVERRIDE
+// #define GRPC_OVERRIDE
 
 #include <string>
 #include <memory>

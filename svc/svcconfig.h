@@ -42,18 +42,17 @@ struct ServiceConfig
 	std::string path;
 };
 
+#ifdef ENABLE_PG
+
+#include <postgresql/libpq-fe.h>
+#include <odb/database.hxx>
+
 /**
  * Establish configured database connection
  */
 PGconn *dbconnect(
 	struct ServiceConfig *config		///< database configuration
 );
-
-/**
- * Establish configured ODB ORM database connection
- */
-odb::database *odbconnect(
-	struct ServiceConfig *config		///< database configuration
-);
+#endif
 
 #endif

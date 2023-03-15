@@ -104,6 +104,24 @@ target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Proto
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
+#
+# rcr-svc
+#
+set(RCR_SVC_SRC
+	svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
+	${GEN_SRC}
+	${ARGTABLE}
+	RcrCredentials.cpp
+	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
+)
+add_executable(rcr-svc ${RCR_SVC_SRC})
+target_link_libraries(rcr-svc PRIVATE
+		${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES}
+		${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} gRPC::grpc++
+)
+target_compile_definitions(rcr-svc PRIVATE ${DEFS})
+target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
+
 #if(WIN32)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# avoid Error LNK2038 mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease'
