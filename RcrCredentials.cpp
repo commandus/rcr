@@ -1,5 +1,5 @@
 /*
- * TicketCredentials.cpp
+ * RcrCredentials.cpp
  */
 
 #include <iostream>
@@ -16,7 +16,7 @@ const char *META_AUTH_USER = "x-auth-user";
 const char DELIM_TICKET = ' ';
 const char *METADATA_PATH = ":path";
 // this is special case when no SSL certificate is not required
-const char *NOSSL_GETCERTIFICATE_METADATA_PATH = "/stickychat.StickyChat/addUser";
+const std::string NOSSL_GETCERTIFICATE_METADATA_PATH = "/rcr.Rcr/";
 
 const char *RcrMetadataCredentialsPlugin::getMetaTicketName()
 {
@@ -82,28 +82,25 @@ Status RcrAuthMetadataProcessor::Process(
 		return Status::OK;
 	int f;
 	int64_t uid, oid;
-	if (mIsRequestUserCertificate)
-	{
+	if (mIsRequestUserCertificate) {
 		// check certificate CN if server required
 		std::vector<grpc::string_ref> id = context->GetPeerIdentity();
 		// client may provide 0, 1 or more identities.
 		bool ok = false;
 		for (std::vector<grpc::string_ref>::iterator it = id.begin(); it != id.end(); it++)
 		{
-			if (mRcrValidator->onCheckCertificateCN(*it, &f, &oid, &uid))
-			{
+			if (mRcrValidator->onCheckCertificateCN(*it, &f, &oid, &uid)) {
 				ok = true;
 				break;
 			}
 		}
-		if (!ok)
-		{
+		if (!ok) {
 			// This is special case	:path: /nfcreceipt.NFCReceipt/getNice
 			auto metapath = auth_metadata.find(METADATA_PATH);
 			if (metapath != auth_metadata.end())
 			{
 				std::string p(metapath->second.data());
-				if (p == NOSSL_GETCERTIFICATE_METADATA_PATH)
+				if (p.find(NOSSL_GETCERTIFICATE_METADATA_PATH) == 0)
 					return Status::OK;
 			}
 			return Status(grpc::StatusCode::UNAUTHENTICATED, ERR_INV_CERTIFICATE);

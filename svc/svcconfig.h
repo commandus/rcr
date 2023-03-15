@@ -1,25 +1,10 @@
 /**
  * service options
- *
  **/
 #ifndef SVCCONFIG_H
 #define SVCCONFIG_H
 
-#include <stdio.h>
-
-#ifndef __cplusplus
-#include <stdbool.h>
-#endif
-#include <sys/types.h>
-
-#ifdef OS_UBUNTU
-#include <postgresql/libpq-fe.h>
-#else
-#include <libpq-fe.h>
-#endif
-
-#include <odb/database.hxx>
-#include <odb/pgsql/database.hxx>
+#include <string>
 
 #define DEF_PORT        50051
 #define DEF_ADDRESS     "0.0.0.0"
@@ -34,6 +19,10 @@ struct ServiceConfig
 	const char *address;			///< HTTP/2 service interface address
 	int port;						///< HTTP/2 service interface port
 
+#ifdef ENABLE_SQLITE
+    std::string sqliteDbName;
+#endif
+#ifdef ENABLE_PG
     // PostgreSQL connection
     const char *dbconn;				///< PostgreSQL connection string
     const char *dbhost;				///< PostgreSQL host
@@ -46,7 +35,7 @@ struct ServiceConfig
     const char *dbsocket;			///< reserved
     const char *dbcharset;			///< reserved
     long dbclientflags;				///< reserved
-
+#endif
     /// SSL
     bool sslon;
 

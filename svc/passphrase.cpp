@@ -533,5 +533,3 @@ std::string getRandomName()
 
 	return ru_left[left] + " " + ru_right[right];
 }
-
-

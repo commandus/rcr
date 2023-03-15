@@ -7,6 +7,7 @@
 
 #ifndef PASSPHRASE_H_
 #define PASSPHRASE_H_
+#include <string>
 
 void initRandomName();
 
