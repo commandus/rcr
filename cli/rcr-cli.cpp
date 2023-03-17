@@ -1,45 +1,27 @@
 /**
- * ./onewayyicketcli -k cert/client.key -c cert/client.crt -r cert/roots.crt  --adduser "Alice"
+ * rcr-cli
+ *
+ * Compile:
+ * g++ -o rcr-cli -I.. -I../third-party ../cli/rcr-cli.cpp ../cli/grpcClient.cpp ../RcrCredentials.cpp ../AppSettings.cpp ../gen/rcr.grpc.pb.cc ../gen/rcr.pb.cc CMakeFiles/rcr-cli.dir/third-party/argtable3/argtable3.c.o -lgrpc++ -lprotobuf
  */
-#include <iostream>
-#include <memory>
 #include <string>
-#include <vector>
+#include <iostream>
+#include <iomanip>
 #include <sstream>
-#include <fstream>
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE /* for tm_gmtoff and tm_zone */
-#endif
-#include <time.h>
-
-#include <openssl/crypto.h>
 
 #include "argtable3/argtable3.h"
 #include <grpc++/grpc++.h>
 
 #include "grpcClient.h"
+
 #include "AppSettings.h"
 #include "RcrCredentials.h"
-
-using grpc::Channel;
-using grpc::ClientContext;
-using grpc::Status;
 
 const char* progname = "rcr-cli";
 const char* DEF_COMMAND = "version";
 
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
-
-void argInt2Vector(std::vector<uint64_t> &retval, struct arg_int *args)
-{
-	int *p = args->ival;
-	for (int i = 0; i < args->count; i++) {
-		retval.push_back(*p);
-		p++;
-	}
-}
 
 class ClientConfig {
 public:
@@ -72,7 +54,7 @@ int parseCmd
 	// SSL
 	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
 	// commands
-	// struct arg_file *a_niceclassfn = arg_file0(NULL, "class", "<file>", "add NICE classes from JSON file");
+	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "version|");
 
 	struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
@@ -137,20 +119,6 @@ int parseCmd
 	return 0;
 }
 
-/**
- * Open file to read, skip UTF-8 BOM if exists.
- */
-std::ifstream *openUtf8BOM(const std::string &fn)
-{
-	std::ifstream *ret = new std::ifstream(fn, std::ifstream::in);
-	// remove byte order mark (BOM) 0xef 0xbb 0xbf
-	unsigned char bom[3];
-	ret->read((char*) bom, 3);
-	if (!((bom[0] == 0xef) && (bom[1] == 0xbb) && (bom[2] == 0xbf)))
-		ret->seekg(0);
-	return ret;
-}
-
 int main(int argc, char** argv)
 {
 	ClientConfig config;
@@ -163,7 +131,7 @@ int main(int argc, char** argv)
     ss << config.intface << ":" << config.port;
     std::string target(ss.str());
 
-    std::shared_ptr<Channel> channel;
+    std::shared_ptr<grpc::Channel> channel;
     if (config.sslOn) {
         grpc::ChannelArguments args;
         args.SetSslTargetNameOverride("avtovokzal-yakutsk.ru");
@@ -185,6 +153,6 @@ int main(int argc, char** argv)
     // rpc.addPropertyType("ptkey", "pt desc");
 
     if (config.command == "version")
-        std::cout << rpc.version();
+        std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;
 	return 0;
 }
