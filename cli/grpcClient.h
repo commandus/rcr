@@ -20,13 +20,20 @@ public:
         const std::string &password
 	);
 	virtual ~RcrClient();
+
 	// method wrappers
     uint64_t version();
     int32_t addPropertyType(
-            const std::string &key,
-            const std::string &description
+        const std::string &key,
+        const std::string &description
     );
 
+    int32_t cardQuery(
+        std::ostream &ostream,
+        const std::string &query,
+        size_t offset,
+        size_t size
+    );
 };
 
 #endif /* GRPCCLIENT_H_ */

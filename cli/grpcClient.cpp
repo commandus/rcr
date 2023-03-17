@@ -4,6 +4,9 @@
 
 #include <iostream>
 
+// json
+#include <google/protobuf/util/json_util.h>
+
 #include "grpcClient.h"
 #include "RcrCredentials.h"
 #include "AppSettings.h"
@@ -47,22 +50,57 @@ int32_t RcrClient::addPropertyType(
 {
     uint32_t r = 0;
     grpc::ClientContext context;
-    rcr::OperationResponse *response = nullptr;
+    rcr::OperationResponse response;
     rcr::ChPropertyTypeRequest request;
     request.set_operationsymbol("+");
     request.mutable_value()->set_key(key);
     request.mutable_value()->set_description(description);
 
-    grpc::Status status = stub->chPropertyType(&context, request, response);
+    grpc::Status status = stub->chPropertyType(&context, request, &response);
     if (!status.ok()) {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
         return -1;
     }
-    int32_t c = response->code();
+    int32_t c = response.code();
     if (c) {
-        std::string d = response->description();
+        std::string d = response.description();
         std::cerr << "Error: " << c << " " << d << std::endl;
         return c;
     }
 	return r;
+}
+
+int32_t RcrClient::cardQuery(
+    std::ostream &ostream,
+    const std::string &query,
+    size_t offset,
+    size_t size
+) {
+    uint32_t r = 0;
+    grpc::ClientContext context;
+    rcr::CardQueryResponse response;
+    rcr::CardQueryRequest request;
+    request.set_query(query);
+    request.mutable_list()->set_offset(offset);
+    request.mutable_list()->set_size(size);
+
+    grpc::Status status = stub->cardQuery(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return -1;
+    }
+
+    int32_t c = response.rslt().code();
+
+    if (c) {
+        std::cerr << "Error: " << c << " " << response.rslt().description() << std::endl;
+        return c;
+    }
+
+    // print cards if exists
+    for (auto c = 0; c < response.cards().count(); c++) {
+
+    }
+
+    return 0;
 }

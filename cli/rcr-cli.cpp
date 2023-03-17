@@ -18,7 +18,7 @@
 #include "RcrCredentials.h"
 
 const char* progname = "rcr-cli";
-const char* DEF_COMMAND = "version";
+const char* DEF_COMMAND = "card";
 
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
@@ -32,6 +32,9 @@ public:
     int verbose;
 
     std::string command;
+    std::string request;
+    size_t offset;
+    size_t size;
     std::string username;
     std::string password;
 };
@@ -55,15 +58,20 @@ int parseCmd
 	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "version|");
+	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "card|version");
+    struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command request");
+    struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
+    struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 100");
 
-	struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
+    struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
 
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
 	struct arg_end *a_end = arg_end(20);
 
-	void* argtable[] = { a_interface, a_port, a_sslon, a_command,
+	void* argtable[] = { a_interface, a_port, a_sslon,
+        a_command, a_request,
+         a_offset, a_size,
 		a_repeats, a_verbose,
 		a_help, a_end };
 
@@ -108,6 +116,19 @@ int parseCmd
     else
         value->command = DEF_COMMAND;
 
+    if (a_offset->count)
+        value->offset = *a_offset->ival;
+    else
+        value->offset = 0;
+
+    if (a_size->count)
+        value->size = *a_offset->ival;
+    else
+        value->size = 100;
+
+    size_t offset;
+    size_t size;
+
     if (a_repeats->count)
 		value->repeats = *a_repeats->ival;
 	else
@@ -151,6 +172,11 @@ int main(int argc, char** argv)
 
     RcrClient rpc(channel, config.username, config.password);
     // rpc.addPropertyType("ptkey", "pt desc");
+
+    if (config.command == "card") {
+        rpc.cardQuery(std::cout, config.request, config.offset, config.size);
+        std::cout << std::endl;
+    }
 
     if (config.command == "version")
         std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;

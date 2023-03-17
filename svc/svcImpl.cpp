@@ -4,13 +4,16 @@
 #include <iostream>
 #include <sstream>
 
-#include <google/protobuf/util/json_util.h>
 #include <grpc++/server_context.h>
 #include <grpc++/security/credentials.h>
 #include <grpc++/security/server_credentials.h>
 
+// JSON
+#include <google/protobuf/util/json_util.h>
+
 #include "svcImpl.h"
 #include "passphrase.h"
+#include "RCQuery.h"
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
@@ -34,6 +37,8 @@ const std::string ERR_SVC_INVALID_ARGS = "Invalid arguments";
 #define LOG(x) std::cerr
 
 typedef uint64_t NOTIFICATION_TYPE;
+
+static google::protobuf::util::JsonPrintOptions printJSONOptions;
 
 static odb::database *odbconnect(
     struct ServiceConfig *config
@@ -77,11 +82,7 @@ std::string logString (
 
     if (msg) {
         std::string s;
-        google::protobuf::util::JsonPrintOptions options;
-        options.add_whitespace = true;
-        options.always_print_primitive_fields = true;
-        options.preserve_proto_field_names = true;
-        google::protobuf::util::MessageToJsonString(*msg, &s, options);
+        google::protobuf::util::MessageToJsonString(*msg, &s, printJSONOptions);
         ss << " message: " << s;
     }
     return ss.str();
@@ -164,6 +165,10 @@ RcrImpl::RcrImpl(struct ServiceConfig *config)
 {
 	mConfig = config;
 	mDb = odbconnect(config);
+
+    printJSONOptions.add_whitespace = true;
+    printJSONOptions.always_print_primitive_fields = true;
+    printJSONOptions.preserve_proto_field_names = true;
 }
 
 RcrImpl::~RcrImpl()
@@ -215,10 +220,33 @@ struct ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-//    BEGIN_GRPC_METHOD("chPropertyType", request, t)
+    BEGIN_GRPC_METHOD("chPropertyType", request, t)
     response->set_id(1);
     response->set_code(2);
     response->set_description(request->value().description());
-//    END_GRPC_METHOD("chPropertyType", request, response, t)
+    END_GRPC_METHOD("chPropertyType", request, response, t)
+    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+::grpc::Status RcrImpl::cardQuery(
+    ::grpc::ServerContext* context,
+    const ::rcr::CardQueryRequest* request,
+    ::rcr::CardQueryResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("cardQuery", request, t)
+    size_t position = 0;
+    RCQuery q;
+    q.parse(ML_RU, request->query(), position);
+
+    response->mutable_rslt()->set_id(0);
+    response->mutable_rslt()->set_code(0);
+    response->mutable_rslt()->set_description("");
+    response->mutable_cards()->set_count(0);
+    END_GRPC_METHOD("cardQuery", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }

@@ -41,8 +41,7 @@ public:
 /**
  * gRPC OneWayTicket implementation with ODB (postgresql) backend
  */
-class RcrImpl : public rcr::Rcr::Service
-{
+class RcrImpl : public rcr::Rcr::Service {
 private:
 	struct ServiceConfig *mConfig;
 protected:
@@ -66,6 +65,7 @@ public:
     ::grpc::Status version(::grpc::ServerContext* context, const ::rcr::VersionRequest* request, ::rcr::VersionResponse* response) override;
     ::grpc::Status cardSearchEqual(::grpc::ServerContext* context, const ::rcr::EqualSearchRequest* request, ::rcr::CardResponse* response) override;
     ::grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
+    ::grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
     // ------------------ back office ------------------
 };
 

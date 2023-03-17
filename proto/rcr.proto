@@ -160,6 +160,18 @@ message ChPropertyTypeRequest
     PropertyType value = 2;
 }
 
+message CardQueryRequest
+{
+    string query = 1;
+    ListRequest list = 2;
+}
+
+message CardQueryResponse
+{
+    OperationResponse rslt = 1;
+    CardResponse cards = 2;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -168,4 +180,5 @@ service Rcr
     rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc version(VersionRequest) returns (VersionResponse) {}
+    rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
 }
