@@ -93,6 +93,17 @@ message Journal
 
 // Requests
 
+message VersionRequest 
+{
+    uint64 value = 1;                           ///<
+}
+
+message VersionResponse 
+{
+    uint64 value = 1;                           ///<
+    string name = 2;
+}
+
 message ListRequest
 {
     uint64 offset = 1;                           ///< 0..
@@ -156,4 +167,5 @@ service Rcr
     // user manipulation
     rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
+    rpc version(VersionRequest) returns (VersionResponse) {}
 }

@@ -662,3 +662,26 @@ To see error description, change console code page:
 chcp 1251
 ```
 
+### Python client
+
+```
+sudo python3 -m pip install grpcio
+python3 -m pip install grpcio
+python3 -m pip install grpcio-tools
+```
+
+#### Generate python code from the proto file
+
+```
+cd proto
+python3 -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. rcr.proto
+cp
+``` 
+
+#### Run an example
+
+```
+cd python
+python3 rcr_client.py
+cp
+``` 

@@ -8,27 +8,21 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <iomanip>
 #include <thread>
 
-#include <ctime>
-#include <stdio.h>
-#include <cerrno>
 #include <csignal>
 #include <memory.h>
-#include <fcntl.h>
 #include <stdlib.h>
 #include <argtable3/argtable3.h>
 
-#include <grpc/grpc.h>
 #include <grpc++/server.h>
 #include <grpc++/server_builder.h>
 
-#include "platform.h"
 #include "svcconfig.h"
 #include "daemonize.h"
 #include "svcImpl.h"
 #include "SSLValidator.h"
+#include "AppSettings.h"
 
 #include "passphrase.h"
 
@@ -42,7 +36,7 @@ const char* DEF_DB_SQLITE = "rcr.db";
 
 typedef void (*TDaemonRunner)();
 
-static struct ServiceConfig config;		//<	program configuration read from command line
+static ServiceConfig config;		//<	program configuration read from command line
 static std::unique_ptr<Server> server;
 
 using grpc::ServerBuilder;
@@ -86,8 +80,17 @@ void runSSL()
 	if (config.verbosity > 0) {
 			std::cerr << "SSL on" << std::endl;
 	}
-	grpc::SslServerCredentialsOptions sslOpts;
-	sslOpts.force_client_auth = false;
+
+    grpc::SslServerCredentialsOptions::PemKeyCertPair pkcp = { AppSettings::key_server(), AppSettings::certificate_server() };
+    grpc::SslServerCredentialsOptions sslOpts;
+    sslOpts.pem_key_cert_pairs.push_back(pkcp);
+    // sslOpts.pem_root_certs required to invalidate client certificates.
+    sslOpts.pem_root_certs = AppSettings::certificate_ca();
+    sslOpts.force_client_auth = false;
+
+    serverCredentials = SslServerCredentials(sslOpts);
+    serverCredentials->SetAuthMetadataProcessor(processor);
+
 	// sslOpts.pem_root_certs required to invalidate client certificates.
 	serverCredentials = SslServerCredentials(sslOpts);
 	serverCredentials->SetAuthMetadataProcessor(processor);
@@ -108,30 +111,23 @@ void run()
 {
 	std::stringstream ss;
 	ss << config.address << ":" << config.port;
+    std::cout << ss.str() << std::endl;
+
 	RcrImpl service(&config);
 
 	ServerBuilder builder;
 	builder.SetMaxMessageSize(2147483647);
 	builder.SetMaxSendMessageSize(2147483647);
-
-	if (config.verbosity > 0)
-	{
-			std::cerr << "SSL off" << std::endl;
-	}
-	// start
 	builder.AddListeningPort(ss.str(), grpc::InsecureServerCredentials());
 	builder.RegisterService(&service);
 	server = builder.BuildAndStart();
-	if (server)
-	{
+	if (server)	{
 		if (config.verbosity > 0)
 			std::cout << "Server listening on " << ss.str() << "." << std::endl;
 		server->Wait();
-	}
-	else
+	} else
 		std::cerr << "Can not start server." << std::endl;
 }
-
 
 void signalHandler(int signal)
 {
@@ -179,7 +175,7 @@ int parseCmd
 	struct arg_str *a_dbcharset = arg_str0(NULL, "dbcharset", "<charset>", "database client charset. Default utf8.");
 	struct arg_int *a_dbclientflags = arg_int0(NULL, "dbclientflags", "<number>", "database client flags. Default 0.");
 #endif
-
+    struct arg_lit *a_ssl = arg_lit0("s", "ssl", "enable SSL");
 	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", "start as daemon/service");
 
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
@@ -192,6 +188,7 @@ int parseCmd
 #ifdef ENABLE_SQLITE
             a_sqliteDbName,
 #endif
+        a_ssl,
         a_help, a_end };
 
 	int nerrors;
@@ -206,8 +203,7 @@ int parseCmd
 	nerrors = arg_parse(argc, argv, argtable);
 
 	// special case: '--help' takes precedence over error reporting
-	if ((a_help->count) || nerrors)
-	{
+	if ((a_help->count) || nerrors)	{
 		if (nerrors)
 			arg_print_errors(stderr, a_end, progname);
 		printf("Usage: %s\n",  progname);
@@ -226,9 +222,8 @@ int parseCmd
 		value->port = *a_port->ival;
 	else
 		value->port = DEF_PORT;
-
-
-	value->verbosity = 0;
+    value->sslOn = a_ssl->count > 0;
+    value->verbosity = 0;
 
 #ifdef ENABLE_SQLITE
     // database
@@ -310,10 +305,10 @@ int main(int argc, char* argv[])
 	if (config.daemonize) {
 		if (config.verbosity)
 			std::cerr << "Start as daemon, use syslog" << std::endl;
-		Daemonize daemonize(progname, config.path, config.sslon ? runSSL : run, stopNWait, done);
+		Daemonize daemonize(progname, config.path, config.sslOn ? runSSL : run, stopNWait, done);
 	}
 	else {
-		config.sslon ? runSSL() : run();
+        config.sslOn ? runSSL() : run();
 		done();
 	}
 	exit(reslt);

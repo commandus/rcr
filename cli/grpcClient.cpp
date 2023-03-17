@@ -11,53 +11,36 @@
 
 #include "grpcClient.h"
 #include "RcrCredentials.h"
-
-using grpc::Channel;
-using grpc::ChannelCredentials;
-using grpc::ClientReader;
-using grpc::ClientReaderWriter;
-using grpc::InsecureChannelCredentials;
-using grpc::SslCredentials;
-using grpc::SslCredentialsOptions;
-using grpc::CallCredentials;
-using grpc::CompositeChannelCredentials;
-using grpc::MetadataCredentialsPlugin;
+#include "AppSettings.h"
 
 
 RcrClient::RcrClient(
-    const std::string &interface,
-    int port,
-    bool sslOn,
+    std::shared_ptr<Channel> channel,
     const std::string &username,
-    const std::string &password,
-    int arepeats
+    const std::string &password
 )
 {
-	// target host name and port
-	std::stringstream ss;
-	ss << interface << ":" << port;
-	std::string target(ss.str());
-	repeats = arepeats;
-
-	std::shared_ptr<Channel> channel;
-	if (sslOn) {
-		SslCredentialsOptions sslOpts;
-		// Server use self-signed certificate, so client must trust CA, issued server certificate
-		std::shared_ptr<ChannelCredentials> channelCredentials = grpc::SslCredentials(sslOpts);
-		std::shared_ptr<CallCredentials> callCredentials = MetadataCredentialsFromPlugin(std::unique_ptr<MetadataCredentialsPlugin>(
-			new RcrMetadataCredentialsPlugin(username, password)));
-		std::shared_ptr<ChannelCredentials> compositeChannelCredentials = grpc::CompositeChannelCredentials(channelCredentials, callCredentials);
-		channel = grpc::CreateChannel(target, compositeChannelCredentials);
-	}
-	else
-	{
-		channel = grpc::CreateChannel(target, InsecureChannelCredentials());
-	}
-	mStub = rcr::Rcr::NewStub(channel);
+    stub = rcr::Rcr::NewStub(channel);
 }
 
 RcrClient::~RcrClient()
 {
+}
+
+std::string RcrClient::version()
+{
+    std::string r;
+    ClientContext ctx;
+    rcr::VersionRequest request;
+    request.set_value(1);
+    rcr::VersionResponse *response = nullptr;
+
+    Status status = stub->version(&ctx, request, response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return "Error";
+    }
+    return response->name();
 }
 
 /**
@@ -66,25 +49,28 @@ RcrClient::~RcrClient()
  * @return 0- success, -1- fatal error, >0- count of warnings(unsuccessful trips)
  */
 int32_t RcrClient::addPropertyType(
-	const rcr::PropertyType &value
+	const std::string &key,
+    const std::string &description
 )
 {
-	uint32_t r = 0;
-	for (int i = 0; i < repeats; i++) {
-		ClientContext context;
-		rcr::OperationResponse *response;
-        rcr::ChPropertyTypeRequest request;
-		Status status = mStub->chPropertyType(&context, request, response);
-		if (!status.ok()) {
-			std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
-			return -1;
-		}
-        int32_t c = response->code();
-		if (c) {
-            std::string d = response->description();
-            std::cerr << "Error: " << c << " " << d << std::endl;
-            return c;
-        }
-	}
+    uint32_t r = 0;
+    ClientContext context;
+    rcr::OperationResponse *response = nullptr;
+    rcr::ChPropertyTypeRequest request;
+    request.set_operationsymbol("+");
+    request.mutable_value()->set_key(key);
+    request.mutable_value()->set_description(description);
+
+    Status status = stub->chPropertyType(&context, request, response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return -1;
+    }
+    int32_t c = response->code();
+    if (c) {
+        std::string d = response->description();
+        std::cerr << "Error: " << c << " " << d << std::endl;
+        return c;
+    }
 	return r;
 }

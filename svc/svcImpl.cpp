@@ -3,8 +3,6 @@
  */
 #include <iostream>
 #include <sstream>
-#include <thread>
-#include <algorithm>
 
 #include <google/protobuf/util/json_util.h>
 #include <grpc++/server_context.h>
@@ -13,7 +11,6 @@
 
 #include "svcImpl.h"
 #include "passphrase.h"
-#include "gen/rcr.pb-odb.hxx"
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
@@ -85,7 +82,7 @@ std::string logString (
         options.always_print_primitive_fields = true;
         options.preserve_proto_field_names = true;
         google::protobuf::util::MessageToJsonString(*msg, &s, options);
-        ss << " input message: " << s;
+        ss << " message: " << s;
     }
     return ss.str();
 }
@@ -99,10 +96,12 @@ std::string logString (
 #define BEGIN_GRPC_METHOD(signature, requestMessage, transact) \
 		transaction transact; \
 		try { \
-			LOG(INFO) << logString(signature, "", "", requestMessage);
+			LOG(INFO) << logString(signature, "", "", requestMessage); \
+	        t.reset(mDb->begin());
 
-#define END_GRPC_METHOD(signature, requestMessage, transaction) \
+#define END_GRPC_METHOD(signature, requestMessage, responseMessage, transaction) \
 		transaction.commit(); \
+        LOG(INFO) << logString(signature, "", "", responseMessage); \
 	} \
 	catch (const odb::exception& oe) { \
 		LOG(ERROR) << logString(signature, "odb::exception", oe.what(), requestMessage); \
@@ -159,6 +158,8 @@ const grpc::string ERR_NOT_IMPLEMENTED("Not implemented");
 const grpc::Status& RcrImpl::STATUS_NO_GRANTS = grpc::Status(StatusCode::PERMISSION_DENIED, ERR_NO_GRANTS);
 const grpc::Status& RcrImpl::STATUS_NOT_IMPLEMENTED = grpc::Status(StatusCode::UNIMPLEMENTED, ERR_NOT_IMPLEMENTED);
 
+uint64_t VERSION_MAJOR = 0x010000;
+
 RcrImpl::RcrImpl(struct ServiceConfig *config)
 {
 	mConfig = config;
@@ -176,6 +177,21 @@ struct ServiceConfig *RcrImpl::getConfig()
 	return mConfig;
 }
 
+::grpc::Status RcrImpl::version(
+    ::grpc::ServerContext* context,
+    const ::rcr::VersionRequest* request,
+    ::rcr::VersionResponse* response
+)
+{
+    BEGIN_GRPC_METHOD("version", request, t)
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    response->set_value(VERSION_MAJOR);
+    response->set_name(getRandomName());
+    END_GRPC_METHOD("version", request, response, t)
+    return grpc::Status::OK;
+}
+
 ::grpc::Status RcrImpl::cardSearchEqual(
     ::grpc::ServerContext* context,
     const ::rcr::EqualSearchRequest* request,
@@ -185,9 +201,7 @@ struct ServiceConfig *RcrImpl::getConfig()
 	if (request == nullptr)
 		return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
 	BEGIN_GRPC_METHOD("cardSearchEqual", request, t)
-	t.reset(mDb->begin());
-
-	END_GRPC_METHOD("cardSearchEqual", request, t)
+	END_GRPC_METHOD("cardSearchEqual", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }
 
@@ -199,9 +213,12 @@ struct ServiceConfig *RcrImpl::getConfig()
 {
     if (request == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-    BEGIN_GRPC_METHOD("chPropertyType", request, t)
-        t.reset(mDb->begin());
-
-    END_GRPC_METHOD("chPropertyType", request, t)
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+//    BEGIN_GRPC_METHOD("chPropertyType", request, t)
+    response->set_id(1);
+    response->set_code(2);
+    response->set_description(request->value().description());
+//    END_GRPC_METHOD("chPropertyType", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }

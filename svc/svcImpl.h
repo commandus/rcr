@@ -63,7 +63,7 @@ public:
 
     // ------------------ front office ------------------
 
-    /// get User by CN or identifier
+    ::grpc::Status version(::grpc::ServerContext* context, const ::rcr::VersionRequest* request, ::rcr::VersionResponse* response) override;
     ::grpc::Status cardSearchEqual(::grpc::ServerContext* context, const ::rcr::EqualSearchRequest* request, ::rcr::CardResponse* response) override;
     ::grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
     // ------------------ back office ------------------

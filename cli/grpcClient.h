@@ -18,23 +18,21 @@ using grpc::Status;
 
 class RcrClient
 {
-private:
-	std::unique_ptr<rcr::Rcr::Stub> mStub;
-	int repeats;
 public:
+	std::unique_ptr<rcr::Rcr::Stub> stub;
     RcrClient(
-		const std::string &interface,
-		int port, 
-		bool sslOn,
+        std::shared_ptr<Channel> channel,
         const std::string &username,
-        const std::string &password,
-        int repeats
+        const std::string &password
 	);
 	virtual ~RcrClient();
 	// method wrappers
+    std::string version();
     int32_t addPropertyType(
-            const rcr::PropertyType &value
+            const std::string &key,
+            const std::string &description
     );
+
 };
 
 #endif /* GRPCCLIENT_H_ */

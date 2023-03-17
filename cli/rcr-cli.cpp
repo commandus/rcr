@@ -19,12 +19,15 @@
 #include <grpc++/grpc++.h>
 
 #include "grpcClient.h"
+#include "AppSettings.h"
+#include "RcrCredentials.h"
 
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
 
 const char* progname = "rcr-cli";
+const char* DEF_COMMAND = "version";
 
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
@@ -42,9 +45,13 @@ class ClientConfig {
 public:
     std::string intface;
     int port;
-    bool sslon;
+    bool sslOn;
     int repeats;
     int verbose;
+
+    std::string command;
+    std::string username;
+    std::string password;
 };
 
 /**
@@ -60,16 +67,13 @@ int parseCmd
 	ClientConfig *value
 )
 {
-	struct arg_str *a_interface = arg_str0("i", "hostname", "<service host name>", "service host name. Default onewayticket.commandus.com");
+	struct arg_str *a_interface = arg_str0("i", "hostname", "<service host name>", "service host name.");
 	struct arg_int *a_port = arg_int0("l", "listen", "<port>", "service port. Default 50051");
 	// SSL
-	struct arg_lit *a_sslon = arg_lit0("s", "sslon", "SSL on");
+	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(NULL, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_getuser = arg_str0(NULL, "getuser", "<phone>", "get user name.");
-	struct arg_str *a_adduser = arg_str0(NULL, "adduser", "<common name>", "register a new user. Use --phone --gcmid");
-	struct arg_lit *a_rmuser = arg_lit0(NULL, "rmuser", "remove user");
-	struct arg_str *a_setuser = arg_str0(NULL, "setuser", "<common name>", "change user, see --phone, -gcmid.");
+	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "version|");
 
 	struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
@@ -77,10 +81,7 @@ int parseCmd
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
 	struct arg_end *a_end = arg_end(20);
 
-	void* argtable[] = { a_interface, a_port,
-		a_sslon,
-		// other parameters
-		a_getuser, a_adduser, a_rmuser, a_setuser,
+	void* argtable[] = { a_interface, a_port, a_sslon, a_command,
 		a_repeats, a_verbose,
 		a_help, a_end };
 
@@ -118,14 +119,15 @@ int parseCmd
 		value->port = DEF_PORT;
 
 	// SSL
+	value->sslOn = a_sslon->count > 0;
 
-	value->sslon = a_sslon->count > 0;
+    if (a_command->count)
+        value->command = *a_command->sval;
+    else
+        value->command = DEF_COMMAND;
 
-
-	if (a_repeats->count)
-	{
+    if (a_repeats->count)
 		value->repeats = *a_repeats->ival;
-	}
 	else
 		value->repeats = 1;
 
@@ -151,10 +153,38 @@ std::ifstream *openUtf8BOM(const std::string &fn)
 
 int main(int argc, char** argv)
 {
-	struct ClientConfig config;
+	ClientConfig config;
 	int r;
 	if (r = parseCmd(argc, argv, &config))
 		exit(r);
 
+    // target host name and port
+    std::stringstream ss;
+    ss << config.intface << ":" << config.port;
+    std::string target(ss.str());
+
+    std::shared_ptr<Channel> channel;
+    if (config.sslOn) {
+        grpc::ChannelArguments args;
+        args.SetSslTargetNameOverride("avtovokzal-yakutsk.ru");
+
+        grpc::SslCredentialsOptions sslOpts;
+        sslOpts.pem_root_certs = AppSettings::certificate_ca();
+        std::shared_ptr<grpc::ChannelCredentials> channelCredentials = grpc::SslCredentials(sslOpts);
+
+        std::shared_ptr<CallCredentials> callCredentials = MetadataCredentialsFromPlugin(std::unique_ptr<MetadataCredentialsPlugin>(
+                new RcrMetadataCredentialsPlugin(config.username, config.password)));
+        std::shared_ptr<grpc::ChannelCredentials> compositeChannelCredentials = grpc::CompositeChannelCredentials(channelCredentials, callCredentials);
+        // channel = grpc::CreateChannel(target, compositeChannelCredentials);
+        channel = grpc::CreateCustomChannel(target, compositeChannelCredentials, args);
+    } else {
+        channel = grpc::CreateChannel(target, grpc::InsecureChannelCredentials());
+    }
+
+    RcrClient rpc(channel, config.username, config.password);
+    // rpc.addPropertyType("ptkey", "pt desc");
+
+    if (config.command == "version")
+        std::cout << rpc.version();
 	return 0;
 }

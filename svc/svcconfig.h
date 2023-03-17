@@ -11,14 +11,14 @@
 #define DEF_DB_HOST		"localhost"
 #define DEF_DB_PORT		"5432"
 
-struct ServiceConfig
+class ServiceConfig
 {
+public:
 	// start up options
 	bool	daemonize;				///< start as daemon
 	int		verbosity;				///< verbose level: 0- error only, 1- warning, 2- info, 3- debug
 	const char *address;			///< HTTP/2 service interface address
 	int port;						///< HTTP/2 service interface port
-
 #ifdef ENABLE_SQLITE
     std::string sqliteDbName;
 #endif
@@ -37,8 +37,7 @@ struct ServiceConfig
     long dbclientflags;				///< reserved
 #endif
     /// SSL
-    bool sslon;
-
+    bool sslOn;
 	std::string path;
 };
 
