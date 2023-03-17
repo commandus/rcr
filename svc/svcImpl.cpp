@@ -14,6 +14,7 @@
 #include "svcImpl.h"
 #include "passphrase.h"
 #include "RCQuery.h"
+#include "RCQueryProcessor.h"
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
@@ -137,20 +138,6 @@ std::string logString (
 		continue; \
 	}
 
-template <class T>
-std::unique_ptr<T> RcrImpl::load(uint64_t id)
-{
-	try	{
-		std::unique_ptr<T> r(mDb->load<T>(id));
-		return r;
-	} catch (const std::exception &e) {
-		LOG(ERROR) << "load object " << id << " error: " << e.what();
-		// return nullptr
-		std::unique_ptr<T> r;
-		return r;
-	}
-}
-
 // --------------------- RcrImpl ---------------------
 
 const grpc::string ERR_NO_GRANTS("No grants to call");
@@ -241,11 +228,12 @@ struct ServiceConfig *RcrImpl::getConfig()
     BEGIN_GRPC_METHOD("cardQuery", request, t)
     size_t position = 0;
     RCQuery q;
-    q.parse(ML_RU, request->query(), position);
+    int r = q.parse(ML_RU, request->query(), position);
 
-    response->mutable_rslt()->set_id(0);
-    response->mutable_rslt()->set_code(0);
-    response->mutable_rslt()->set_description("");
+    RCQueryProcessor p(q);
+    rcr::CardQueryResponse qr;
+    p.exec(mDb, &t, request->list(), response->mutable_rslt(), response->mutable_cards());
+
     response->mutable_cards()->set_count(0);
     END_GRPC_METHOD("cardQuery", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");

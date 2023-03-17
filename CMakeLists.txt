@@ -113,6 +113,7 @@ set(RCR_SVC_SRC
 	${ARGTABLE}
 	RcrCredentials.cpp AppSettings.cpp
 	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
+	RCQuery.cpp RCQueryProcessor.cpp
 )
 add_executable(rcr-svc ${RCR_SVC_SRC})
 target_link_libraries(rcr-svc PRIVATE
@@ -157,7 +158,6 @@ endif()
 if (ENABLE_LISTENER_EMBEDDED)
 	set (LNS_DEF ${LNS_DEF} ENABLE_LISTENER_EMBEDDED )
 endif()
-
 
 #
 # gtest gtest_main
