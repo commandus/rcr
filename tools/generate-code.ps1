@@ -2,7 +2,7 @@ $WORK_DIR = $($args[0])
 $ODB_DATABASE_NAME = $($args[1])
 
 $GRPC_PLUGIN = "c:\bin\grpc_cpp_plugin.exe"
-$PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows-static\include"
+$PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows\include"
 $DEST = "."
 $GEN = "gen"
 $ODB_OPT_DIR = "odb"
@@ -32,7 +32,7 @@ function Add-Proto {
     # Seriaization
     protoc -I $IncludeDir --cpp_out=$OutputDir $ProtoFile
     # gRPC
-    protoc -I $IncludeDir --grpc_out=$OutputDir --plugin=protoc-gen-grpc=$PluginFile $ProtoFile
+    protoc -I $IncludeDir -I $PROTOBUF_INC --grpc_out=$OutputDir --plugin=protoc-gen-grpc=$PluginFile $ProtoFile
 }
 
 $PRECLASS = " private:`r`n  friend class odb::access;`r`n  // @@prepare-pb-odb-class(`$1.`$2)"

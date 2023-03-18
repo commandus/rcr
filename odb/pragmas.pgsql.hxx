@@ -92,6 +92,7 @@
 
 namespace rcr
 {
+	/*
 	ODB_TABLE(Operation)
 		ODB_STRING(Operation, symbol)
 		ODB_STRING(Operation, description)
@@ -126,5 +127,9 @@ namespace rcr
 		ODB_NUMBER(Card, nominal)
  		#pragma db member(Card::properties_) transient
 		#pragma db member(Card::packages_) transient
-	
+*/	
+#pragma	db object(Operation) no_id
+
+// #pragma db access(Operation:symbol)
+// #pragma db access(Operation::id) get(id) set(set_id) id auto
 }

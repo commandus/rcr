@@ -6,7 +6,7 @@
 
 set(Protobuf_DIR "~/src-old/third_party/protobuf")
 set(gRPC_DIR "third-party/grpc-1.24.3")
-
+set(VCPKG_INC "\git\vcpkg\installed\x64-windows\include")
 #
 # -------------------- Do not edit below this line --------------------
 #
@@ -23,6 +23,12 @@ set(CMAKE_MODULE_PATH ${MQTTAPP_CMAKE_DIR} ${CMAKE_MODULE_PATH})
 #
 find_package(ICU 61.0 COMPONENTS uc i18n REQUIRED)
 set(ICU_LIBS ICU::uc ICU::i18n)
+
+#
+# xlsx load
+#
+find_package(xlnt CONFIG REQUIRED)
+set(XLSX_LIBS xlnt:xlnt)
 
 #
 # ODB requires 11, 14?, not compile 17
@@ -79,7 +85,7 @@ set(GEN_GRPC_SRC ${GEN}/rcr.grpc.pb.cc ${GEN}/rcr.pb.cc)
 set(GEN_SRC ${GEN_GRPC_SRC} ${GEN}/rcr.pb-odb.cxx)
 set(GEN_HDR ${GEN}/rcr.grpc.pb.h ${GEN}/rcr.pb.h ${GEN}/rcr.pb-odb.hxx)
 
-include_directories("third-party" "odb" "." "gtests/lib")
+include_directories("third-party" "odb" "." "gtests/lib" ${VCPKG_INC})
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	# avoid Error LNK2038 mismatch detected for 'RuntimeLibrary': value 'MT_StaticRelease' doesn't match value 'MD_DynamicRelease'
@@ -118,7 +124,7 @@ set(RCR_SVC_SRC
 add_executable(rcr-svc ${RCR_SVC_SRC})
 target_link_libraries(rcr-svc PRIVATE
 	${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
-	gRPC::grpc++ ${Protobuf_LIBRARIES}
+	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}
 )
 target_compile_definitions(rcr-svc PRIVATE ${DEFS})
 target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -134,7 +140,7 @@ set(RCR_CLI_SRC
 	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})
-target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS})
+target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS})
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})
 target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
