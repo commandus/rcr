@@ -397,6 +397,31 @@ Visual Code UMLet.
 
 ## Quick start
 
+### Windows
+
+Install vcpkg
+
+```
+cd \git
+git clone https://github.com/microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh
+./vcpkg integrate install
+```
+
+then run
+```
+cd \git\vcpkg
+vcpkg install libodb:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows icu:x64-windows xlnt:x64-windows
+```
+
+Produce solution:
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+```
+
 Install dependencies and tool first (see section Prerequisites).
 
 Check proto/mgp.proto file.
@@ -640,6 +665,8 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake
 
 ### gcc
 
+tools/generate-code.ps1 on odb calls gcc
+
 odb exit with gcc error :
 
 ```
@@ -653,7 +680,16 @@ C:\git\vcpkg\packages\protobuf_x64-windows-static\include/google/protobuf/stubs/
 Solution
 
 Remove (comment) line 124 in the C:\git\vcpkg\packages\protobuf_x64-windows-static\include/google/protobuf/stubs/mutex.h
+(C:\git\vcpkg\packages\protobuf_x64-windows\include\google\protobuf\stubs\mutex.h)
 
+```
+#if defined(__QNX__)
+  constexpr WrappedMutex() = default;
+#else
+// constexpr <-- comment this!
+  WrappedMutex() {}
+#endif
+```
 
 ### odb
 
@@ -662,7 +698,22 @@ To see error description, change console code page:
 chcp 1251
 ```
 
-### Python client
+### protoc
+
+Windows issue:
+
+```
+gen/rcr.pb.h:10:40: fatal error: google/protobuf/port_def.inc: No such file or directory
+#include <google/protobuf/port_def.inc>
+```
+
+Set valid path in tools/generate-code.ps1
+
+```
+$PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows-static\include"
+```
+
+## Python client
 
 ```
 sudo python3 -m pip install grpcio
@@ -670,7 +721,7 @@ python3 -m pip install grpcio
 python3 -m pip install grpcio-tools
 ```
 
-#### Generate python code from the proto file
+### Generate python code from the proto file
 
 ```
 cd proto
