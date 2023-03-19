@@ -72,8 +72,11 @@
     _Pragma(STRINGIFY(db member(c::m) virtual(std::string) get(m) set(_internal_set_ ## m) type("TEXT")))
 
 #define ODB_OBJECT(C, M, c, m) \
-    _Pragma(STRINGIFY(db member(C::M) access(M ## _))) \
+    _Pragma(STRINGIFY(db member(C::M) virtual(*Symbol) access(mutable_ ## M))) \
 	ODB_IDX(C, c, m)
+
+#define ODB_OBJECT_2(C, S, c, s) \
+	_Pragma(STRINGIFY(db member(C::s) virtual(P ## S) get(S (mutable_ ## s)) set(S (set_allocated_ ## s)) ))
 
 // not tested
 #define ODB_VECTOR(c, m) \
@@ -83,9 +86,25 @@
 #define ODB_ARRAY(c, m) \
     _Pragma(STRINGIFY(db member(c::m ## _) ))
 
+namespace rcr {
 
-namespace rcr
-{
+typedef rcr::Symbol* PSymbol;
+typedef rcr::PropertyType* PPropertyType;
+typedef rcr::Card* PCard;
+typedef rcr::Component* PComponent;
+
+/*
+#pragma db value(Symbol)
+#pragma db member(Symbol::id) virtual(uint64_t) get(id) set(set_id)
+#pragma db member(Symbol::sym) virtual(std::string) get(sym) set(_internal_set_sym)
+#pragma db member(Symbol::unit) virtual(std::string) get(unit) set(_internal_set_unit)
+#pragma db member(Symbol::pow10) virtual(int32_t) get(pow10) set(set_pow10)
+
+#pragma db object(Component) transient
+#pragma db member(Component::id) virtual(uint64_t) get(id) set(set_id) id auto
+#pragma db member(Component::symbol) virtual(PSymbol) get(::rcr::Symbol (mutable_symbol)) set(::rcr::Symbol (set_allocated_symbol))
+*/
+
 	ODB_TABLE(Operation)
 		ODB_STRING(Operation, symbol)
 		ODB_STRING(Operation, description)
@@ -95,27 +114,29 @@ namespace rcr
 		ODB_STRING(Symbol, unit)
 		ODB_NUMBER(Symbol, pow10, int)
 
-	ODB_TABLE(Component)
-		ODB_OBJECT(Component, symbol, component, symbol)
-		ODB_STRING(Component, name)
-
 	ODB_TABLE(PropertyType)
 		ODB_STRING(PropertyType, key)
 		ODB_STRING(PropertyType, description)
-
-	// #pragma db object(Property)
-	ODB_TABLE(Property)
-		ODB_OBJECT(Property, typ, property, typ)
-		ODB_STRING(Property, value)
 
 	ODB_TABLE(Package)
 		ODB_NUMBER(Package, cardid, uint64_t)
 		ODB_NUMBER(Package, boxes, uint64_t)
 		ODB_NUMBER(Package, qty, uint64_t)
 
+	ODB_TABLE(Component)
+		ODB_OBJECT_2(Component, Symbol, component, symbol)
+		ODB_STRING(Component, name)
+
+	ODB_TABLE(Property)
+		ODB_OBJECT_2(Property, PropertyType, property, typ)
+		ODB_STRING(Property, value)
+
 	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
-		ODB_OBJECT(Card, component, card, component)
+		ODB_OBJECT_2(Card, Component, card, component)
 		ODB_NUMBER(Card, nominal, uint64_t)
+
+// #pragma	db index(Component::symbol) member(Component::symbol)
+
 }
