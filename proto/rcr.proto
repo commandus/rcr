@@ -28,7 +28,7 @@ message Symbol
 message Component
 {
     uint64 id = 1;
-    Symbol symbol = 2;
+    uint64 symbol_id = 2;
     string name = 3;
 }
 
@@ -42,14 +42,14 @@ message PropertyType
 message Property
 {
     uint64 id = 1;
-    PropertyType typ = 2;
+    uint64 property_type_id = 2;
     string value = 3;
 }
 
 message Package
 {
     uint64 id = 1;
-    uint64 cardid = 2;
+    uint64 card_id = 2;
     uint64 boxes = 3;                          ///< 4 * 2 bytes
     uint64 qty = 4;
 }
@@ -58,7 +58,7 @@ message Card
 {
     uint64 id = 1;
     string name = 2;
-    Component component = 3;
+    uint64 component_id = 3;
     uint64 nominal = 4;
     repeated Property properties = 5;
     repeated Package packages = 6;

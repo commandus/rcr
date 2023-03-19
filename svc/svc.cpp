@@ -279,8 +279,13 @@ int parseCmd
 
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 
+#ifdef _MSC_VER
+	char wd[MAX_PATH];
+	GetCurrentDirectoryA(MAX_PATH - 1, wd);
+#else
 	char wd[PATH_MAX];
-	value->path = getcwd(wd, PATH_MAX);	
+	value->path = getcwd(wd, PATH_MAX);
+#endif
 	return 0;
 }
 
@@ -288,10 +293,12 @@ void setSignalHandler(
     int signal
 )
 {
+#ifndef _MSC_VER
 	struct sigaction action;
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = &signalHandler;
 	sigaction(signal, &action, NULL);
+#endif
 }
 
 int main(int argc, char* argv[])
