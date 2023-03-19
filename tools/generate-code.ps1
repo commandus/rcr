@@ -93,6 +93,7 @@ function Odb-Db {
     param (
         $Driver, $OutDir, $SetDef, $HeaderFile
     )
+    Write-Output("odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile")
     odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile
 }
 

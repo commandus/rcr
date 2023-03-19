@@ -34,16 +34,12 @@
 #define STRINGIFY2(a) STRINGIFY(a)
 #define STRINGIFY(a) #a
 
-#define ODB_VALUE(C) \
-	_Pragma(STRINGIFY(db value(C))) \
-	_Pragma(STRINGIFY(db member(C::_internal_metadata_) transient)) \
-	_Pragma(STRINGIFY(db member(C::_cached_size_) transient))
+#define ODB_VALUE(C, T) \
+	_Pragma(STRINGIFY(db value(C) virtual(T)))
 
 #define ODB_TABLE(C) \
-	_Pragma(STRINGIFY(db object(C))) \
-	_Pragma(STRINGIFY(db member(C::id_) get(id) set(set_id) id auto)) \
-	_Pragma(STRINGIFY(db member(C::_internal_metadata_) transient)) \
-	_Pragma(STRINGIFY(db member(C::_cached_size_) transient))
+	_Pragma(STRINGIFY(db object(C) transient)) \
+	_Pragma(STRINGIFY(db member(C::id) virtual(uint64_t) get(id) set(set_id) id auto))
 
 #define ODB_TRANSIENT(C, c) \
 	_Pragma(STRINGIFY(db member(C::c) transient))
@@ -60,25 +56,23 @@
 #define ODB_IDX(C, c, m) \
     _Pragma(STRINGIFY2(IDX(C, c, m)))
 
-#define ODB_NUMBER(c, m) \
-    _Pragma(STRINGIFY(db member(c::m ## _) get(m) set(set_ ## m)))
+#define ODB_NUMBER(c, m, T) \
+    _Pragma(STRINGIFY(db member(c::m) virtual(T) get(m) set(set_ ## m)))
 
 #define ODB_BOOL(c, m) \
-    ODB_NUMBER(c, m)
+    ODB_NUMBER(c, m, int)
 
 // Protobuf since version XX changed call set_ to _internal_set_
 #define ODB_STRING(c, m) \
-    _Pragma(STRINGIFY(db member(c::m ## _) transient)) \
     _Pragma(STRINGIFY(db member(c::m) virtual(std::string) get(m) set(_internal_set_ ## m)))
 
 // big text or blob
 // Protobuf since version XX changed call set_ to _internal_set_
 #define ODB_TEXT(c, m) \
-    _Pragma(STRINGIFY(db member(c::m ## _) transient)) \
     _Pragma(STRINGIFY(db member(c::m) virtual(std::string) get(m) set(_internal_set_ ## m) type("TEXT")))
 
 #define ODB_OBJECT(C, M, c, m) \
-    _Pragma(STRINGIFY(db member(C::M ## _) access(M ## _))) \
+    _Pragma(STRINGIFY(db member(C::M) access(M ## _))) \
 	ODB_IDX(C, c, m)
 
 // not tested
@@ -92,7 +86,6 @@
 
 namespace rcr
 {
-	/*
 	ODB_TABLE(Operation)
 		ODB_STRING(Operation, symbol)
 		ODB_STRING(Operation, description)
@@ -100,7 +93,7 @@ namespace rcr
 	ODB_TABLE(Symbol)
 		ODB_STRING(Symbol, sym)
 		ODB_STRING(Symbol, unit)
-		ODB_NUMBER(Symbol, pow10)
+		ODB_NUMBER(Symbol, pow10, int)
 
 	ODB_TABLE(Component)
 		ODB_OBJECT(Component, symbol, component, symbol)
@@ -116,20 +109,13 @@ namespace rcr
 		ODB_STRING(Property, value)
 
 	ODB_TABLE(Package)
-		ODB_NUMBER(Package, cardid)
-		ODB_NUMBER(Package, boxes)
-		ODB_NUMBER(Package, qty)
+		ODB_NUMBER(Package, cardid, uint64_t)
+		ODB_NUMBER(Package, boxes, uint64_t)
+		ODB_NUMBER(Package, qty, uint64_t)
 
 	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
 		ODB_OBJECT(Card, component, card, component)
-		ODB_NUMBER(Card, nominal)
- 		#pragma db member(Card::properties_) transient
-		#pragma db member(Card::packages_) transient
-*/	
-#pragma	db object(Operation) no_id
-
-// #pragma db access(Operation:symbol)
-// #pragma db access(Operation::id) get(id) set(set_id) id auto
+		ODB_NUMBER(Card, nominal, uint64_t)
 }
