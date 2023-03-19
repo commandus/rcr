@@ -27,8 +27,8 @@ set(ICU_LIBS ICU::uc ICU::i18n)
 #
 # xlsx load
 #
-find_package(xlnt CONFIG REQUIRED)
-set(XLSX_LIBS xlnt:xlnt)
+find_package(Xlnt CONFIG REQUIRED)
+set(XLSX_LIBS xlnt::xlnt)
 
 #
 # ODB requires 11, 14?, not compile 17

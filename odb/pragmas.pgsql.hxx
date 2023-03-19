@@ -17,6 +17,14 @@
  *			Add to the end of prepare-pb-odb script next line:
  *				addvector Message headers HeaderType
  *
+ * #pragma db value(Symbol)
+ * #pragma db member(Symbol::id) virtual(uint64_t) get(id) set(set_id)
+ * #pragma db member(Symbol::sym) virtual(std::string) get(sym) set(_internal_set_sym)
+ * #pragma db object(Component) transient
+ * #pragma db member(Component::id) virtual(uint64_t) get(id) set(set_id) id auto
+ * #pragma db member(Component::symbol) virtual(PSymbol) get(::rcr::Symbol (mutable_symbol)) set(::rcr::Symbol (set_allocated_symbol))
+ * #pragma db member(Component::symbol) virtual(PSymbol) get(::rcr::Symbol (mutable_symbol)) set(::rcr::Symbol (set_allocated_symbol))
+ *
  */
 // #pragma db value(google::protobuf::internal::ArenaStringPtr) type ("VARCHAR(255)")
 #pragma db value(google::protobuf::internal::ArenaStringPtr) type ("TEXT")
@@ -76,7 +84,8 @@
 	ODB_IDX(C, c, m)
 
 #define ODB_OBJECT_2(C, S, c, s) \
-	_Pragma(STRINGIFY(db member(C::s) virtual(P ## S) get(S (mutable_ ## s)) set(S (set_allocated_ ## s)) ))
+	_Pragma(STRINGIFY(db member(C::s) virtual(P ## S) get(S (mutable_ ## s)) set(S (set_allocated_ ## s)) )) \
+	_Pragma(STRINGIFY(db index(C) member(s)))
 
 // not tested
 #define ODB_VECTOR(c, m) \
@@ -87,24 +96,6 @@
     _Pragma(STRINGIFY(db member(c::m ## _) ))
 
 namespace rcr {
-
-typedef rcr::Symbol* PSymbol;
-typedef rcr::PropertyType* PPropertyType;
-typedef rcr::Card* PCard;
-typedef rcr::Component* PComponent;
-
-/*
-#pragma db value(Symbol)
-#pragma db member(Symbol::id) virtual(uint64_t) get(id) set(set_id)
-#pragma db member(Symbol::sym) virtual(std::string) get(sym) set(_internal_set_sym)
-#pragma db member(Symbol::unit) virtual(std::string) get(unit) set(_internal_set_unit)
-#pragma db member(Symbol::pow10) virtual(int32_t) get(pow10) set(set_pow10)
-
-#pragma db object(Component) transient
-#pragma db member(Component::id) virtual(uint64_t) get(id) set(set_id) id auto
-#pragma db member(Component::symbol) virtual(PSymbol) get(::rcr::Symbol (mutable_symbol)) set(::rcr::Symbol (set_allocated_symbol))
-*/
-
 	ODB_TABLE(Operation)
 		ODB_STRING(Operation, symbol)
 		ODB_STRING(Operation, description)
@@ -119,24 +110,21 @@ typedef rcr::Component* PComponent;
 		ODB_STRING(PropertyType, description)
 
 	ODB_TABLE(Package)
-		ODB_NUMBER(Package, cardid, uint64_t)
+		ODB_NUMBER(Package, card_id, uint64_t)
 		ODB_NUMBER(Package, boxes, uint64_t)
 		ODB_NUMBER(Package, qty, uint64_t)
 
 	ODB_TABLE(Component)
-		ODB_OBJECT_2(Component, Symbol, component, symbol)
+		ODB_NUMBER(Component, symbol_id, uint64_t)
 		ODB_STRING(Component, name)
 
 	ODB_TABLE(Property)
-		ODB_OBJECT_2(Property, PropertyType, property, typ)
+		ODB_NUMBER(Property, property_type_id, uint64_t)
 		ODB_STRING(Property, value)
 
 	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
-		ODB_OBJECT_2(Card, Component, card, component)
+		ODB_NUMBER(Card, component_id, uint64_t)
 		ODB_NUMBER(Card, nominal, uint64_t)
-
-// #pragma	db index(Component::symbol) member(Component::symbol)
-
 }

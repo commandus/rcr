@@ -38,7 +38,7 @@ public:
 int parseCmd(
 	int argc,
 	char* argv[],
-	struct ClientConfig *value
+	ClientConfig &value
 )
 {
 	struct arg_str *a_connection = arg_str0("c", "connection", "<connection-string>",
@@ -72,14 +72,14 @@ int parseCmd(
 		return 1;
 	}
 	if (a_connection->count)
-		value->connection = *a_connection->sval;
+		value.connection = *a_connection->sval;
 	else
-		value->connection = DEF_CONNECTION;
+		value.connection = DEF_CONNECTION;
     if (a_locale->count)
-        value->locale = pchar2MEASURE_LOCALE(*a_locale->sval);
+        value.locale = pchar2MEASURE_LOCALE(*a_locale->sval);
     else
-        value->connection = DEF_LOCALE;
-	value->verbosity = a_verbose->count;
+        value.locale = DEF_LOCALE;
+	value.verbosity = a_verbose->count;
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 	return 0;
 }
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 {
 	ClientConfig config;
 	int r;
-	if (r = parseCmd(argc, argv, &config))
+	if (r = parseCmd(argc, argv, config))
 		exit(r);
 
 	if (config.verbosity > 1) {
