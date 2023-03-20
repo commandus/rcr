@@ -15,5 +15,7 @@ add_executable(Google_Tests_run test-measure-unit.cpp
     ../StockOperation.cpp
     ../RCQuery.cpp
     ../string-helper.cpp
-    ../QueryProperties.cpp)
+    ../QueryProperties.cpp
+    ../BoxName.cpp
+)
 target_link_libraries(Google_Tests_run gtest gtest_main ${ICU_LIBS})

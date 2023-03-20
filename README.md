@@ -447,13 +447,30 @@ Then call ./tools/generate-code.ps1
 
 ### Dependencies
 
-
 tools/install-grpc.sh installs libgrpc++.so.1.24.3
 
 
 gRPC depends on c-ares
 ```
 sudo apt install libc-ares-dev
+```
+
+### Xlnt
+
+Linux
+
+```
+git clone https://github.com/tfussell/xlnt.git
+cd xmake lnt
+git submodule init
+git submodule update
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+ls /usr/local/lib/libxlnt.so.1.5.0
+ls /usr/local/include/xlnt/xlnt.hpp
 ```
 
 ### Serialzation & protocol support classes

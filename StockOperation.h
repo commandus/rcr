@@ -22,22 +22,6 @@ typedef enum {
 class StockOperation {
 protected:
     /**
-     * Parse box
-     * box examples:
-     *  "219", "219-1", "219-10-2", "221-1-2-3"
-     * @param value
-     * @param start
-     * @param finish
-     * @return blocks count: 0..4
-     */
-    static int parseBoxes(
-        uint64_t &retBoxes,
-        const std::string &value,
-        size_t start,
-        size_t finish
-    );
-
-    /**
      * Parse command +1, -1, -1, sum, count, rm
      * @param value
      * @param start
@@ -91,7 +75,23 @@ public:
         size_t &position
     );
 
+    /**
+    * Parse box
+    * box examples:
+    *  "219", "219-1", "219-10-2", "221-1-2-3"
+    * @param value
+    * @param start
+    * @param finish
+    * @return blocks count: 0..4
+    */
+    static int parseBoxes(
+        uint64_t &retBoxes,
+        const std::string &value,
+        size_t start,
+        size_t finish
+    );
+    static uint64_t boxAppendBox(uint64_t boxes, int box);
+    static std::string boxes2string(uint64_t boxes);
 };
-
 
 #endif //RCR_STOCKOPERATION_H

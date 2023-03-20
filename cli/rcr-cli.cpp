@@ -16,6 +16,10 @@
 
 #include "AppSettings.h"
 #include "RcrCredentials.h"
+#include "SpreadSheetHelper.h"
+#include "BoxName.h"
+#include "StockOperation.h"
+#include "utilfile.h"
 
 const char* progname = "rcr-cli";
 const char* DEF_COMMAND = "card";
@@ -37,6 +41,7 @@ public:
     size_t size;
     std::string username;
     std::string password;
+    std::string box;
 };
 
 /**
@@ -58,8 +63,9 @@ int parseCmd
 	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "card|version");
-    struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command request");
+	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "card|version|xlsx");
+    struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command parameter(request)");
+    struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
     struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
     struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 100");
 
@@ -70,8 +76,8 @@ int parseCmd
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port, a_sslon,
-        a_command, a_request,
-         a_offset, a_size,
+        a_command, a_request, a_box,
+        a_offset, a_size,
 		a_repeats, a_verbose,
 		a_help, a_end };
 
@@ -115,6 +121,14 @@ int parseCmd
         value->command = *a_command->sval;
     else
         value->command = DEF_COMMAND;
+    if (a_request->count)
+        value->request = *a_request->sval;
+    else
+        value->request = "";
+    if (a_box->count)
+        value->box = *a_box->sval;
+    else
+        value->box = "";
 
     if (a_offset->count)
         value->offset = *a_offset->ival;
@@ -180,5 +194,27 @@ int main(int argc, char** argv)
 
     if (config.command == "version")
         std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;
+
+    if (config.command == "xlsx") {
+        std::vector<std::string> spreadSheets;
+        util::filesInPath(config.request, ".xlsx", 0, &spreadSheets);
+        std::cout << "Found " << spreadSheets.size() << " *.xlsx files in " << config.request << std::endl;
+        for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
+            uint64_t box = BoxName::extractFromFileName(config.box);    //  + " " + *it <- add if filename contains boxes
+            std::cout << *it << " box " << StockOperation::boxes2string(box);
+            SpreadSheetHelper spreadSheet(*it, box);
+            std::cout << ": " << spreadSheet.items.size() << " items" << std::endl;
+            // statistics
+            for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
+                if (bx->second)
+                    std::cout << bx->first << ":\t" << bx->second << ";\t";
+            }
+            std::cout << std::endl;
+            // data itself
+            for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
+                std::cout << item->id << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t" << std::endl;
+            }
+        }
+    }
 	return 0;
 }

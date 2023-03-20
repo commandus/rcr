@@ -6,6 +6,22 @@
 #include "StockOperation.h"
 #include "QueryProperties.h"
 #include "RCQuery.h"
+#include "BoxName.h"
+
+TEST(BoxName, FileName) {
+    uint64_t b = BoxName::extractFromFileName("221 Мксх_Золотовский_1");
+    ASSERT_EQ(b, 0x00dd000100000000);
+    std::string bn = StockOperation::boxes2string(b);
+    ASSERT_EQ(bn, "221-1");
+    uint64_t a = StockOperation::boxAppendBox(0x00dd000100000000, 0xdd);
+    bn = StockOperation::boxes2string(a);
+    ASSERT_EQ(bn, "221-1-221");
+
+    a = StockOperation::boxAppendBox(a, 0xdd);
+    bn = StockOperation::boxes2string(a);
+    ASSERT_EQ(bn, "221-1-221-221");
+
+}
 
 TEST(RCQuery, Count) {
     size_t position;
@@ -35,8 +51,6 @@ TEST(RCQuery, Count) {
 
     ASSERT_EQ(q.code, SO_COUNT);
     ASSERT_EQ(q.count, 0);
-
-
 }
 
 TEST(RCQuery, Parse) {

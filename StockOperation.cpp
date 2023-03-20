@@ -2,6 +2,7 @@
 // Created by andrei on 14.03.23.
 //
 
+#include <sstream>
 #include "StockOperation.h"
 
 StockOperation::StockOperation(
@@ -291,4 +292,52 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
         }
     }
     return r;
+}
+
+std::string StockOperation::boxes2string(
+    uint64_t boxes
+)
+{
+    std::stringstream ss;
+    int boxCnt = 0;
+    if (boxes & 0xffff)
+        boxCnt = 4;
+    else
+        if (boxes & 0xffff0000)
+            boxCnt = 3;
+        else
+            if (boxes & 0xffff00000000)
+                boxCnt = 2;
+            else
+                if (boxes & 0xffff000000000000)
+                    boxCnt = 1;
+    int shift = 6 * 8;
+    ss <<  (boxes >> shift);
+    for (int i = boxCnt; i > 1; i--) {
+        shift -= 16;
+        ss << '-' << ((boxes >> shift) & 0xffff);
+    }
+    return ss.str();
+}
+
+uint64_t StockOperation::boxAppendBox(
+    uint64_t boxes,
+    int box
+)
+{
+    box &= 0xffff;
+
+    int boxCnt = 0;
+    if (boxes & 0xffff)
+        return boxes;   // no room
+    else
+    if (boxes & 0xffff0000)
+        boxCnt = 0;
+    else
+    if (boxes & 0xffff00000000)
+        boxCnt = 1;
+    else
+    if (boxes & 0xffff000000000000)
+        boxCnt = 2;
+    return boxes | (box << boxCnt * 16);
 }
