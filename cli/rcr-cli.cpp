@@ -20,6 +20,7 @@
 #include "BoxName.h"
 #include "StockOperation.h"
 #include "utilfile.h"
+#include "string-helper.h"
 
 const char* progname = "rcr-cli";
 const char* DEF_COMMAND = "card";
@@ -42,6 +43,7 @@ public:
     std::string username;
     std::string password;
     std::string box;
+    const std::string componentSymbol;
 };
 
 /**
@@ -63,7 +65,8 @@ int parseCmd
 	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>", "card|version|xlsx");
+	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>",
+            "card|version|dictionaries|xlsx|xlsx-list|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command parameter(request)");
     struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
     struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
@@ -194,25 +197,46 @@ int main(int argc, char** argv)
 
     if (config.command == "version")
         std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;
+    if (config.command == "dictionaries") {
+        std::cout << rpc.getDictionariesJson() << std::endl;
+    }
 
-    if (config.command == "xlsx") {
+    if (config.command.find("xlsx") == 0) {
         std::vector<std::string> spreadSheets;
         util::filesInPath(config.request, ".xlsx", 0, &spreadSheets);
         std::cout << "Found " << spreadSheets.size() << " *.xlsx files in " << config.request << std::endl;
         for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
-            uint64_t box = BoxName::extractFromFileName(config.box);    //  + " " + *it <- add if filename contains boxes
+            uint64_t box = BoxName::extractFromFileName(
+                    config.box + " " + *it); //  <- add if filename contains boxes
             std::cout << *it << " box " << StockOperation::boxes2string(box);
             SpreadSheetHelper spreadSheet(*it, box);
-            std::cout << ": " << spreadSheet.items.size() << " items" << std::endl;
-            // statistics
+            std::cout << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
+
             for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
-                if (bx->second)
-                    std::cout << bx->first << ":\t" << bx->second << ";\t";
+                if (bx->second) {
+                    std::cout << StockOperation::boxes2string(StockOperation::boxAppendBox(box, bx->first))  << ": " << bx->second << "\t";
+                }
             }
             std::cout << std::endl;
-            // data itself
-            for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
-                std::cout << item->id << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t" << std::endl;
+
+            // print data itself
+            if (config.command.find("xlsx-list") == 0) {
+                for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
+                    std::cout
+                        << StockOperation::boxes2string(StockOperation::boxAppendBox(box, item->id))
+                        << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t"
+                        << std::endl;
+                }
+            }
+
+            // load data
+            if (config.command.find("xlsx-add") == 0) {
+                std::string cs;
+                cs = config.command.substr(9);
+                if (cs.empty())
+                    cs = config.componentSymbol;
+                cs = toUpperCase(ML_RU, cs);
+                int r = rpc.saveSpreadsheet(cs, spreadSheet.items);
             }
         }
     }

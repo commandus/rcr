@@ -24,6 +24,7 @@
 #ifdef ENABLE_PG
 #include <odb/pgsql/database.hxx>
 #endif
+#include "gen/rcr.pb-odb.hxx"
 
 using namespace odb::core;
 using grpc::StatusCode;
@@ -56,6 +57,25 @@ static odb::database *odbconnect(
 #ifdef ENABLE_SQLITE
     return new odb::sqlite::database(config->sqliteDbName);
 #endif
+}
+
+template <class T>
+std::unique_ptr<T> RcrImpl::load(
+    uint64_t id
+)
+{
+    try
+    {
+        std::unique_ptr<T> r(mDb->load<T>(id));
+        return r;
+    }
+    catch (const std::exception &e)
+    {
+        LOG(ERROR) << "load object " << id << " error: " << e.what();
+        // return nullptr
+        std::unique_ptr<T> r;
+        return r;
+    }
 }
 
 /**
@@ -236,5 +256,83 @@ struct ServiceConfig *RcrImpl::getConfig()
 
     response->mutable_cards()->set_count(0);
     END_GRPC_METHOD("cardQuery", request, response, t)
+    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+::grpc::Status RcrImpl::getDictionaries(
+    ::grpc::ServerContext* context,
+    const ::rcr::DictionariesRequest* request,
+    ::rcr::DictionariesResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("getDictionaries", request, t)
+
+    try {
+        odb::result<rcr::Operation> qs(mDb->query<rcr::Operation>(odb::query<rcr::Operation>::id != 0));
+        for (odb::result<rcr::Operation>::iterator i(qs.begin()); i != qs.end(); i++) {
+            rcr::Operation *op = response->add_operation();
+            op->CopyFrom(*i);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "list operations error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "list operations unknown error";
+    }
+
+    try {
+        odb::result<rcr::Symbol> qs(mDb->query<rcr::Symbol>(odb::query<rcr::Symbol>::sym != 0));
+        for (odb::result<rcr::Symbol>::iterator i(qs.begin()); i != qs.end(); i++) {
+            rcr::Symbol *sym = response->add_symbol();
+            sym->CopyFrom(*i);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "list symbols error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "list symbols unknown error";
+    }
+
+    try {
+        odb::result<rcr::PropertyType> qs(mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::id != 0));
+        for (odb::result<rcr::PropertyType>::iterator i(qs.begin()); i != qs.end(); i++) {
+            rcr::PropertyType *op = response->add_property_type();
+            op->CopyFrom(*i);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "list property type error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "list property type unknown error";
+    }
+
+    END_GRPC_METHOD("getDictionaries", request, response, t)
+    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+::grpc::Status RcrImpl::cardPush(
+    ::grpc::ServerContext* context,
+    ::grpc::ServerReader< ::rcr::Card>* reader,
+    ::rcr::OperationResponse* response
+)
+{
+    if (reader == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("cardLoad", response, t)
+    rcr::Card card;
+    int r = 0;
+    while (reader->Read(&card)) {
+        RCQueryProcessor p;
+        r = p.saveCard(mDb, &t, card);
+        if (r)
+            break;
+    }
+    response->set_id(0);
+    response->set_code(r);
+    response->set_description("");
+    END_GRPC_METHOD("cardLoad", response, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }

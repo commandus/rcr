@@ -9,6 +9,7 @@
 #include <grpc++/grpc++.h>
 
 #include "gen/rcr.grpc.pb.h"
+#include "SpreadSheetHelper.h"
 
 class RcrClient
 {
@@ -34,6 +35,13 @@ public:
         size_t offset,
         size_t size
     );
+
+    int saveSpreadsheet(
+        const std::string componentSymbol,  ///< "U"- IC
+        const std::vector<SheetRow> &rows
+    );
+
+    std::string getDictionariesJson();
 };
 
 #endif /* GRPCCLIENT_H_ */

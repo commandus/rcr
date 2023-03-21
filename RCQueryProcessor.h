@@ -12,7 +12,8 @@ class RCQueryProcessor {
 private:
     const RCQuery *query;
 public:
-    explicit RCQueryProcessor(const RCQuery &query);
+    RCQueryProcessor();
+    RCQueryProcessor(const RCQuery &query);
     void exec(
         odb::database *db,
         odb::transaction *t,
@@ -27,6 +28,12 @@ public:
         rcr::CardResponse *retCards,
         const RCQuery *query,
         const rcr::ListRequest &list
+    );
+
+    int saveCard(
+        odb::database *db,
+        odb::transaction *t,
+        const rcr::Card &card
     );
 };
 

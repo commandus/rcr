@@ -6,10 +6,29 @@
 
 #include <xlnt/xlnt.hpp>
 
+#include "utilstring.h"
+
+void SheetRow::toCard(
+    rcr::Card &retval
+) const
+{
+    retval.set_id(id);
+    retval.set_component_id(id);
+    retval.set_name(name);
+    retval.set_nominal(0);
+    for (std::vector <std::string>::const_iterator it = properties.begin(); it != properties.end(); it++) {
+        rcr::Property *prop = retval.mutable_properties()->Add();
+        prop->set_id(0);
+        prop->set_property_type_id(0);
+        prop->set_value(*it);
+    }
+}
+
 SpreadSheetHelper::SpreadSheetHelper(
     const std::string &aFileName,
     uint64_t box
 )
+    : total(0)
 {
     int r = load(aFileName, box);
 }
@@ -33,36 +52,33 @@ int SpreadSheetHelper::load(
         for (auto row : wsheet.rows()) {
             SheetRow sr;
             sr.id = boxId;
-            for (auto cell: row) {
-                auto col = cell.column().index;
-                switch (col) {
-                    case 1:
-                        // id
-                        if (cell.has_value()) {
-                            boxId = std::strtoull(cell.to_string().c_str(), nullptr, 10);
-                            sr.id = boxId;
-                        }
-                        break;
-                    case 2:
-                        // name and properties
-                        sr.name = cell.to_string();
-                        break;
-                    case 3:
-                        // qty
-                        if (!cell.has_value())
-                            continue;
-                        sr.qty = std::strtoull(cell.to_string().c_str(), nullptr, 10);
-                        break;
-                    case 4:
-                        // remarks
-                        sr.remarks = cell.to_string();
-                        break;
-                    default:
-                        continue;
-                }
+            // id
+            if (row[0].has_value()) {
+                if (row[0].data_type() != xlnt::cell_type::number)
+                    continue;
+                boxId = std::strtoull(row[0].to_string().c_str(), nullptr, 10);
+                sr.id = boxId;
             }
+            // name and properties
+            if (!row[1].has_value())
+               continue;
+            sr.name = row[1].to_string();
+            sr.name = trim(sr.name);
+            // qty
+            if ((!row[2].has_value()) || (row[2].data_type() != xlnt::cell_type::number))
+                continue;
+            sr.qty = std::strtoull(row[2].to_string().c_str(), nullptr, 10);
+            if (sr.qty <= 0)
+                continue;
+            // property: case
+            sr.property_dip = row[3].to_string();
+            sr.property_dip = trim(sr.property_dip);
+            // remarks
+            sr.remarks = row[4].to_string();
+            sr.remarks = trim(sr.remarks);
             items.push_back(sr);
             // update statistic counters
+            total += sr.qty;
             boxItemCount[sr.id] += sr.qty;
         }
     }

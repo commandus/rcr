@@ -59,7 +59,7 @@ int32_t RcrClient::addPropertyType(
     grpc::Status status = stub->chPropertyType(&context, request, &response);
     if (!status.ok()) {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
-        return -1;
+        return status.error_code();
     }
     int32_t c = response.code();
     if (c) {
@@ -87,7 +87,7 @@ int32_t RcrClient::cardQuery(
     grpc::Status status = stub->cardQuery(&context, request, &response);
     if (!status.ok()) {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
-        return -1;
+        return status.error_code();
     }
 
     int32_t c = response.rslt().code();
@@ -103,4 +103,54 @@ int32_t RcrClient::cardQuery(
     }
 
     return 0;
+}
+
+/**
+ *
+ * @param rows
+ * @return
+ *     rpc cardLoad(stream Card) returns (OperationResponse) {}
+ */
+int RcrClient::saveSpreadsheet(
+    const std::string componentSymbol,  ///< "U"- IC
+    const std::vector<SheetRow> &rows
+) {
+    grpc::ClientContext context;
+    rcr::OperationResponse response;
+    rcr::Card card;
+
+    std::unique_ptr<grpc::ClientWriter<rcr::Card> > writer(stub->cardPush(&context, &response));
+    for (auto item = rows.begin(); item != rows.end(); item++) {
+        item->toCard(card);
+        card.set_component_id(0); // set default
+
+        if (!writer->Write(card)) {
+            // Broken stream
+            break;
+        }
+    }
+    writer->WritesDone();
+    grpc::Status status = writer->Finish();
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return status.error_code();
+    }
+    return 0;
+}
+
+std::string RcrClient::getDictionariesJson() {
+    grpc::ClientContext context;
+    rcr::DictionariesResponse response;
+    rcr::DictionariesRequest request;
+    request.set_flags(0);
+
+    grpc::Status status = stub->getDictionaries(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return "{}";
+    }
+    std::string r;
+    google::protobuf::util::JsonPrintOptions oprions;
+    google::protobuf::util::MessageToJsonString(response, &r, oprions);
+    return r;
 }

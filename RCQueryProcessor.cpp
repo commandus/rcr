@@ -10,6 +10,12 @@
 
 #define LOG(x) std::cerr
 
+RCQueryProcessor::RCQueryProcessor()
+    : query(nullptr)
+{
+
+}
+
 RCQueryProcessor::RCQueryProcessor(
     const RCQuery &aQuery
 )
@@ -56,4 +62,13 @@ void RCQueryProcessor::loadCards(
     const rcr::ListRequest &list
 ) {
 
+}
+
+int RCQueryProcessor::saveCard(
+    odb::database *db,
+    odb::transaction *t,
+    const rcr::Card &card
+)
+{
+    return 0;
 }

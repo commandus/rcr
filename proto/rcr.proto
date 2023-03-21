@@ -172,13 +172,26 @@ message CardQueryResponse
     CardResponse cards = 2;
 }
 
+message DictionariesRequest
+{
+    int32 flags = 1;
+}
+
+message DictionariesResponse
+{
+    repeated Operation operation = 1;
+    repeated Symbol symbol = 2;
+    repeated PropertyType property_type = 3;
+}
+
 // ------------ RPC -------------
 
 service Rcr
 {
-    // user manipulation
     rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc version(VersionRequest) returns (VersionResponse) {}
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
+    rpc cardPush(stream Card) returns (OperationResponse) {}
+    rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
 }
