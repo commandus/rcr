@@ -116,21 +116,30 @@ int RcrClient::saveSpreadsheet(
     const std::vector<SheetRow> &rows
 ) {
     grpc::ClientContext context;
+    rcr::DictionariesResponse responseDictionaries;
+    rcr::DictionariesRequest requestDictionaries;
+
+    grpc::Status status = stub->getDictionaries(&context, requestDictionaries, &responseDictionaries);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return status.error_code();
+    }
+
     rcr::OperationResponse response;
-    rcr::Card card;
+    rcr::CardRequest card;
+    card.set_symbol_name("+"); // add
 
-    std::unique_ptr<grpc::ClientWriter<rcr::Card> > writer(stub->cardPush(&context, &response));
+    grpc::ClientContext context2;
+    std::unique_ptr<grpc::ClientWriter<rcr::CardRequest> > writer(stub->cardPush(&context2, &response));
     for (auto item = rows.begin(); item != rows.end(); item++) {
-        item->toCard(card);
-        card.set_component_id(0); // set default
-
+        item->toCardRequest(card);
         if (!writer->Write(card)) {
             // Broken stream
             break;
         }
     }
     writer->WritesDone();
-    grpc::Status status = writer->Finish();
+    status = writer->Finish();
     if (!status.ok()) {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
         return status.error_code();
@@ -150,7 +159,10 @@ std::string RcrClient::getDictionariesJson() {
         return "{}";
     }
     std::string r;
-    google::protobuf::util::JsonPrintOptions oprions;
-    google::protobuf::util::MessageToJsonString(response, &r, oprions);
+    google::protobuf::util::JsonPrintOptions formattingOptions;
+    formattingOptions.add_whitespace = true;
+    formattingOptions.always_print_primitive_fields = true;
+    formattingOptions.preserve_proto_field_names = true;
+    google::protobuf::util::MessageToJsonString(response, &r, formattingOptions);
     return r;
 }

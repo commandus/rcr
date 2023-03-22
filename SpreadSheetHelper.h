@@ -14,15 +14,18 @@
 
 class SheetRow {
 public:
-    int id;
-    std::string name;
-    std::vector <std::string> properties;
-    int qty;
-    std::string property_dip;
-    std::string remarks;
+    int id;                                 // column A
+    std::string name;                       // B
+    std::vector <std::string> properties;   // B after ','
+    int qty;                                // C
+    std::string property_dip;               // D
+    std::string remarks;                    // E
 
     SheetRow() = default;
-    void toCard(rcr::Card &retval) const;
+    void toCardRequest(
+        rcr::CardRequest &retval
+    ) const;
+
 };
 
 class SpreadSheetHelper {

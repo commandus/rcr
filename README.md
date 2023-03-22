@@ -234,6 +234,13 @@ Visual Code UMLet.
 
 ## CLI
 
+### Загрузка перечня из файлов Excel
+
+Проверка
+```
+xlsx-list "/home/andrei/src/mgp/data" -b 121
+```
+
 Список карточек
 
 ```

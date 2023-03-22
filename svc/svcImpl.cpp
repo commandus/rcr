@@ -269,12 +269,48 @@ struct ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
     BEGIN_GRPC_METHOD("getDictionaries", request, t)
+    r = loadDictionaries(response);
+    END_GRPC_METHOD("getDictionaries", request, response, t)
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}
 
+::grpc::Status RcrImpl::cardPush(
+    ::grpc::ServerContext* context,
+    ::grpc::ServerReader< ::rcr::CardRequest>* reader,
+    ::rcr::OperationResponse* response
+)
+{
+    if (reader == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("cardPush", response, t)
+    rcr::DictionariesResponse dictionaries;
+    r = loadDictionaries(&dictionaries);
+    rcr::CardRequest cardRequest;
+    while (reader->Read(&cardRequest)) {
+        RCQueryProcessor p;
+        r = p.saveCard(mDb, &t, cardRequest, &dictionaries);
+        if (r)
+            break;
+    }
+    response->set_id(0);
+    response->set_code(r);
+    response->set_description("");
+    END_GRPC_METHOD("cardPush", response, response, t)
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+int RcrImpl::loadDictionaries(
+    rcr::DictionariesResponse *retVal
+) {
     try {
         odb::result<rcr::Operation> qs(mDb->query<rcr::Operation>(odb::query<rcr::Operation>::id != 0));
         for (odb::result<rcr::Operation>::iterator i(qs.begin()); i != qs.end(); i++) {
-            rcr::Operation *op = response->add_operation();
+            rcr::Operation *op = retVal->add_operation();
             op->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
@@ -284,9 +320,9 @@ struct ServiceConfig *RcrImpl::getConfig()
     }
 
     try {
-        odb::result<rcr::Symbol> qs(mDb->query<rcr::Symbol>(odb::query<rcr::Symbol>::sym != 0));
+        odb::result<rcr::Symbol> qs(mDb->query<rcr::Symbol>(odb::query<rcr::Symbol>::id != 0));
         for (odb::result<rcr::Symbol>::iterator i(qs.begin()); i != qs.end(); i++) {
-            rcr::Symbol *sym = response->add_symbol();
+            rcr::Symbol *sym = retVal->add_symbol();
             sym->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
@@ -298,7 +334,7 @@ struct ServiceConfig *RcrImpl::getConfig()
     try {
         odb::result<rcr::PropertyType> qs(mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::id != 0));
         for (odb::result<rcr::PropertyType>::iterator i(qs.begin()); i != qs.end(); i++) {
-            rcr::PropertyType *op = response->add_property_type();
+            rcr::PropertyType *op = retVal->add_property_type();
             op->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
@@ -306,33 +342,5 @@ struct ServiceConfig *RcrImpl::getConfig()
     } catch (...) {
         LOG(ERROR) << "list property type unknown error";
     }
-
-    END_GRPC_METHOD("getDictionaries", request, response, t)
-    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
-}
-
-::grpc::Status RcrImpl::cardPush(
-    ::grpc::ServerContext* context,
-    ::grpc::ServerReader< ::rcr::Card>* reader,
-    ::rcr::OperationResponse* response
-)
-{
-    if (reader == nullptr)
-        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-    if (response == nullptr)
-        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-    BEGIN_GRPC_METHOD("cardLoad", response, t)
-    rcr::Card card;
-    int r = 0;
-    while (reader->Read(&card)) {
-        RCQueryProcessor p;
-        r = p.saveCard(mDb, &t, card);
-        if (r)
-            break;
-    }
-    response->set_id(0);
-    response->set_code(r);
-    response->set_description("");
-    END_GRPC_METHOD("cardLoad", response, response, t)
-    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+    return 0;
 }

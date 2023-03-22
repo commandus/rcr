@@ -33,6 +33,57 @@ public:
     int saveCard(
         odb::database *db,
         odb::transaction *t,
+        const rcr::CardRequest &card,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
+    // return nullptr if not found
+    static const rcr::Symbol* findSymbol(
+        const rcr::DictionariesResponse *dictionaries, const std::string &sym
+    );
+    // return nullptr if not found
+    static const rcr::PropertyType* findPropertyType(
+        const rcr::DictionariesResponse *dictionaries,
+        const std::string &key
+    );
+    // return nullptr if not found
+    static const rcr::Operation* findOperation(
+        const rcr::DictionariesResponse *dictionaries,
+        const std::string &symbol
+    );
+
+    void copyKnownProperties(
+        google::protobuf::RepeatedPtrField<rcr::Property> *retVal,
+        const google::protobuf::RepeatedPtrField<::rcr::PropertyRequest> &from,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
+    bool findCardByNameNominalProperties(
+        rcr::Card &card,
+        odb::database *db,
+        odb::transaction *transaction
+    );
+
+    uint64_t getQuantity(
+        odb::database *db,
+        odb::transaction *transaction,
+        uint64_t &retPackageId,
+        uint64_t cardId,
+        uint64_t box
+    );
+
+    uint64_t setQuantity(
+        odb::database *db,
+        odb::transaction *transaction,
+        uint64_t packageId,
+        uint64_t cardId,
+        uint64_t box,
+        uint64_t qty
+    );
+
+    void setProperties(
+        odb::database *db,
+        odb::transaction *transaction,
         const rcr::Card &card
     );
 };

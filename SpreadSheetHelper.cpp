@@ -8,18 +8,17 @@
 
 #include "utilstring.h"
 
-void SheetRow::toCard(
-    rcr::Card &retval
+void SheetRow::toCardRequest(
+    rcr::CardRequest &retval
 ) const
 {
-    retval.set_id(id);
-    retval.set_component_id(id);
     retval.set_name(name);
     retval.set_nominal(0);
+    retval.set_symbol_name("U");
+
     for (std::vector <std::string>::const_iterator it = properties.begin(); it != properties.end(); it++) {
-        rcr::Property *prop = retval.mutable_properties()->Add();
-        prop->set_id(0);
-        prop->set_property_type_id(0);
+        rcr::PropertyRequest *prop = retval.mutable_properties()->Add();
+        prop->set_property_type_name("K");
         prop->set_value(*it);
     }
 }

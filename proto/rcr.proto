@@ -25,13 +25,6 @@ message Symbol
     int32 pow10 = 4;                            ///< power of 10
 }
 
-message Component
-{
-    uint64 id = 1;
-    uint64 symbol_id = 2;
-    string name = 3;
-}
-
 message PropertyType
 {
     uint64 id = 1;
@@ -42,15 +35,16 @@ message PropertyType
 message Property
 {
     uint64 id = 1;
-    uint64 property_type_id = 2;
-    string value = 3;
+    uint64 card_id = 2;
+    uint64 property_type_id = 3;
+    string value = 4;
 }
 
 message Package
 {
     uint64 id = 1;
     uint64 card_id = 2;
-    uint64 boxes = 3;                          ///< 4 * 2 bytes
+    uint64 box = 3;                          ///< 4 * 2 bytes
     uint64 qty = 4;
 }
 
@@ -58,7 +52,7 @@ message Card
 {
     uint64 id = 1;
     string name = 2;
-    uint64 component_id = 3;
+    uint64 symbol_id = 3;
     uint64 nominal = 4;
     repeated Property properties = 5;
     repeated Package packages = 6;
@@ -184,6 +178,27 @@ message DictionariesResponse
     repeated PropertyType property_type = 3;
 }
 
+message PropertyRequest
+{
+    string property_type_name = 1;
+    string value = 2;
+}
+
+message CardRequest
+{
+    // what to do
+    string operation_symbol = 1;
+    // search criterias
+    string symbol_name = 2;
+    string name = 3;
+    uint64 nominal = 4;
+    repeated PropertyRequest properties = 5;
+    // in which box
+    uint64 box = 6;
+    // quantity
+    uint64 qty = 7;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -192,6 +207,6 @@ service Rcr
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc version(VersionRequest) returns (VersionResponse) {}
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
-    rpc cardPush(stream Card) returns (OperationResponse) {}
+    rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
 }

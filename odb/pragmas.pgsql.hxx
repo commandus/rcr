@@ -111,20 +111,17 @@ namespace rcr {
 
 	ODB_TABLE(Package)
 		ODB_NUMBER(Package, card_id, uint64_t)
-		ODB_NUMBER(Package, boxes, uint64_t)
+		ODB_NUMBER(Package, box, uint64_t)
 		ODB_NUMBER(Package, qty, uint64_t)
 
-	ODB_TABLE(Component)
-		ODB_NUMBER(Component, symbol_id, uint64_t)
-		ODB_STRING(Component, name)
-
 	ODB_TABLE(Property)
+		ODB_NUMBER(Property, card_id, uint64_t)
 		ODB_NUMBER(Property, property_type_id, uint64_t)
 		ODB_STRING(Property, value)
 
 	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
-		ODB_NUMBER(Card, component_id, uint64_t)
+		ODB_NUMBER(Card, symbol_id, uint64_t)
 		ODB_NUMBER(Card, nominal, uint64_t)
 }

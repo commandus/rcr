@@ -65,9 +65,10 @@ public:
     ::grpc::Status cardSearchEqual(::grpc::ServerContext* context, const ::rcr::EqualSearchRequest* request, ::rcr::CardResponse* response) override;
     ::grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
     ::grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
-    ::grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::Card>* reader, ::rcr::OperationResponse* response) override;
+    ::grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
     ::grpc::Status getDictionaries(::grpc::ServerContext* context, const ::rcr::DictionariesRequest* request, ::rcr::DictionariesResponse* response) override;
     // ------------------ back office ------------------
+    int loadDictionaries(rcr::DictionariesResponse *pResponse);
 };
 
 #endif
