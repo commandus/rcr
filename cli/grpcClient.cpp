@@ -112,19 +112,10 @@ int32_t RcrClient::cardQuery(
  *     rpc cardLoad(stream Card) returns (OperationResponse) {}
  */
 int RcrClient::saveSpreadsheet(
+    uint64_t box,
     const std::string componentSymbol,  ///< "U"- IC
     const std::vector<SheetRow> &rows
 ) {
-    grpc::ClientContext context;
-    rcr::DictionariesResponse responseDictionaries;
-    rcr::DictionariesRequest requestDictionaries;
-
-    grpc::Status status = stub->getDictionaries(&context, requestDictionaries, &responseDictionaries);
-    if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
-        return status.error_code();
-    }
-
     rcr::OperationResponse response;
     rcr::CardRequest card;
     card.set_symbol_name("+"); // add
@@ -132,14 +123,14 @@ int RcrClient::saveSpreadsheet(
     grpc::ClientContext context2;
     std::unique_ptr<grpc::ClientWriter<rcr::CardRequest> > writer(stub->cardPush(&context2, &response));
     for (auto item = rows.begin(); item != rows.end(); item++) {
-        item->toCardRequest(card);
+        item->toCardRequest("+", box, card);
         if (!writer->Write(card)) {
             // Broken stream
             break;
         }
     }
     writer->WritesDone();
-    status = writer->Finish();
+    grpc::Status status = writer->Finish();
     if (!status.ok()) {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
         return status.error_code();

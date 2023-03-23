@@ -231,12 +231,13 @@ int main(int argc, char** argv)
 
             // load data
             if (config.command.find("xlsx-add") == 0) {
+                // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
                 std::string cs;
                 cs = config.command.substr(9);
                 if (cs.empty())
                     cs = config.componentSymbol;
                 cs = toUpperCase(ML_RU, cs);
-                int r = rpc.saveSpreadsheet(cs, spreadSheet.items);
+                int r = rpc.saveSpreadsheet(box, cs, spreadSheet.items);
             }
         }
     }

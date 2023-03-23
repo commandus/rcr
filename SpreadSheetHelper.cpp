@@ -7,13 +7,19 @@
 #include <xlnt/xlnt.hpp>
 
 #include "utilstring.h"
+#include "StockOperation.h"
 
 void SheetRow::toCardRequest(
+    const std::string &operation,
+    uint64_t box,
     rcr::CardRequest &retval
 ) const
 {
+    retval.set_operation_symbol(operation);
     retval.set_name(name);
     retval.set_nominal(0);
+    retval.set_qty(qty);
+    retval.set_box(StockOperation::boxAppendBox(box, id));
     retval.set_symbol_name("U");
 
     for (std::vector <std::string>::const_iterator it = properties.begin(); it != properties.end(); it++) {

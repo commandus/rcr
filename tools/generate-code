@@ -69,5 +69,6 @@ sed -i "s/\ \ \/\/ @@protoc_insertion_point(class_scope:\(.*\)\.\(.*\))/  \/\/ @
 ODBINC="-I/usr/include/x86_64-linux-gnu -I/usr/local/include -I$SRC/odb"
 ODBDEFS="-DGEN_ODB -D__x86_64__ -D__LP64__"
 odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable \
-    --generate-query --generate-schema --schema-format sql \
-    $ODBINC $ODBDEFS $H
+    --generate-query --generate-schema --schema-format sql $ODBINC $ODBDEFS $H
+odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable \
+    --generate-query --generate-schema --schema-format embedded $ODBINC $ODBDEFS $H

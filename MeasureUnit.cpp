@@ -37,29 +37,29 @@ static const std::string prefixes[LOCALES][MAX_POW10] {
 };
 
 static const std::string prefixesPart[LOCALES][MAX_POW10] {
-"",
-"m",    // milli
-"µ",    // micro - start here
-"n",    // nano
-"p",    // pico
-"f",    // femto
-"a",
-"z",
-"y",
-"r",
-"q",
+    "",
+    "m",    // milli
+    "µ",    // micro - start here
+    "n",    // nano
+    "p",    // pico
+    "f",    // femto
+    "a",
+    "z",
+    "y",
+    "r",
+    "q",
 
-"",
-"м",    // milli
-"мк",   // micro - start here
-"н",    // nano
-"п",    // pico
-"ф",    // femto
-"ф",
-"з",
-"и",
-"р",
-"кв"
+    "",
+    "м",    // milli
+    "мк",   // micro - start here
+    "н",    // nano
+    "п",    // pico
+    "ф",    // femto
+    "ф",
+    "з",
+    "и",
+    "р",
+    "кв"
 };
 
 
@@ -71,14 +71,14 @@ static int measurePow10[4] {
 };
 
 static const std::string symNames[LOCALES][4] {
-"R",
-"C",
-"L",
-"U",
-"R",
-"C",
-"L",
-"U"
+    "R",
+    "C",
+    "L",
+    "U",
+    "R",
+    "C",
+    "L",
+    "U"
 };
 
 static const std::string unitNames[LOCALES][4] {
@@ -94,15 +94,15 @@ static const std::string unitNames[LOCALES][4] {
 };
 
 static const std::string unitNamesUpperCase[LOCALES][4] {
-        "OHM",
-        "F",
-        "G",
-        "",
+    "OHM",
+    "F",
+    "G",
+    "",
 
-        "ОМ",
-        "Ф",
-        "ГН",
-        ""
+    "ОМ",
+    "Ф",
+    "ГН",
+    ""
 };
 
 std::string MeasureUnit::sym(MEASURE_LOCALE locale, MEASURE measure) {

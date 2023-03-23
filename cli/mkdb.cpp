@@ -112,9 +112,14 @@ static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &
         symbol.set_unit(unit.unit(locale, M_C));
         symbol.set_pow10(unit.pow10(M_C));
         db.persist(symbol);
-        symbol.set_sym(unit.sym(locale, M_R));
-        symbol.set_unit(unit.unit(locale, M_C));
+        symbol.set_sym(unit.sym(locale, M_L));
+        symbol.set_unit(unit.unit(locale, M_L));
         symbol.set_pow10(unit.pow10(M_L));
+        db.persist(symbol);
+
+        symbol.set_sym(unit.sym(locale, M_U));
+        symbol.set_unit(unit.unit(locale, M_U));
+        symbol.set_pow10(unit.pow10(M_U));
         db.persist(symbol);
 
         rcr::Operation operation;
@@ -134,9 +139,13 @@ static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &
         db.persist(propertyType);
 
         r = true;
-    } catch (odb::exception &ignored) {
+    } catch (odb::exception &ex) {
+        std::cerr << "Error filling schema : " << ex.what() << std::endl;
         r = false;
+    } catch (...) {
+        std::cerr << "Unknown error filling schema" << std::endl;
     }
+
     return r;
 }
 
@@ -149,16 +158,21 @@ static bool sqliteCreateSchemaIfExists(ClientConfig &config)
     try {
         db->query<rcr::Card>(odb::query<rcr::Card>::id == 0);
         exists = true;
-    } catch (odb::exception &ignored) {
+    } catch (...) {
         exists = false;
     }
     if (!exists) {
         try {
             odb::schema_catalog::create_schema(*db);
-            created = sqliteFillOutDatabase(config.locale, *db);
-        } catch (odb::exception &ignored) {
+        } catch (odb::exception &ex) {
+            std::cerr << "Error create schema " << ex.what() << std::endl;
+        } catch (...) {
+            std::cerr << "Unknown error create schema" << std::endl;
         }
     }
+
+    created = sqliteFillOutDatabase(config.locale, *db);
+
     t.commit();
     delete db;
     return created;
@@ -173,14 +187,6 @@ int main(int argc, char** argv)
 
 	if (config.verbosity > 1) {
 	}
-
-	int code = 0;
-	std::ifstream *strmin;
-	std::ostream *strmout;
-
-	if (code != 0)
-		std::cerr << "Error: " << code << std::endl;
-
 #ifdef ENABLE_SQLITE
     sqliteCreateSchemaIfExists(config);
 #else

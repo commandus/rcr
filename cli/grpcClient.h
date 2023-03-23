@@ -37,6 +37,7 @@ public:
     );
 
     int saveSpreadsheet(
+        uint64_t box,
         const std::string componentSymbol,  ///< "U"- IC
         const std::vector<SheetRow> &rows
     );
