@@ -245,16 +245,18 @@ struct ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
     BEGIN_GRPC_METHOD("cardQuery", request, t)
+    rcr::DictionariesResponse dictionaries;
+    r = loadDictionaries(&dictionaries);
     size_t position = 0;
     RCQuery q;
     int r = q.parse(ML_RU, request->query(), position);
-
-    RCQueryProcessor p(q);
-    rcr::CardQueryResponse qr;
-    p.exec(mDb, &t, request->list(), response->mutable_rslt(), response->mutable_cards());
-
-    response->mutable_cards()->set_count(0);
+    if (!r) {
+        RCQueryProcessor p(q);
+        rcr::CardQueryResponse qr;
+        p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards());
+    }
     END_GRPC_METHOD("cardQuery", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }

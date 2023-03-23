@@ -54,13 +54,6 @@ message Card
     string name = 2;
     uint64 symbol_id = 3;
     uint64 nominal = 4;
-    repeated Property properties = 5;
-    repeated Package packages = 6;
-}
-
-message Cards
-{
-    repeated Card cards = 1;
 }
 
 message Packages
@@ -189,14 +182,15 @@ message CardRequest
     // what to do
     string operation_symbol = 1;
     // search criterias
-    string symbol_name = 2;
-    string name = 3;
-    uint64 nominal = 4;
-    repeated PropertyRequest properties = 5;
+    uint64 id = 2;  // usually I dont know id, but..
+    string symbol_name = 3;
+    string name = 4;
+    uint64 nominal = 5;
+    repeated PropertyRequest properties = 6;
     // in which box
-    uint64 box = 6;
+    uint64 box = 7;
     // quantity
-    uint64 qty = 7;
+    uint64 qty = 8;
 }
 
 // ------------ RPC -------------

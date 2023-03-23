@@ -95,14 +95,20 @@ int32_t RcrClient::cardQuery(
     if (c) {
         std::cerr << "Error: " << c << " " << response.rslt().description() << std::endl;
         return c;
+    } else {
+        google::protobuf::util::JsonPrintOptions formattingOptions;
+        formattingOptions.add_whitespace = true;
+        formattingOptions.always_print_primitive_fields = true;
+        formattingOptions.preserve_proto_field_names = true;
+
+        // print cards if exists
+        for (auto card = response.cards().cards().begin(); card != response.cards().cards().end(); card++) {
+            std::string r;
+            google::protobuf::util::MessageToJsonString(*card, &r, formattingOptions);
+            ostream << r << std::endl;
+        }
     }
-
-    // print cards if exists
-    for (auto c = 0; c < response.cards().count(); c++) {
-
-    }
-
-    return 0;
+    return c;
 }
 
 /**

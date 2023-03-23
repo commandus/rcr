@@ -104,22 +104,22 @@ static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &
     try {
         MeasureUnit unit;
         rcr::Symbol symbol;
-        symbol.set_sym(unit.sym(locale, M_R));
-        symbol.set_unit(unit.unit(locale, M_R));
-        symbol.set_pow10(unit.pow10(M_R));
+        symbol.set_sym(MeasureUnit::sym(locale, M_R));
+        symbol.set_unit(MeasureUnit::unit(locale, M_R));
+        symbol.set_pow10(MeasureUnit::pow10(M_R));
         db.persist(symbol);
-        symbol.set_sym(unit.sym(locale, M_C));
-        symbol.set_unit(unit.unit(locale, M_C));
-        symbol.set_pow10(unit.pow10(M_C));
+        symbol.set_sym(MeasureUnit::sym(locale, M_C));
+        symbol.set_unit(MeasureUnit::unit(locale, M_C));
+        symbol.set_pow10(MeasureUnit::pow10(M_C));
         db.persist(symbol);
-        symbol.set_sym(unit.sym(locale, M_L));
-        symbol.set_unit(unit.unit(locale, M_L));
-        symbol.set_pow10(unit.pow10(M_L));
+        symbol.set_sym(MeasureUnit::sym(locale, M_L));
+        symbol.set_unit(MeasureUnit::unit(locale, M_L));
+        symbol.set_pow10(MeasureUnit::pow10(M_L));
         db.persist(symbol);
 
-        symbol.set_sym(unit.sym(locale, M_U));
-        symbol.set_unit(unit.unit(locale, M_U));
-        symbol.set_pow10(unit.pow10(M_U));
+        symbol.set_sym(MeasureUnit::sym(locale, M_U));
+        symbol.set_unit(MeasureUnit::unit(locale, M_U));
+        symbol.set_pow10(MeasureUnit::pow10(M_U));
         db.persist(symbol);
 
         rcr::Operation operation;

@@ -17,6 +17,7 @@ public:
     void exec(
         odb::database *db,
         odb::transaction *t,
+        const rcr::DictionariesResponse *dictionaries,
         const rcr::ListRequest &list,
         rcr::OperationResponse *operationResponse,
         rcr::CardResponse *cards
@@ -25,6 +26,7 @@ public:
     void loadCards(
         odb::database *db,
         odb::transaction *t,
+        const rcr::DictionariesResponse *dictionaries,
         rcr::CardResponse *retCards,
         const RCQuery *query,
         const rcr::ListRequest &list
@@ -39,7 +41,8 @@ public:
 
     // return nullptr if not found
     static const rcr::Symbol* findSymbol(
-        const rcr::DictionariesResponse *dictionaries, const std::string &sym
+        const rcr::DictionariesResponse *dictionaries,
+        const std::string &sym
     );
     // return nullptr if not found
     static const rcr::PropertyType* findPropertyType(
@@ -58,10 +61,11 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    bool findCardByNameNominalProperties(
-        rcr::Card &card,
+    uint64_t findCardByNameNominalProperties(
+        const rcr::CardRequest &cardRequest,
         odb::database *db,
-        odb::transaction *transaction
+        odb::transaction *transaction,
+        const rcr::DictionariesResponse *dictionaries
     );
 
     uint64_t getQuantity(
@@ -84,8 +88,32 @@ public:
     void setProperties(
         odb::database *db,
         odb::transaction *transaction,
-        const rcr::Card &card
+        const rcr::CardRequest &card,
+        uint64_t cardId,
+        const rcr::DictionariesResponse *dictionaries
     );
+
+    uint64_t measure2symbolId(
+        const rcr::DictionariesResponse *dictionaries,
+        const MEASURE measure
+    );
+
+    bool hasAllProperties(
+        odb::database *db,
+        odb::transaction *transaction,
+        const std::map<std::string, std::string> &what,
+        uint64_t cardIdWhere,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
+    bool hasAllProperties2(
+        odb::database *db,
+        odb::transaction *transaction,
+        const google::protobuf::RepeatedPtrField<rcr::PropertyRequest> &what,
+        uint64_t cardIdWhere,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
 };
 
 #endif //RCR_RCQUERYPROCESSOR_H

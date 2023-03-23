@@ -191,8 +191,10 @@ int main(int argc, char** argv)
     // rpc.addPropertyType("ptkey", "pt desc");
 
     if (config.command == "card") {
-        rpc.cardQuery(std::cout, config.request, config.offset, config.size);
-        std::cout << std::endl;
+        int32_t r = rpc.cardQuery(std::cout, config.request, config.offset, config.size);
+        if (r) {
+            exit(r);
+        }
     }
 
     if (config.command == "version")
