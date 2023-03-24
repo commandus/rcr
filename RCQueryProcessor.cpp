@@ -88,8 +88,10 @@ void RCQueryProcessor::loadCards(
             if (sz > list.size())
                 break;
             //
-            rcr::Card *c = retCards->mutable_cards()->Add();
-            c->CopyFrom(*itCard);
+            rcr::CardNPropetiesPackages *c = retCards->mutable_cards()->Add();
+            c->mutable_card()->CopyFrom(*itCard);
+            loadPackages(db, t, itCard->id(), c->mutable_packages());
+            loadProperties(db, t, itCard->id(), c->mutable_properties());
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
@@ -325,11 +327,6 @@ void RCQueryProcessor::setProperties(
     }
 }
 
-#define MAX_MEASURE_NAMES 4
-static std::string MEASURENAMES[MAX_MEASURE_NAMES] = {
-    "R","C","L","U"
-};
-
 uint64_t RCQueryProcessor::measure2symbolId(
      const rcr::DictionariesResponse *dictionaries,
      const MEASURE measure
@@ -337,8 +334,7 @@ uint64_t RCQueryProcessor::measure2symbolId(
     if (!dictionaries)
         return 0;
 
-    const std::string &mn = (measure < MAX_MEASURE_NAMES ? MEASURENAMES[measure] : "");
-
+    const std::string &mn = MeasureUnit::sym(ML_RU, measure);
     for (auto it = dictionaries->symbol().begin(); it != dictionaries->symbol().end(); it++) {
         if (it->sym() == mn)
             return it->id();
@@ -413,5 +409,47 @@ bool RCQueryProcessor::hasAllProperties2(
         LOG(ERROR) << "hasAllProperties unknown error";
     }
     return cnt == props.size();
+}
+
+void RCQueryProcessor::loadPackages(
+    odb::database *db,
+    odb::transaction *transaction,
+    uint64_t cardId,
+    google::protobuf::RepeatedPtrField<rcr::Package> *retPackages
+) {
+    try {
+        odb::result<rcr::Package> q(db->query<rcr::Package>(
+                odb::query<rcr::Package>::card_id == cardId
+        ));
+        for (odb::result<rcr::Package>::iterator it(q.begin()); it != q.end(); it++) {
+            auto p = retPackages->Add();
+            p->CopyFrom(*it);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "loadPackages error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "loadPackages unknown error";
+    }
+}
+
+void RCQueryProcessor::loadProperties(
+    odb::database *db,
+    odb::transaction *transaction,
+    uint64_t cardId,
+    google::protobuf::RepeatedPtrField<rcr::Property> *retProperties
+) {
+    try {
+        odb::result<rcr::Property> q(db->query<rcr::Property>(
+                odb::query<rcr::Property>::card_id == cardId
+        ));
+        for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
+            auto p = retProperties->Add();
+            p->CopyFrom(*it);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "load properties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "load properties unknown error";
+    }
 }
 

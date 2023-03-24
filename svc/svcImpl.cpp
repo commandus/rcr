@@ -180,8 +180,7 @@ RcrImpl::RcrImpl(struct ServiceConfig *config)
 
 RcrImpl::~RcrImpl()
 {
-	if (mDb)
-		delete mDb;
+    delete mDb;
 }
 
 struct ServiceConfig *RcrImpl::getConfig()
@@ -196,8 +195,9 @@ struct ServiceConfig *RcrImpl::getConfig()
 )
 {
     BEGIN_GRPC_METHOD("version", request, t)
-    if (response == nullptr)
+    if (response == nullptr) {
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    }
     response->set_value(VERSION_MAJOR);
     response->set_name(getRandomName());
     END_GRPC_METHOD("version", request, response, t)
@@ -210,8 +210,9 @@ struct ServiceConfig *RcrImpl::getConfig()
     ::rcr::CardResponse* response
 )
 {
-	if (request == nullptr)
-		return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+	if (request == nullptr) {
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    }
 	BEGIN_GRPC_METHOD("cardSearchEqual", request, t)
 	END_GRPC_METHOD("cardSearchEqual", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
@@ -245,20 +246,25 @@ struct ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-    int r;
+    int r = 0;
     BEGIN_GRPC_METHOD("cardQuery", request, t)
     rcr::DictionariesResponse dictionaries;
     r = loadDictionaries(&dictionaries);
-    size_t position = 0;
-    RCQuery q;
-    int r = q.parse(ML_RU, request->query(), position);
     if (!r) {
-        RCQueryProcessor p(q);
-        rcr::CardQueryResponse qr;
-        p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards());
+        const rcr::Symbol *measureSym = RCQueryProcessor::findSymbol(&dictionaries, request->measure_symbol());
+        if (measureSym) {
+            size_t position = 0;
+            RCQuery q;
+            int r = q.parse(ML_RU, request->query(), position, (MEASURE) (measureSym->id() - 1));
+            if (!r) {
+                RCQueryProcessor p(q);
+                rcr::CardQueryResponse qr;
+                p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards());
+            }
+        }
     }
     END_GRPC_METHOD("cardQuery", request, response, t)
-    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+    return r == 0 ? grpc::Status::OK : grpc::Status(StatusCode::INTERNAL, "");
 }
 
 ::grpc::Status RcrImpl::getDictionaries(
@@ -280,7 +286,7 @@ struct ServiceConfig *RcrImpl::getConfig()
 
 ::grpc::Status RcrImpl::cardPush(
     ::grpc::ServerContext* context,
-    ::grpc::ServerReader< ::rcr::CardRequest>* reader,
+    ::grpc::ServerReader<::rcr::CardRequest>* reader,
     ::rcr::OperationResponse* response
 )
 {

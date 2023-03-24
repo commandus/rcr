@@ -102,6 +102,7 @@ namespace rcr {
 
 	ODB_TABLE(Symbol)
 		ODB_STRING(Symbol, sym)
+		ODB_STRING(Symbol, description)
 		ODB_STRING(Symbol, unit)
 		ODB_NUMBER(Symbol, pow10, int)
 

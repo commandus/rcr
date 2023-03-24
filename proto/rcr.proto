@@ -21,8 +21,9 @@ message Symbol
 {
     uint64 id = 1;
     string sym = 2;
-    string unit = 3;
-    int32 pow10 = 4;                            ///< power of 10
+    string description = 3;
+    string unit = 4;
+    int32 pow10 = 5;                            ///< power of 10
 }
 
 message PropertyType
@@ -56,9 +57,11 @@ message Card
     uint64 nominal = 4;
 }
 
-message Packages
+message CardNPropetiesPackages
 {
-    repeated Package package = 1;
+    Card card = 1;
+    repeated Property properties = 2;
+    repeated Package packages = 3;
 }
 
 // Operation log
@@ -131,7 +134,7 @@ message CardResponse
 {
     uint64 count = 1;                           ///< dataset size
     ListRequest listrequest = 2;                ///< return request's offset and size
-    repeated Card cards = 3;                    ///< dataset
+    repeated CardNPropetiesPackages cards = 3;  ///< dataset
 }
 
 message OperationResponse
@@ -150,7 +153,8 @@ message ChPropertyTypeRequest
 message CardQueryRequest
 {
     string query = 1;
-    ListRequest list = 2;
+    string measure_symbol = 2;
+    ListRequest list = 3;
 }
 
 message CardQueryResponse
@@ -200,7 +204,9 @@ service Rcr
     rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc version(VersionRequest) returns (VersionResponse) {}
+
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
+
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
 }

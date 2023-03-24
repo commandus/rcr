@@ -114,6 +114,11 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
+    void loadPackages(odb::database *db, odb::transaction *transaction, uint64_t cardId,
+                      google::protobuf::RepeatedPtrField<rcr::Package> *retPackages);
+
+    void loadProperties(odb::database *db, odb::transaction *transaction, uint64_t id,
+                        google::protobuf::RepeatedPtrField<rcr::Property> *retProperties);
 };
 
 #endif //RCR_RCQUERYPROCESSOR_H

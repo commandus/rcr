@@ -24,6 +24,7 @@ public:
     SheetRow() = default;
     void toCardRequest(
         const std::string &operation,
+        const std::string &componentSymbol,
         uint64_t box,
         rcr::CardRequest &retval
     ) const;

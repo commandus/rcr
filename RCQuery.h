@@ -28,10 +28,17 @@ public:
 
     RCQuery() = default;
     RCQuery(const RCQuery &value) = default;
-    RCQuery(MEASURE_LOCALE aLocale, const std::string &value);
+    RCQuery(
+        MEASURE_LOCALE aLocale,
+        const std::string &value
+    );
 
-    int parse(MEASURE_LOCALE aLocale, const std::string &value, size_t &position);
+    int parse(
+        MEASURE_LOCALE aLocale,
+        const std::string &value,
+        size_t &position,
+        MEASURE defaultMeasure = M_U
+    );
 };
-
 
 #endif //RCR_RCQUERY_H

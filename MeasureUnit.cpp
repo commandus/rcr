@@ -33,7 +33,6 @@ static const std::string prefixes[LOCALES][MAX_POW10] {
     "И",
     "Р",
     "Кв"
-
 };
 
 static const std::string prefixesPart[LOCALES][MAX_POW10] {
@@ -62,51 +61,229 @@ static const std::string prefixesPart[LOCALES][MAX_POW10] {
     "кв"
 };
 
-
-static int measurePow10[4] {
-    0,      // R
-    -12,    // C
-    -12,    // L
-    0       // U
+static int measurePow10[MEASURE_COUNT] {
+    0,   // M_A Устройства
+    0,   // M_B Микрофоны, громкоговорители
+    -12, // M_C Конденсаторы
+    0,   // M_D Интегральные схемы
+    0,   // M_E Разные элементы
+    0,   // M_F Плавкие предохранители
+    0,   // M_G Источники питания
+    0,   // M_H Индикаторы
+    0,   // M_K Реле
+    -12, // M_L Дроссели
+    0,   // M_M Двигатели
+    0,   // M_P Счетчики
+    0,   // M_Q Выключатели
+    0,   // M_R Резисторы
+    0,   // M_S Переключатели
+    0,   // M_T Трансформаторы
+    0,   // M_U Выпрямители
+    0,   // M_V Диоды, тиристоры, транзисторы
+    0,   // M_W Антенны
+    0,   // M_X Гнезда
+    0,   // M_Y Электромагнитный привод
+    0    // M_Z Кварцевые фильтры
 };
 
-static const std::string symNames[LOCALES][4] {
-    "R",
-    "C",
-    "L",
-    "U",
-    "R",
-    "C",
-    "L",
-    "U"
+static const std::string symNames[LOCALES][MEASURE_COUNT] {
+        "A",   // M_A Устройства
+        "B",   // M_B Микрофоны, громкоговорители
+        "C",   // M_C Конденсаторы
+        "D",   // M_D Интегральные схемы
+        "E",   // M_E Разные элементы
+        "F",   // M_F Плавкие предохранители
+        "G",   // M_G Источники питания
+        "H",   // M_H Индикаторы
+        "K",   // M_K Реле
+        "L",   // M_L Дроссели
+        "M",   // M_M Двигатели
+        "P",   // M_P Счетчики
+        "Q",   // M_Q Выключатели
+        "R",   // M_R Резисторы
+        "S",   // M_S Переключатели
+        "T",   // M_T Трансформаторы
+        "U",   // M_U Выпрямители
+        "V",   // M_V Диоды, тиристоры, транзисторы
+        "W",   // M_W Антенны
+        "X",   // M_X Гнезда
+        "Y",   // M_Y Электромагнитный привод
+        "Z",   // M_Z Кварцевые фильтры
+
+        "A",   // M_A Устройства
+        "B",   // M_B Микрофоны, громкоговорители
+        "C",   // M_C Конденсаторы
+        "D",   // M_D Интегральные схемы
+        "E",   // M_E Разные элементы
+        "F",   // M_F Плавкие предохранители
+        "G",   // M_G Источники питания
+        "H",   // M_H Индикаторы
+        "K",   // M_K Реле
+        "L",   // M_L Дроссели
+        "M",   // M_M Двигатели
+        "P",   // M_P Счетчики
+        "Q",   // M_Q Выключатели
+        "R",   // M_R Резисторы
+        "S",   // M_S Переключатели
+        "T",   // M_T Трансформаторы
+        "U",   // M_U Выпрямители
+        "V",   // M_V Диоды, тиристоры, транзисторы
+        "W",   // M_W Антенны
+        "X",   // M_X Гнезда
+        "Y",   // M_Y Электромагнитный привод
+        "Z",   // M_Z Кварцевые фильтры
 };
 
-static const std::string unitNames[LOCALES][4] {
-    "Ohm",
-    "F",
-    "G",
-    "",
+static const std::string symDescriptions[LOCALES][MEASURE_COUNT] {
+        "Devices",   // M_A
+        "Mics",   // M_B
+        "C",   // M_C
+        "IC схемы",   // M_D
+        "Etc",   // M_E
+        "Fuses",   // M_F
+        "Gen",   // M_G
+        "Ind",   // M_H
+        "Relay",   // M_K
+        "L",   // M_L
+        "Motors",   // M_M
+        "Counters",   // M_P
+        "Switches",   // M_Q
+        "R",   // M_R
+        "S",   // M_S
+        "Trans",   // M_T
+        "Rect",   // M_U
+        "Diodes, Transistors",   // M_V
+        "Ant",   // M_W
+        "Nests",   // M_X
+        "Actuators",   // M_Y
+        "Quartz",   // M_Z
 
-    "Ом",
-    "Ф",
-    "Гн",
-    ""
+        "Устройства",   // M_A
+        "Микрофоны, динамики",   // M_B
+        "Конденсаторы",   // M_C
+        "Интегральные схемы",   // M_D
+        "Разные элементы",   // M_E
+        "Предохранители",   // M_F
+        "Источники питания",   // M_G
+        "Индикаторы",   // M_H
+        "Реле",   // M_K
+        "Дроссели",   // M_L
+        "Двигатели",   // M_M
+        "Счетчики",   // M_P
+        "Выключатели",   // M_Q
+        "Резисторы",   // M_R
+        "Переключатели",   // M_S
+        "Трансформаторы",   // M_T
+        "Выпрямители",   // M_U
+        "Диоды, транзисторы",   // M_V
+        "Антенны",   // M_W
+        "Гнезда",   // M_X
+        "Электромагнитные приводы",   // M_Y
+        "Кварцевые фильтры"   // M_Z
 };
 
-static const std::string unitNamesUpperCase[LOCALES][4] {
-    "OHM",
-    "F",
-    "G",
-    "",
+static const std::string unitNames[LOCALES][MEASURE_COUNT] {
+        "",   // M_A Устройства
+        "",   // M_B Микрофоны, громкоговорители
+        "F",   // M_C Конденсаторы
+        "",   // M_D Интегральные схемы
+        "",   // M_E Разные элементы
+        "",   // M_F Плавкие предохранители
+        "",   // M_G Источники питания
+        "",   // M_H Индикаторы
+        "",   // M_K Реле
+        "G",  // M_L Дроссели
+        "",   // M_M Двигатели
+        "",   // M_P Счетчики
+        "",   // M_Q Выключатели
+        "Ohm",// M_R Резисторы
+        "",   // M_S Переключатели
+        "",   // M_T Трансформаторы
+        "",   // M_U Выпрямители
+        "",   // M_V Диоды, тиристоры, транзисторы
+        "",   // M_W Антенны
+        "",   // M_X Гнезда
+        "",   // M_Y Электромагнитный привод
+        "",   // M_Z Кварцевые фильтры
 
-    "ОМ",
-    "Ф",
-    "ГН",
-    ""
+        "",   // M_A Устройства
+        "",   // M_B Микрофоны, громкоговорители
+        "Ф",  // M_C Конденсаторы
+        "",   // M_D Интегральные схемы
+        "",   // M_E Разные элементы
+        "",   // M_F Плавкие предохранители
+        "",   // M_G Источники питания
+        "",   // M_H Индикаторы
+        "",   // M_K Реле
+        "Гн", // M_L Дроссели
+        "",   // M_M Двигатели
+        "",   // M_P Счетчики
+        "",   // M_Q Выключатели
+        "Ом", // M_R Резисторы
+        "",   // M_S Переключатели
+        "",   // M_T Трансформаторы
+        "",   // M_U Выпрямители
+        "",   // M_V Диоды, тиристоры, транзисторы
+        "",   // M_W Антенны
+        "",   // M_X Гнезда
+        "",   // M_Y Электромагнитный привод
+        ""    // M_Z Кварцевые фильтры
+};
+
+static const std::string unitNamesUpperCase[LOCALES][MEASURE_COUNT] {
+        "",   // M_A Устройства
+        "",   // M_B Микрофоны, громкоговорители
+        "F",   // M_C Конденсаторы
+        "",   // M_D Интегральные схемы
+        "",   // M_E Разные элементы
+        "",   // M_F Плавкие предохранители
+        "",   // M_G Источники питания
+        "",   // M_H Индикаторы
+        "",   // M_K Реле
+        "G",  // M_L Дроссели
+        "",   // M_M Двигатели
+        "",   // M_P Счетчики
+        "",   // M_Q Выключатели
+        "OHM",// M_R Резисторы
+        "",   // M_S Переключатели
+        "",   // M_T Трансформаторы
+        "",   // M_U Выпрямители
+        "",   // M_V Диоды, тиристоры, транзисторы
+        "",   // M_W Антенны
+        "",   // M_X Гнезда
+        "",   // M_Y Электромагнитный привод
+        "",   // M_Z Кварцевые фильтры
+
+        "",   // M_A Устройства
+        "",   // M_B Микрофоны, громкоговорители
+        "Ф",  // M_C Конденсаторы
+        "",   // M_D Интегральные схемы
+        "",   // M_E Разные элементы
+        "",   // M_F Плавкие предохранители
+        "",   // M_G Источники питания
+        "",   // M_H Индикаторы
+        "",   // M_K Реле
+        "ГН", // M_L Дроссели
+        "",   // M_M Двигатели
+        "",   // M_P Счетчики
+        "",   // M_Q Выключатели
+        "ОМ", // M_R Резисторы
+        "",   // M_S Переключатели
+        "",   // M_T Трансформаторы
+        "",   // M_U Выпрямители
+        "",   // M_V Диоды, тиристоры, транзисторы
+        "",   // M_W Антенны
+        "",   // M_X Гнезда
+        "",   // M_Y Электромагнитный привод
+        ""    // M_Z Кварцевые фильтры
 };
 
 std::string MeasureUnit::sym(MEASURE_LOCALE locale, MEASURE measure) {
     return symNames[locale][measure];
+}
+
+std::string MeasureUnit::description(MEASURE_LOCALE locale, MEASURE measure) {
+    return symDescriptions[locale][measure];
 }
 
 std::string MeasureUnit::unit(MEASURE_LOCALE locale, MEASURE measure)
@@ -158,7 +335,8 @@ int MeasureUnit::parse(
     size_t &position,
     uint64_t &nominal,
     MEASURE &measure,
-    std::string &retname
+    std::string &retname,
+    MEASURE defaultMeasure
 )
 {
     size_t start = position;
@@ -240,8 +418,11 @@ int MeasureUnit::parse(
         // try to find out unit
         start = finish;
         idx = -1;
-        for (auto ui = 0; ui < 3; ui++) {
-            if (valueUpperCase.find(unitNamesUpperCase[locale][ui], start) == start) {
+        for (auto ui = 0; ui < MEASURE_COUNT; ui++) {
+            const std::string &s = unitNamesUpperCase[locale][ui];
+            if (s.empty())
+                continue;
+            if (valueUpperCase.find(s, start) == start) {
                 // found unit name
                 finish = start + unitNames[locale][ui].length();
                 // 100пФ -12                -4 * 3
@@ -262,8 +443,8 @@ int MeasureUnit::parse(
             return 0;
         }
     }
-    // IC
-    measure = M_U;
+    // by default IC
+    measure = defaultMeasure;
     // skip spaces if exists
     start = position;
     finish = eolp;

@@ -73,6 +73,7 @@ int32_t RcrClient::addPropertyType(
 int32_t RcrClient::cardQuery(
     std::ostream &ostream,
     const std::string &query,
+    const std::string &measureSymbol,
     size_t offset,
     size_t size
 ) {
@@ -81,6 +82,7 @@ int32_t RcrClient::cardQuery(
     rcr::CardQueryResponse response;
     rcr::CardQueryRequest request;
     request.set_query(query);
+    request.set_measure_symbol(measureSymbol);
     request.mutable_list()->set_offset(offset);
     request.mutable_list()->set_size(size);
 
@@ -119,17 +121,15 @@ int32_t RcrClient::cardQuery(
  */
 int RcrClient::saveSpreadsheet(
     uint64_t box,
-    const std::string componentSymbol,  ///< "U"- IC
+    const std::string componentSymbol,  ///< "D"- IC
     const std::vector<SheetRow> &rows
 ) {
     rcr::OperationResponse response;
-    rcr::CardRequest card;
-    card.set_symbol_name("+"); // add
-
     grpc::ClientContext context2;
     std::unique_ptr<grpc::ClientWriter<rcr::CardRequest> > writer(stub->cardPush(&context2, &response));
     for (auto item = rows.begin(); item != rows.end(); item++) {
-        item->toCardRequest("+", box, card);
+        rcr::CardRequest card;
+        item->toCardRequest("+", componentSymbol, box, card);
         if (!writer->Write(card)) {
             // Broken stream
             break;

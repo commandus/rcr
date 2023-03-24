@@ -32,6 +32,7 @@ public:
     int32_t cardQuery(
         std::ostream &ostream,
         const std::string &query,
+        const std::string &measureSymbol,
         size_t offset,
         size_t size
     );

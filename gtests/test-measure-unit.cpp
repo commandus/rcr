@@ -28,7 +28,7 @@ TEST(RCQuery, Count) {
     RCQuery q;
 
     position = 0;
-    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2", position);
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2", position, M_S);
     ASSERT_EQ(q.measure, M_U);
     ASSERT_EQ(q.nominal, 0);
     ASSERT_EQ(q.componentName, "К555ЛА7");
@@ -41,7 +41,7 @@ TEST(RCQuery, Count) {
     ASSERT_EQ(q.count, 0);
 
     position = 0;
-    q.parse(ML_RU, " К555ЛА7 key1:value1 count", position);
+    q.parse(ML_RU, " К555ЛА7 key1:value1 count", position, M_S);
     ASSERT_EQ(q.measure, M_U);
     ASSERT_EQ(q.nominal, 0);
     ASSERT_EQ(q.componentName, "К555ЛА7");
@@ -58,7 +58,7 @@ TEST(RCQuery, Parse) {
 
     position = 0;
     RCQuery q;
-    q.parse(ML_RU, "154 ком key:value 221-1 +12", position);
+    q.parse(ML_RU, "154 ком key:value 221-1 +12", position, M_S);
     ASSERT_EQ(q.measure, M_R);
     ASSERT_EQ(q.nominal, 154000);
     ASSERT_EQ(q.properties["key"], "value");
@@ -71,7 +71,7 @@ TEST(RCQuery, Parse) {
 
 
     position = 0;
-    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 =123 ", position);
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 =123 ", position, M_U);
     ASSERT_EQ(q.measure, M_U);
     ASSERT_EQ(q.nominal, 0);
     ASSERT_EQ(q.componentName, "К555ЛА7");
@@ -84,7 +84,7 @@ TEST(RCQuery, Parse) {
     ASSERT_EQ(q.count, 123);
 
     position = 0;
-    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 ", position);
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 ", position, M_U);
     ASSERT_EQ(q.measure, M_U);
     ASSERT_EQ(q.nominal, 0);
     ASSERT_EQ(q.componentName, "К555ЛА7");
@@ -97,7 +97,7 @@ TEST(RCQuery, Parse) {
     ASSERT_EQ(q.count, 0);
 
     position = 0;
-    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 count", position);
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 count", position, M_U);
     ASSERT_EQ(q.measure, M_U);
     ASSERT_EQ(q.nominal, 0);
     ASSERT_EQ(q.componentName, "К555ЛА7");
@@ -166,12 +166,12 @@ TEST(MeasureUnit, ParseC) {
     std::string ic;
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "100 пФ", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "100 пФ", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 100);
     ASSERT_EQ(measure, M_C);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "100 мкФ", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "100 мкФ", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 100000000);
     ASSERT_EQ(measure, M_C);
 }
@@ -183,38 +183,38 @@ TEST(MeasureUnit, ParseR) {
     std::string ic;
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "100 кОм", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "100 кОм", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 100000);
     ASSERT_EQ(measure, M_R);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "1000 ком", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "1000 ком", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 1000000);
     ASSERT_EQ(measure, M_R);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "100 ом", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "100 ом", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 100);
     ASSERT_EQ(measure, M_R);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "1 ом", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "1 ом", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 1);
     ASSERT_EQ(measure, M_R);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "0 ом", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "0 ом", position, nominal, measure, ic, M_S);
     ASSERT_EQ(nominal, 0);
     ASSERT_EQ(measure, M_R);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, " ом", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, " ом", position, nominal, measure, ic, M_S);
     ASSERT_EQ(ic, "ом");
     ASSERT_EQ(nominal, 0);
     ASSERT_EQ(measure, M_U);
 
     position = 0;
-    MeasureUnit::parse(ML_RU, "К155ЛА5", position, nominal, measure, ic);
+    MeasureUnit::parse(ML_RU, "К155ЛА5", position, nominal, measure, ic, M_S);
     ASSERT_EQ(ic, "К155ЛА5");
     ASSERT_EQ(nominal, 0);
     ASSERT_EQ(measure, M_U);

@@ -43,7 +43,7 @@ public:
     std::string username;
     std::string password;
     std::string box;
-    const std::string componentSymbol;
+    std::string componentSymbol;
 };
 
 /**
@@ -106,6 +106,8 @@ int parseCmd
 		arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 		return 1;
 	}
+
+    value->componentSymbol = "D";   // IC
 
 	if (a_interface->count)
 		value->intface = *a_interface->sval;
@@ -190,8 +192,15 @@ int main(int argc, char** argv)
     RcrClient rpc(channel, config.username, config.password);
     // rpc.addPropertyType("ptkey", "pt desc");
 
-    if (config.command == "card") {
-        int32_t r = rpc.cardQuery(std::cout, config.request, config.offset, config.size);
+    if (config.command.find("card") == 0) {
+        // component symbol card-d -> D card-r -> R card-c -> C card-l -> L
+        std::string cs;
+        if (cs.size() > 5)
+            cs = config.command.substr(5);
+        if (cs.empty())
+            cs = config.componentSymbol;
+        cs = toUpperCase(ML_RU, cs);
+        int32_t r = rpc.cardQuery(std::cout, config.request, cs, config.offset, config.size);
         if (r) {
             exit(r);
         }
@@ -235,7 +244,8 @@ int main(int argc, char** argv)
             if (config.command.find("xlsx-add") == 0) {
                 // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
                 std::string cs;
-                cs = config.command.substr(9);
+                if (cs.size() > 9)
+                    cs = config.command.substr(9);
                 if (cs.empty())
                     cs = config.componentSymbol;
                 cs = toUpperCase(ML_RU, cs);
