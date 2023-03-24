@@ -50,6 +50,12 @@ public:
         const std::string &key
     );
     // return nullptr if not found
+    static const std::string& findPropertyTypeName(
+            const rcr::DictionariesResponse *dictionaries,
+            uint64_t key
+    );
+
+    // return nullptr if not found
     static const rcr::Operation* findOperation(
         const rcr::DictionariesResponse *dictionaries,
         const std::string &symbol
@@ -114,11 +120,27 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    void loadPackages(odb::database *db, odb::transaction *transaction, uint64_t cardId,
-                      google::protobuf::RepeatedPtrField<rcr::Package> *retPackages);
+    void loadPackages(
+        odb::database *db,
+        odb::transaction *transaction,
+        uint64_t cardId,
+        google::protobuf::RepeatedPtrField<rcr::Package> *retPackages
+    );
 
-    void loadProperties(odb::database *db, odb::transaction *transaction, uint64_t id,
-                        google::protobuf::RepeatedPtrField<rcr::Property> *retProperties);
+    void loadProperties(
+        odb::database *db,
+        odb::transaction *transaction,
+        uint64_t cardId,
+        google::protobuf::RepeatedPtrField<rcr::Property> *retProperties
+    );
+
+    void loadPropertiesWithName(
+        odb::database *db,
+        odb::transaction *transaction,
+        uint64_t cardId,
+        google::protobuf::RepeatedPtrField<rcr::PropertyWithName> *retVal,
+        const rcr::DictionariesResponse *dictionaries
+    );
 };
 
 #endif //RCR_RCQUERYPROCESSOR_H

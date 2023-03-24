@@ -66,8 +66,7 @@ public:
         MEASURE measure,
         uint64_t value
     );
-    static int
-    parse(
+    static int parse(
         MEASURE_LOCALE locale,
         const std::string &value,
         size_t &position,

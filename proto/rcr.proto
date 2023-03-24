@@ -41,6 +41,13 @@ message Property
     string value = 4;
 }
 
+message PropertyWithName
+{
+    uint64 id = 1;
+    string property_type = 2;
+    string value = 3;
+}
+
 message Package
 {
     uint64 id = 1;
@@ -60,7 +67,7 @@ message Card
 message CardNPropetiesPackages
 {
     Card card = 1;
-    repeated Property properties = 2;
+    repeated PropertyWithName properties = 2;
     repeated Package packages = 3;
 }
 

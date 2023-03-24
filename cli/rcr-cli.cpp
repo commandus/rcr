@@ -23,7 +23,7 @@
 #include "string-helper.h"
 
 const char* progname = "rcr-cli";
-const char* DEF_COMMAND = "card";
+const char* DEF_COMMAND = "stream-query";
 
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
@@ -195,12 +195,12 @@ int main(int argc, char** argv)
     if (config.command.find("card") == 0) {
         // component symbol card-d -> D card-r -> R card-c -> C card-l -> L
         std::string cs;
-        if (cs.size() > 5)
+        if (config.command.size() > 5)
             cs = config.command.substr(5);
         if (cs.empty())
             cs = config.componentSymbol;
         cs = toUpperCase(ML_RU, cs);
-        int32_t r = rpc.cardQuery(std::cout, config.request, cs, config.offset, config.size);
+        int32_t r = rpc.cardQuery(std::cout, config.request, cs, config.offset, config.size, true);
         if (r) {
             exit(r);
         }
@@ -210,6 +210,22 @@ int main(int argc, char** argv)
         std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;
     if (config.command == "dictionaries") {
         std::cout << rpc.getDictionariesJson() << std::endl;
+    }
+    if (config.command.find("stream") == 0) {
+        std::string cs;
+        if (config.command.size() > 7)
+            cs = config.command.substr(7);
+        if (cs == "query") {
+            std::string line;
+            std::string symbol = "D";
+            while (std::getline(std::cin, line)) {
+                int32_t r = rpc.cardQuery(std::cout, line, symbol, config.offset, config.size, false);
+                std::cout << std::endl;
+                if (r) {
+                    exit(r);
+                }
+            }
+        }
     }
 
     if (config.command.find("xlsx") == 0) {
@@ -244,7 +260,7 @@ int main(int argc, char** argv)
             if (config.command.find("xlsx-add") == 0) {
                 // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
                 std::string cs;
-                if (cs.size() > 9)
+                if (config.command.size() > 9)
                     cs = config.command.substr(9);
                 if (cs.empty())
                     cs = config.componentSymbol;

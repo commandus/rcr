@@ -10,6 +10,8 @@
 #include "grpcClient.h"
 #include "RcrCredentials.h"
 #include "AppSettings.h"
+#include "MeasureUnit.h"
+#include "StockOperation.h"
 
 RcrClient::RcrClient(
     std::shared_ptr<grpc::Channel> channel,
@@ -75,7 +77,8 @@ int32_t RcrClient::cardQuery(
     const std::string &query,
     const std::string &measureSymbol,
     size_t offset,
-    size_t size
+    size_t size,
+    bool json
 ) {
     uint32_t r = 0;
     grpc::ClientContext context;
@@ -106,8 +109,25 @@ int32_t RcrClient::cardQuery(
         // print cards if exists
         for (auto card = response.cards().cards().begin(); card != response.cards().cards().end(); card++) {
             std::string r;
-            google::protobuf::util::MessageToJsonString(*card, &r, formattingOptions);
-            ostream << r << std::endl;
+            if (json) {
+                google::protobuf::util::MessageToJsonString(*card, &r, formattingOptions);
+                ostream << r << std::endl;
+            } else {
+                std::string n = card->card().name();
+                if (n.empty()) {
+                    ostream << MeasureUnit::value(ML_RU, (MEASURE) (card->card().symbol_id() - 1), card->card().nominal());
+                } else {
+                    ostream << card->card().name();
+                }
+                for (auto p = card->properties().begin(); p != card->properties().end(); p++) {
+                    ostream
+                        << p->property_type()
+                        << ": " << p->value();
+                }
+                for (auto p = card->packages().begin(); p != card->packages().end(); p++) {
+                    ostream << " " << StockOperation::boxes2string(p->box()) << ": " << p->qty();
+                }
+            }
         }
     }
     return c;

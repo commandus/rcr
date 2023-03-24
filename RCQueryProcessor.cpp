@@ -16,6 +16,8 @@
 
 #define LOG(x) std::cerr
 
+const std::string EMPTY_STRING = "";
+
 RCQueryProcessor::RCQueryProcessor()
     : query(nullptr)
 {
@@ -91,7 +93,7 @@ void RCQueryProcessor::loadCards(
             rcr::CardNPropetiesPackages *c = retCards->mutable_cards()->Add();
             c->mutable_card()->CopyFrom(*itCard);
             loadPackages(db, t, itCard->id(), c->mutable_packages());
-            loadProperties(db, t, itCard->id(), c->mutable_properties());
+            loadPropertiesWithName(db, t, itCard->id(), c->mutable_properties(), dictionaries);
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
@@ -168,6 +170,20 @@ const rcr::PropertyType* RCQueryProcessor::findPropertyType(
             return &*it;
     }
     return nullptr;
+}
+
+const std::string& RCQueryProcessor::findPropertyTypeName(
+    const rcr::DictionariesResponse *dictionaries,
+    uint64_t propertyId
+)
+{
+    if (!dictionaries)
+        return EMPTY_STRING;
+    for (auto it = dictionaries->property_type().begin(); it != dictionaries->property_type().end(); it++) {
+        if (it->id() == propertyId)
+            return it->key();
+    }
+    return EMPTY_STRING;
 }
 
 // return nullptr if not found
@@ -445,6 +461,31 @@ void RCQueryProcessor::loadProperties(
         for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
             auto p = retProperties->Add();
             p->CopyFrom(*it);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "load properties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "load properties unknown error";
+    }
+}
+
+void RCQueryProcessor::loadPropertiesWithName(
+    odb::database *db,
+    odb::transaction *transaction,
+    uint64_t cardId,
+    google::protobuf::RepeatedPtrField<rcr::PropertyWithName> *retProperties,
+    const rcr::DictionariesResponse *dictionaries
+) {
+    try {
+        odb::result<rcr::Property> q(db->query<rcr::Property>(
+            odb::query<rcr::Property>::card_id == cardId
+        ));
+        for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
+            auto p = retProperties->Add();
+            p->set_id(it->id());
+            const std::string &ptn = findPropertyTypeName(dictionaries, it->property_type_id());
+            p->set_property_type(ptn);
+            p->set_value(it->value());
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "load properties error: " << e.what();

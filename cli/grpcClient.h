@@ -34,7 +34,8 @@ public:
         const std::string &query,
         const std::string &measureSymbol,
         size_t offset,
-        size_t size
+        size_t size,
+        bool json
     );
 
     int saveSpreadsheet(

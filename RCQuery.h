@@ -27,6 +27,17 @@ public:
     size_t count;
 
     RCQuery() = default;
+
+    RCQuery(
+        MEASURE_LOCALE locale,
+        MEASURE measure,
+        uint64_t nominal, const std::string &componentName,
+        const std::map<std::string, std::string> &properties,
+        STOCK_OPERATION_CODE code,
+        uint64_t boxes,
+        size_t count
+    );
+
     RCQuery(const RCQuery &value) = default;
     RCQuery(
         MEASURE_LOCALE aLocale,
@@ -39,6 +50,8 @@ public:
         size_t &position,
         MEASURE defaultMeasure = M_U
     );
+
+    std::string toString();
 };
 
 #endif //RCR_RCQUERY_H
