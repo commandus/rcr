@@ -39,7 +39,9 @@ void RCQueryProcessor::exec(
     const rcr::DictionariesResponse *dictionaries,
     const rcr::ListRequest &list,
     rcr::OperationResponse *operationResponse,
-    rcr::CardResponse *cards
+    rcr::CardResponse *cards,
+    size_t &count,
+    size_t &sum
 )
 {
     if (query == nullptr || operationResponse == nullptr || cards == nullptr)
@@ -58,7 +60,10 @@ void RCQueryProcessor::exec(
             loadCards(db, t, dictionaries,cards, query, list);
             break;
         case SO_SET:
-
+        case SO_ADD:
+        case SO_SUB:
+        case SO_SUM:
+            count = setCards(db, t, dictionaries, query, &sum);
             break;
     }
 }
@@ -324,8 +329,8 @@ uint64_t RCQueryProcessor::setQuantity(
 
     try {
         if (packageId == 0) {
-            updateBox1(db, transaction, box, "");
             packageId = db->persist(p);
+            updateBox1(db, transaction, box, "");
         }
         else
             db->update(p);
@@ -523,4 +528,51 @@ void RCQueryProcessor::loadPropertiesWithName(
     } catch (...) {
         LOG(ERROR) << "load properties unknown error";
     }
+}
+
+size_t RCQueryProcessor::setCards(
+    odb::database *db,
+    odb::transaction *t,
+    const rcr::DictionariesResponse *dictionaries,
+    const RCQuery *query,
+    size_t *sum
+) {
+    size_t cnt = 0;
+    try {
+        odb::result<rcr::Card> q(db->query<rcr::Card>(
+            odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
+            &&
+            odb::query<rcr::Card>::nominal == query->nominal
+            &&
+            odb::query<rcr::Card>::symbol_id == measure2symbolId(dictionaries, query->measure)
+        ));
+        for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
+            if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
+                continue;
+            //
+            uint64_t packageId;
+            // get packageId, if not, ret 0
+            uint64_t q = getQuantity(db, t, packageId, itCard->id(), query->boxes);
+            if (query->code == SO_SET)
+                setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
+            if (query->code == SO_ADD)
+                setQuantity(db, t, packageId, itCard->id(), query->boxes, q + query->count);
+            if (query->code == SO_SUB) {
+                uint64_t d;
+                if (q > query->count)
+                    d = q - query->count;
+                else
+                    d = 0;
+                setQuantity(db, t, packageId, itCard->id(), query->boxes, d);
+            }
+            if (sum)
+                *sum += query->count;
+            cnt++;
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
+    }
+    return cnt;
 }

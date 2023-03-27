@@ -3,6 +3,7 @@
 //
 
 #include <sstream>
+#include <limits>
 #include "StockOperation.h"
 
 StockOperation::StockOperation(
@@ -346,7 +347,7 @@ uint64_t StockOperation::maxBox(
         case 4:
             return minBox;
         default:    // 0
-            return 0xffffffffffffffff;
+            return std::numeric_limits<uint64_t>::max();
     }
 }
 

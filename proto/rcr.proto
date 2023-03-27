@@ -149,7 +149,7 @@ message RangeSearchRequest
 // Responses
 message CardResponse 
 {
-    repeated CardNPropetiesPackages cards = 1;  ///< dataset
+    repeated CardNPropetiesPackages cards = 3;  ///< dataset
 }
 
 message OperationResponse
@@ -157,6 +157,8 @@ message OperationResponse
     int32 code = 1;
     uint64 id = 2;
     string description = 3;
+    uint64 count = 4;
+    uint64 sum = 5;
 }
 
 message ChPropertyTypeRequest

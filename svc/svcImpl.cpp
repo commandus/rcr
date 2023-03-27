@@ -259,7 +259,13 @@ struct ServiceConfig *RcrImpl::getConfig()
             if (!r) {
                 RCQueryProcessor p(q);
                 rcr::CardQueryResponse qr;
-                p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards());
+                uint64_t cnt = 0;
+                uint64_t sum = 0;
+                p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards(), cnt, sum);
+                response->mutable_rslt()->set_count(cnt);
+                response->mutable_rslt()->set_sum(sum);
+            } else {
+                response->mutable_rslt()->set_code(r);
             }
         }
     }
@@ -368,6 +374,11 @@ grpc::Status RcrImpl::getBox(
     uint64_t startBox = request->start();
     int dp;
     uint64_t finishBox = StockOperation::maxBox(request->start(), dp);
+#ifdef ENABLE_SQLITE
+    // Sqlite support int64 not uint64
+    if (finishBox == std::numeric_limits<uint64_t>::max())
+        finishBox = std::numeric_limits<int64_t>::max();
+#endif
     int depth = request->depth();
     if (depth <= 0)
         depth = 1;

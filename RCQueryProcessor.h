@@ -20,7 +20,9 @@ public:
         const rcr::DictionariesResponse *dictionaries,
         const rcr::ListRequest &list,
         rcr::OperationResponse *operationResponse,
-        rcr::CardResponse *cards
+        rcr::CardResponse *cards,
+        size_t &count,
+        size_t &sum
     );
 
     void loadCards(
@@ -147,6 +149,14 @@ public:
         uint64_t cardId,
         google::protobuf::RepeatedPtrField<rcr::PropertyWithName> *retVal,
         const rcr::DictionariesResponse *dictionaries
+    );
+
+    size_t setCards(
+        odb::database *db,
+        odb::transaction *t,
+        const rcr::DictionariesResponse *dictionaries,
+        const RCQuery *query,
+        size_t *sum
     );
 };
 
