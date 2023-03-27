@@ -343,7 +343,7 @@ int MeasureUnit::parse(
     size_t eolp = value.length();
     size_t finish = eolp;
 
-    std::string valueUpperCase = toUpperCase(locale, value);
+    std::string valueUpperCase = toUpperCase(value);
 
     // skip spaces if exists
     for (auto p = start; p < eolp; p++) {

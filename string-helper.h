@@ -9,9 +9,6 @@
 
 #include "MeasureUnit.h"
 
-std::string toUpperCase(
-    MEASURE_LOCALE locale,
-    const std::string &value
-);
+std::string toUpperCase(const std::string &value);
 
 #endif //RCR_STRING_HELPER_H

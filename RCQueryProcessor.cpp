@@ -7,6 +7,8 @@
 
 // ODB ORM
 #include "gen/rcr.pb-odb.hxx"
+#include "string-helper.h"
+
 #ifdef ENABLE_SQLITE
 #include <odb/sqlite/database.hxx>
 #endif
@@ -46,7 +48,6 @@ void RCQueryProcessor::exec(
     operationResponse->set_id(0);
     operationResponse->set_code(0);
     operationResponse->set_description("");
-    cards->set_count(0);
 
     if (query->code == SO_NONE)
         return;
@@ -74,7 +75,7 @@ void RCQueryProcessor::loadCards(
     size_t sz = 0;
     try {
         odb::result<rcr::Card> q(db->query<rcr::Card>(
-            odb::query<rcr::Card>::name == query->componentName
+            odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
             &&
             odb::query<rcr::Card>::nominal == query->nominal
             &&
@@ -116,6 +117,7 @@ int RCQueryProcessor::saveCard(
     card.set_symbol_id(symbolId->id());
     card.set_nominal(cardRequest.nominal());
     card.set_name(cardRequest.name());
+    card.set_uname(toUpperCase(cardRequest.name()));
 
     // find out card
     uint64_t foundCardId = findCardByNameNominalProperties(cardRequest, db, t, dictionaries);
@@ -138,6 +140,33 @@ int RCQueryProcessor::saveCard(
             uint64_t qPrevious = getQuantity(db, t, packageId, card.id(), cardRequest.box());
             setQuantity(db, t, packageId, card.id(), cardRequest.box(), qPrevious + cardRequest.qty());
         }
+    }
+    return 0;
+}
+
+int RCQueryProcessor::updateBox1(
+    odb::database *db,
+    odb::transaction *t,
+    uint64_t boxId,
+    const std::string &name
+)
+{
+    try {
+        odb::result<rcr::Box> q(db->query<rcr::Box>(
+            odb::query<rcr::Box>::box_id == boxId
+        ));
+        odb::result<rcr::Box>::iterator itBox(q.begin());
+        if (itBox == q.end()) {
+            rcr::Box box;
+            box.set_box_id(boxId);
+            box.set_name(name);
+            box.set_uname(toUpperCase(name));
+            db->persist(box);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
     }
     return 0;
 }
@@ -294,8 +323,10 @@ uint64_t RCQueryProcessor::setQuantity(
     p.set_qty(qty);
 
     try {
-        if (packageId == 0)
+        if (packageId == 0) {
+            updateBox1(db, transaction, box, "");
             packageId = db->persist(p);
+        }
         else
             db->update(p);
     } catch (const odb::exception &e) {
@@ -493,4 +524,3 @@ void RCQueryProcessor::loadPropertiesWithName(
         LOG(ERROR) << "load properties unknown error";
     }
 }
-

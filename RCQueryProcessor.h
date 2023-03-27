@@ -39,6 +39,13 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
+    int updateBox1(
+        odb::database *db,
+        odb::transaction *t,
+        uint64_t boxId,
+        const std::string &name
+    );
+
     // return nullptr if not found
     static const rcr::Symbol* findSymbol(
         const rcr::DictionariesResponse *dictionaries,

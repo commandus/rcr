@@ -92,6 +92,15 @@ public:
     );
     static uint64_t boxAppendBox(uint64_t boxes, int box);
     static std::string boxes2string(uint64_t boxes);
+    /**
+     * @param minBox
+     * @param depth Return 0 or 1..4
+     * @return
+     */
+    static uint64_t maxBox(
+        uint64_t minBox,
+        int &depth
+    );
 };
 
 #endif //RCR_STOCKOPERATION_H

@@ -13,6 +13,19 @@
 #include "MeasureUnit.h"
 #include "StockOperation.h"
 
+static std::string message2Json(
+    const google::protobuf::Message& message
+)
+{
+    google::protobuf::util::JsonPrintOptions formattingOptions;
+    formattingOptions.add_whitespace = true;
+    formattingOptions.always_print_primitive_fields = true;
+    formattingOptions.preserve_proto_field_names = true;
+    std::string r;
+    google::protobuf::util::MessageToJsonString(message, &r, formattingOptions);
+    return r;
+}
+
 RcrClient::RcrClient(
     std::shared_ptr<grpc::Channel> channel,
     const std::string &username,
@@ -164,6 +177,54 @@ int RcrClient::saveSpreadsheet(
     return 0;
 }
 
+void RcrClient::printBox(
+    std::ostream &ostream,
+    uint64_t minBox,
+    size_t offset,
+    size_t size
+)
+{
+    grpc::ClientContext context;
+    rcr::BoxResponse response;
+    rcr::BoxRequest request;
+    request.set_start(minBox);
+    request.set_depth(4);
+    request.mutable_list()->set_offset(offset);
+    request.mutable_list()->set_size(size);
+
+    grpc::Status status = stub->getBox(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    // print cards if exists
+    for (auto box = response.box().begin(); box != response.box().end(); box++) {
+        std::string r = StockOperation::boxes2string(box->box_id());
+        ostream << r << std::endl;
+    }
+}
+
+std::string RcrClient::getBoxJson(
+    uint64_t minBox,
+    size_t offset,
+    size_t size
+) {
+    grpc::ClientContext context;
+    rcr::BoxResponse response;
+    rcr::BoxRequest request;
+    request.set_start(minBox);
+    request.set_depth(4);
+    request.mutable_list()->set_offset(offset);
+    request.mutable_list()->set_size(size);
+
+    grpc::Status status = stub->getBox(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return "{}";
+    }
+    return message2Json(response);
+}
+
 std::string RcrClient::getDictionariesJson() {
     grpc::ClientContext context;
     rcr::DictionariesResponse response;
@@ -175,11 +236,6 @@ std::string RcrClient::getDictionariesJson() {
         std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
         return "{}";
     }
-    std::string r;
-    google::protobuf::util::JsonPrintOptions formattingOptions;
-    formattingOptions.add_whitespace = true;
-    formattingOptions.always_print_primitive_fields = true;
-    formattingOptions.preserve_proto_field_names = true;
-    google::protobuf::util::MessageToJsonString(response, &r, formattingOptions);
-    return r;
+    return message2Json(response);
 }
+

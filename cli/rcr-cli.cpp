@@ -66,7 +66,7 @@ int parseCmd
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>",
-            "card|version|dictionaries|xlsx|xlsx-list|xlsx-add-u");
+            "card|box|version|dictionaries|xlsx|xlsx-list|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command parameter(request)");
     struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
     struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
@@ -199,8 +199,25 @@ int main(int argc, char** argv)
             cs = config.command.substr(5);
         if (cs.empty())
             cs = config.componentSymbol;
-        cs = toUpperCase(ML_RU, cs);
+        cs = toUpperCase(cs);
         int32_t r = rpc.cardQuery(std::cout, config.request, cs, config.offset, config.size, true);
+        if (r) {
+            exit(r);
+        }
+    }
+
+    if (config.command.find("box") == 0) {
+        // component symbol card-219 -> 219 card-219-1 -> 219-1 card-219-1-2 -> 219-1-2
+        std::string cs;
+        if (config.command.size() > 4)
+            cs = config.command.substr(4);
+        if (cs.empty())
+            cs = config.componentSymbol;
+        uint64_t minBox = 0;
+        StockOperation::parseBoxes(minBox, cs, 0, cs.size());
+        // std::cout << rpc.getBoxJson(minBox, config.offset, config.size) << std::endl;;
+        rpc.printBox(std::cout, minBox, config.offset, config.size);
+        std::cout << std::endl;;
         if (r) {
             exit(r);
         }
@@ -264,7 +281,7 @@ int main(int argc, char** argv)
                     cs = config.command.substr(9);
                 if (cs.empty())
                     cs = config.componentSymbol;
-                cs = toUpperCase(ML_RU, cs);
+                cs = toUpperCase(cs);
                 int r = rpc.saveSpreadsheet(box, cs, spreadSheet.items);
             }
         }

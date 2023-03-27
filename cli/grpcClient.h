@@ -45,6 +45,14 @@ public:
     );
 
     std::string getDictionariesJson();
+
+    std::string getBoxJson(
+        uint64_t minBox,
+        size_t offset,
+        size_t size
+    );
+
+    void printBox(std::ostream &strm, uint64_t boxId, size_t offset, size_t size);
 };
 
 #endif /* GRPCCLIENT_H_ */

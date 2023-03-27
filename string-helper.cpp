@@ -5,10 +5,7 @@
 
 #include <unicode/unistr.h>
 
-std::string toUpperCase(
-    MEASURE_LOCALE locale,
-    const std::string &value
-)
+std::string toUpperCase(const std::string &value)
 {
     std::string r;
     icu::UnicodeString::fromUTF8(value).toUpper().toUTF8String(r);

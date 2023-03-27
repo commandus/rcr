@@ -56,12 +56,22 @@ message Package
     uint64 qty = 4;
 }
 
+message Box
+{
+    uint64 id = 1;
+    uint64 box_id = 2;
+    string name = 3;
+    string uname = 4;   ///< uppercase name for search
+}
+
+
 message Card
 {
     uint64 id = 1;
     string name = 2;
-    uint64 symbol_id = 3;
-    uint64 nominal = 4;
+    string uname = 3;   ///< uppercase name for search
+    uint64 symbol_id = 4;
+    uint64 nominal = 5;
 }
 
 message CardNPropetiesPackages
@@ -139,9 +149,7 @@ message RangeSearchRequest
 // Responses
 message CardResponse 
 {
-    uint64 count = 1;                           ///< dataset size
-    ListRequest listrequest = 2;                ///< return request's offset and size
-    repeated CardNPropetiesPackages cards = 3;  ///< dataset
+    repeated CardNPropetiesPackages cards = 1;  ///< dataset
 }
 
 message OperationResponse
@@ -204,6 +212,18 @@ message CardRequest
     uint64 qty = 8;
 }
 
+message BoxRequest
+{
+    uint64 start = 1;
+    uint32 depth = 2;
+    ListRequest list = 3;
+}
+
+message BoxResponse
+{
+    repeated Box box = 1;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -216,4 +236,5 @@ service Rcr
 
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
+    rpc getBox(BoxRequest) returns (BoxResponse) {}
 }

@@ -352,3 +352,57 @@ int RcrImpl::loadDictionaries(
     }
     return 0;
 }
+
+grpc::Status RcrImpl::getBox(
+    grpc::ServerContext* context,
+    const rcr::BoxRequest* request,
+    rcr::BoxResponse* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r = 0;
+    BEGIN_GRPC_METHOD("getBox", request, t)
+
+    uint64_t startBox = request->start();
+    int dp;
+    uint64_t finishBox = StockOperation::maxBox(request->start(), dp);
+    int depth = request->depth();
+    if (depth <= 0)
+        depth = 1;
+    if (depth > 4)
+        depth = 4;
+    size_t offset = request->list().offset();
+    size_t size = request->list().size();
+    if (size == 0)
+        size  = DEF_LIST_SIZE;
+    size_t cnt = 0;
+    size_t sz = 0;
+
+    try {
+        odb::result<rcr::Box> qs(mDb->query<rcr::Box>(
+            odb::query<rcr::Box>::box_id >= startBox
+            &&
+            odb::query<rcr::Box>::box_id <= finishBox
+        ));
+        for (odb::result<rcr::Box>::iterator i(qs.begin()); i != qs.end(); i++) {
+            cnt++;
+            if (cnt - 1 < offset)
+                continue;
+            sz++;
+            if (sz > size)
+                break;
+            rcr::Box *op = response->add_box();
+            op->CopyFrom(*i);
+        }
+    } catch (const odb::exception &e) {
+        r = -1;
+        LOG(ERROR) << "list box error: " << e.what();
+    } catch (...) {
+        r = -2;
+        LOG(ERROR) << "list box unknown error";
+    }
+    END_GRPC_METHOD("getBox", response, response, t)
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}

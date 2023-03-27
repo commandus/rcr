@@ -114,15 +114,23 @@ namespace rcr {
 		ODB_NUMBER(Package, card_id, uint64_t)
 		ODB_NUMBER(Package, box, uint64_t)
 		ODB_NUMBER(Package, qty, uint64_t)
+		#pragma db index(Package) members(card_id)
+		#pragma db index(Package) members(box)
 
 	ODB_TABLE(Property)
 		ODB_NUMBER(Property, card_id, uint64_t)
 		ODB_NUMBER(Property, property_type_id, uint64_t)
 		ODB_STRING(Property, value)
 
-	
 	ODB_TABLE(Card)
 		ODB_STRING(Card, name)
+		ODB_STRING(Card, uname)
 		ODB_NUMBER(Card, symbol_id, uint64_t)
 		ODB_NUMBER(Card, nominal, uint64_t)
+
+	ODB_TABLE(Box)
+		ODB_NUMBER(Box, box_id, uint64_t)
+		ODB_STRING(Box, name)
+		ODB_STRING(Box, uname)
+		#pragma db index(Box) members(box_id)
 }

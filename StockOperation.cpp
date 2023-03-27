@@ -294,30 +294,60 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
     return r;
 }
 
+/**
+ * Return count of box depth 4..1 (0 if no one)
+ * @param boxes if boxes == 0 return 0
+ * @return
+ */
+static inline int getBoxDepth(uint64_t boxes)
+{
+    int boxCnt = 0;
+    if (boxes & 0xffff)
+        boxCnt = 4;
+    else
+    if (boxes & 0xffff0000)
+        boxCnt = 3;
+    else
+    if (boxes & 0xffff00000000)
+        boxCnt = 2;
+    else
+    if (boxes & 0xffff000000000000)
+        boxCnt = 1;
+    return boxCnt;
+}
+
 std::string StockOperation::boxes2string(
     uint64_t boxes
 )
 {
     std::stringstream ss;
-    int boxCnt = 0;
-    if (boxes & 0xffff)
-        boxCnt = 4;
-    else
-        if (boxes & 0xffff0000)
-            boxCnt = 3;
-        else
-            if (boxes & 0xffff00000000)
-                boxCnt = 2;
-            else
-                if (boxes & 0xffff000000000000)
-                    boxCnt = 1;
     int shift = 6 * 8;
-    ss <<  (boxes >> shift);
-    for (int i = boxCnt; i > 1; i--) {
+    ss << (boxes >> shift);
+    for (int i = getBoxDepth(boxes); i > 1; i--) {
         shift -= 16;
         ss << '-' << ((boxes >> shift) & 0xffff);
     }
     return ss.str();
+}
+
+uint64_t StockOperation::maxBox(
+    uint64_t minBox,
+    int &depth
+)
+{
+    depth = getBoxDepth(minBox);
+    switch (depth) {
+        case 1:
+            return minBox | 0xffffffffffff;
+        case 2:
+            return minBox | 0xffffffff;
+        case 3:
+            return minBox | 0xffff;
+        case 4:
+            return minBox;
+        default:    // 0
+            return 0xffffffffffffffff;
+    }
 }
 
 uint64_t StockOperation::boxAppendBox(
@@ -326,7 +356,6 @@ uint64_t StockOperation::boxAppendBox(
 )
 {
     box &= 0xffff;
-
     int boxCnt = 0;
     if (boxes & 0xffff)
         return boxes;   // no room
