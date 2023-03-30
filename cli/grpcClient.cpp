@@ -128,7 +128,7 @@ int32_t RcrClient::cardQuery(
             } else {
                 std::string n = card->card().name();
                 if (n.empty()) {
-                    ostream << MeasureUnit::value(ML_RU, (MEASURE) (card->card().symbol_id() - 1), card->card().nominal());
+                    ostream << MeasureUnit::value(ML_RU, (COMPONENT) (card->card().symbol_id() - 1), card->card().nominal());
                 } else {
                     ostream << card->card().name();
                 }
@@ -140,6 +140,7 @@ int32_t RcrClient::cardQuery(
                 for (auto p = card->packages().begin(); p != card->packages().end(); p++) {
                     ostream << " " << StockOperation::boxes2string(p->box()) << ": " << p->qty();
                 }
+                ostream << std::endl;
             }
         }
     }

@@ -103,14 +103,14 @@ static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &
     bool r;
     try {
         MeasureUnit unit;
-        for (MEASURE v = M_A; v <= M_Z;) {
+        for (COMPONENT v = COMPONENT_A; v <= COMPONENT_Z;) {
             rcr::Symbol symbol;
             symbol.set_sym(MeasureUnit::sym(locale, v));
             symbol.set_description(MeasureUnit::description(locale, v));
             symbol.set_unit(MeasureUnit::unit(locale, v));
             symbol.set_pow10(MeasureUnit::pow10(v));
             db.persist(symbol);
-            v = (MEASURE) ((int) v + 1);
+            v = (COMPONENT) ((int) v + 1);
         }
         rcr::Operation operation;
         operation.set_symbol("+");

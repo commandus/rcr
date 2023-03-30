@@ -16,54 +16,54 @@ typedef enum {
 #define MEASURE_COUNT 22
 
 typedef enum {
-    M_A,    // Устройства
-    M_B,    // Микрофоны, громкоговорители
-    M_C,    // Конденсаторы
-    M_D,    // Интегральные схемы
-    M_E,    // Разные элементы
-    M_F,    // Плавкие предохранители
-    M_G,    // Источники питания
-    M_H,    // Индикаторы
-    M_K,    // Реле
-    M_L,    // Дроссели
-    M_M,    // Двигатели
-    M_P,    // Счетчики
-    M_Q,    // Выключатели
-    M_R,    // Резисторы
-    M_S,    // Переключатели
-    M_T,    // Трансформаторы
-    M_U,    // Выпрямители
-    M_V,    // Диоды, тиристоры, транзисторы
-    M_W,    // Антенны
-    M_X,    // Гнезда
-    M_Y,    // Электромагнитный привод
-    M_Z     // Кварцевые фильтры
-} MEASURE;
+    COMPONENT_A,    // Устройства
+    COMPONENT_B,    // Микрофоны, громкоговорители
+    COMPONENT_C,    // Конденсаторы
+    COMPONENT_D,    // Интегральные схемы
+    COMPONENT_E,    // Разные элементы
+    COMPONENT_F,    // Плавкие предохранители
+    COMPONENT_G,    // Источники питания
+    COMPONENT_H,    // Индикаторы
+    COMPONENT_K,    // Реле
+    COMPONENT_L,    // Дроссели
+    COMPONENT_M,    // Двигатели
+    COMPONENT_P,    // Счетчики
+    COMPONENT_Q,    // Выключатели
+    COMPONENT_R,    // Резисторы
+    COMPONENT_S,    // Переключатели
+    COMPONENT_T,    // Трансформаторы
+    COMPONENT_U,    // Выпрямители
+    COMPONENT_V,    // Диоды, тиристоры, транзисторы
+    COMPONENT_W,    // Антенны
+    COMPONENT_X,    // Гнезда
+    COMPONENT_Y,    // Электромагнитный привод
+    COMPONENT_Z     // Кварцевые фильтры
+} COMPONENT;
 
 class MeasureUnit {
 public:
     static std::string sym(
         MEASURE_LOCALE locale,
-        MEASURE measure
+        COMPONENT measure
     );
     static std::string description(
         MEASURE_LOCALE locale,
-        MEASURE measure
+        COMPONENT measure
     );
     static std::string unit(
         MEASURE_LOCALE locale,
-        MEASURE measure
+        COMPONENT measure
     );
     static int pow10(
-        MEASURE measure
+            COMPONENT measure
     );
     static std::string value(
         MEASURE_LOCALE locale,
-        MEASURE measure,
+        COMPONENT measure,
         uint64_t val
     );
     static double val(
-        MEASURE measure,
+        COMPONENT measure,
         uint64_t value
     );
     static int parse(
@@ -71,9 +71,9 @@ public:
         const std::string &value,
         size_t &position,
         uint64_t &nominal,
-        MEASURE &measure,
+        COMPONENT &measure,
         std::string &retname,
-        MEASURE param
+        COMPONENT param
     );
 };
 

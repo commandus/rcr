@@ -2,6 +2,7 @@
 // Created by andrei on 17.03.23.
 //
 
+#include <algorithm>
 #include "RCQueryProcessor.h"
 #include "svc/svcImpl.h"
 
@@ -68,6 +69,63 @@ void RCQueryProcessor::exec(
     }
 }
 
+static void mkCardQuery(
+    odb::database *db,
+    odb::transaction *t,
+    const rcr::DictionariesResponse *dictionaries,
+    odb::result<rcr::Card> &retVal,
+    const RCQuery *query
+)
+{
+    uint64_t symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+    std::string cn = toUpperCase(query->componentName);
+    if (cn.empty() || cn == "*") {  // just all
+        if (symbId)
+            retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                    odb::query<rcr::Card>::nominal == query->nominal
+                    &&
+                    odb::query<rcr::Card>::symbol_id == symbId
+            ));
+        else
+            retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                    odb::query<rcr::Card>::nominal == query->nominal
+            ));
+    } else {
+        if (cn.find("*") != std::string::npos) {    // LIKE 'K%'
+            std::replace(cn.begin(), cn.end(), '*', '%');
+            if (symbId)
+                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                    odb::query<rcr::Card>::uname.like(cn)
+                    &&
+                    odb::query<rcr::Card>::nominal == query->nominal
+                    &&
+                    odb::query<rcr::Card>::symbol_id == symbId
+                ));
+            else
+                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                    odb::query<rcr::Card>::uname.like(cn)
+                    &&
+                    odb::query<rcr::Card>::nominal == query->nominal
+                ));
+        } else {
+            if (symbId)
+                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                        odb::query<rcr::Card>::uname == cn
+                        &&
+                        odb::query<rcr::Card>::nominal == query->nominal
+                        &&
+                        odb::query<rcr::Card>::symbol_id == symbId
+                ));
+            else
+                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
+                        odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
+                        &&
+                        odb::query<rcr::Card>::nominal == query->nominal
+                ));
+        }
+    }
+}
+
 void RCQueryProcessor::loadCards(
     odb::database *db,
     odb::transaction *t,
@@ -79,13 +137,8 @@ void RCQueryProcessor::loadCards(
     size_t cnt = 0;
     size_t sz = 0;
     try {
-        odb::result<rcr::Card> q(db->query<rcr::Card>(
-            odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
-            &&
-            odb::query<rcr::Card>::nominal == query->nominal
-            &&
-            odb::query<rcr::Card>::symbol_id == measure2symbolId(dictionaries, query->measure)
-        ));
+        odb::result<rcr::Card> q;
+        mkCardQuery(db, t, dictionaries, q, query);
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;
@@ -381,7 +434,7 @@ void RCQueryProcessor::setProperties(
 
 uint64_t RCQueryProcessor::measure2symbolId(
      const rcr::DictionariesResponse *dictionaries,
-     const MEASURE measure
+     const COMPONENT measure
 ) {
     if (!dictionaries)
         return 0;
@@ -539,13 +592,8 @@ size_t RCQueryProcessor::setCards(
 ) {
     size_t cnt = 0;
     try {
-        odb::result<rcr::Card> q(db->query<rcr::Card>(
-            odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
-            &&
-            odb::query<rcr::Card>::nominal == query->nominal
-            &&
-            odb::query<rcr::Card>::symbol_id == measure2symbolId(dictionaries, query->measure)
-        ));
+        odb::result<rcr::Card> q;
+        mkCardQuery(db, t, dictionaries, q, query);
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;

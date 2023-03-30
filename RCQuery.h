@@ -13,7 +13,7 @@ class RCQuery {
 public:
     // MeasureUnit
     MEASURE_LOCALE locale;
-    MEASURE measure;
+    COMPONENT measure;
     uint64_t nominal;
     std::string componentName;
 
@@ -30,7 +30,7 @@ public:
 
     RCQuery(
         MEASURE_LOCALE locale,
-        MEASURE measure,
+        COMPONENT measure,
         uint64_t nominal, const std::string &componentName,
         const std::map<std::string, std::string> &properties,
         STOCK_OPERATION_CODE code,
@@ -41,14 +41,15 @@ public:
     RCQuery(const RCQuery &value) = default;
     RCQuery(
         MEASURE_LOCALE aLocale,
-        const std::string &value
+        const std::string &value,
+        const COMPONENT defaultMeasure = COMPONENT_D
     );
 
     int parse(
         MEASURE_LOCALE aLocale,
         const std::string &value,
         size_t &position,
-        MEASURE defaultMeasure = M_U
+        COMPONENT defaultMeasure = COMPONENT_D
     );
 
     std::string toString();

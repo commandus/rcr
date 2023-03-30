@@ -7,18 +7,19 @@
 
 RCQuery::RCQuery(
     MEASURE_LOCALE aLocale,
-    const std::string &aValue
+    const std::string &aValue,
+    COMPONENT defaultMeasure
 )
 {
     size_t p = 0;
-    parse(aLocale, aValue, p, M_S);
+    parse(aLocale, aValue, p, defaultMeasure);
 }
 
 int RCQuery::parse(
     MEASURE_LOCALE aLocale,
     const std::string &value,
     size_t &position,
-    MEASURE defaultMeasure
+    COMPONENT defaultMeasure
 )
 {
     int r = MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName, defaultMeasure);
@@ -34,14 +35,14 @@ int RCQuery::parse(
 }
 
 RCQuery::RCQuery(
-    MEASURE_LOCALE locale,
-    MEASURE measure,
-    uint64_t nominal,
-    const std::string &componentName,
-    const std::map<std::string, std::string> &properties,
-    STOCK_OPERATION_CODE code,
-    uint64_t boxes,
-    size_t count
+        MEASURE_LOCALE locale,
+        COMPONENT measure,
+        uint64_t nominal,
+        const std::string &componentName,
+        const std::map<std::string, std::string> &properties,
+        STOCK_OPERATION_CODE code,
+        uint64_t boxes,
+        size_t count
 )
     : locale(locale), measure(measure), nominal(nominal),
     componentName(componentName), properties(properties), code(code),

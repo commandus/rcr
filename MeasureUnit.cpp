@@ -278,20 +278,20 @@ static const std::string unitNamesUpperCase[LOCALES][MEASURE_COUNT] {
         ""    // M_Z Кварцевые фильтры
 };
 
-std::string MeasureUnit::sym(MEASURE_LOCALE locale, MEASURE measure) {
+std::string MeasureUnit::sym(MEASURE_LOCALE locale, COMPONENT measure) {
     return symNames[locale][measure];
 }
 
-std::string MeasureUnit::description(MEASURE_LOCALE locale, MEASURE measure) {
+std::string MeasureUnit::description(MEASURE_LOCALE locale, COMPONENT measure) {
     return symDescriptions[locale][measure];
 }
 
-std::string MeasureUnit::unit(MEASURE_LOCALE locale, MEASURE measure)
+std::string MeasureUnit::unit(MEASURE_LOCALE locale, COMPONENT measure)
 {
     return unitNames[locale][measure];
 }
 
-int MeasureUnit::pow10(MEASURE measure)
+int MeasureUnit::pow10(COMPONENT measure)
 {
     return measurePow10[measure];
 }
@@ -312,7 +312,7 @@ std::string val1000(MEASURE_LOCALE locale, uint64_t value, int initialPow10) {
     return "";
 }
 
-std::string MeasureUnit::value(MEASURE_LOCALE locale, MEASURE measure, uint64_t val)
+std::string MeasureUnit::value(MEASURE_LOCALE locale, COMPONENT measure, uint64_t val)
 {
     return val1000(locale, val, measurePow10[measure]) + unit(locale, measure);
 }
@@ -320,7 +320,7 @@ std::string MeasureUnit::value(MEASURE_LOCALE locale, MEASURE measure, uint64_t 
 static uint64_t pow10table[13] = { 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000,
     100000000, 1000000000, 10000000000L, 100000000000L, 1000000000000L };
 
-double MeasureUnit::val(MEASURE measure, uint64_t value)
+double MeasureUnit::val(COMPONENT measure, uint64_t value)
 {
     int p = measurePow10[measure];
     if (p < 0)
@@ -330,13 +330,13 @@ double MeasureUnit::val(MEASURE measure, uint64_t value)
 }
 
 int MeasureUnit::parse(
-    MEASURE_LOCALE locale,
-    const std::string &value,
-    size_t &position,
-    uint64_t &nominal,
-    MEASURE &measure,
-    std::string &retname,
-    MEASURE defaultMeasure
+        MEASURE_LOCALE locale,
+        const std::string &value,
+        size_t &position,
+        uint64_t &nominal,
+        COMPONENT &measure,
+        std::string &retname,
+        COMPONENT defaultMeasure
 )
 {
     size_t start = position;
@@ -438,7 +438,7 @@ int MeasureUnit::parse(
         }
         bool hasMeasureUnit = finish > start;
         if (hasMeasureUnit) {
-            measure = (MEASURE) idx;
+            measure = (COMPONENT) idx;
             position = finish;
             return 0;
         }

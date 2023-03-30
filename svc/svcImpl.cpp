@@ -255,7 +255,7 @@ struct ServiceConfig *RcrImpl::getConfig()
         if (measureSym) {
             size_t position = 0;
             RCQuery q;
-            int r = q.parse(ML_RU, request->query(), position, (MEASURE) (measureSym->id() - 1));
+            int r = q.parse(ML_RU, request->query(), position, (COMPONENT) (measureSym->id() - 1));
             if (!r) {
                 RCQueryProcessor p(q);
                 rcr::CardQueryResponse qr;

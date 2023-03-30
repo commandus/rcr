@@ -108,9 +108,9 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    uint64_t measure2symbolId(
+    static uint64_t measure2symbolId(
         const rcr::DictionariesResponse *dictionaries,
-        const MEASURE measure
+        const COMPONENT measure
     );
 
     bool hasAllProperties(
