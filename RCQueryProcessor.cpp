@@ -541,8 +541,6 @@ bool RCQueryProcessor::loadPackages(
         for (odb::result<rcr::Package>::iterator it(q.begin()); it != q.end(); it++) {
             if (!StockOperation::isBoxInBoxes(it->box(), boxId))
                 continue;
-            std::cerr << std::hex << it->box() << " " << boxId << " : "
-                << StockOperation::isBoxInBoxes(it->box(), boxId) << std::endl;
             auto p = retPackages->Add();
             p->CopyFrom(*it);
             r = true;

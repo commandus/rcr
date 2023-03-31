@@ -378,6 +378,12 @@ uint64_t StockOperation::boxAppendBox(
     return boxes | (box << boxCnt * 16);
 }
 
+/**
+ * Return true- innerBox is outerBox or innerBox is in outerBox
+ * @param innerBox box id
+ * @param outerBox box id
+ * @return true- innerBox is outerBox or innerBox is in outerBox
+ */
 bool StockOperation::isBoxInBoxes(
     uint64_t innerBox,
     uint64_t outerBox
