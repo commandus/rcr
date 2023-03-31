@@ -7,6 +7,13 @@
 
 #include <string>
 
+typedef struct {
+    union {
+        uint16_t a[4];
+        uint64_t b;
+    };
+} BoxArray;
+
 typedef enum {
     SO_NONE = 0,
     SO_LIST = 1,
@@ -103,6 +110,8 @@ public:
     );
 
     static bool isBoxInBoxes(uint64_t innerBox, uint64_t outerBox);
+
+    static int box2Array(BoxArray& retVal, uint64_t boxId);
 };
 
 #endif //RCR_STOCKOPERATION_H

@@ -5,6 +5,7 @@
 #include <sstream>
 #include <limits>
 #include "StockOperation.h"
+#include "platform.h"
 
 StockOperation::StockOperation(
     const std::string &value
@@ -402,4 +403,26 @@ bool StockOperation::isBoxInBoxes(
         (out2 == 0 || ((innerBox & 0x00000000ffff0000) == out2))
         &&
         (out1 == 0 || ((innerBox & 0x000000000000ffff) == out1));
+}
+
+
+int StockOperation::box2Array(
+    BoxArray& retVal,
+    uint64_t boxId
+)
+{
+    // retVal.a[0] - outer box, retVal.a[3]- inner box
+#if BYTE_ORDER == BIG_ENDIAN
+    retVal.b = SWAP_BYTES_8(boxId);
+#else
+    retVal.b = boxId;
+#endif
+    if (retVal.a[0] == 0)
+        return 0;
+    if (retVal.a[1] == 0)
+        return 1;
+    if (retVal.a[2] == 0)
+        return 2;
+    if (retVal.a[3] == 0)
+        return 3;
 }
