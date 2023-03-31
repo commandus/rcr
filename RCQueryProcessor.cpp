@@ -149,6 +149,9 @@ void RCQueryProcessor::loadCards(
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;
+            google::protobuf::RepeatedPtrField<rcr::Package> pkgs;
+            if (!loadPackages(db, t, query->boxes, itCard->id(), &pkgs))
+                continue;
             cnt++;
             if (cnt - 1 < list.offset())
                 continue;
@@ -158,7 +161,7 @@ void RCQueryProcessor::loadCards(
             //
             rcr::CardNPropetiesPackages *c = retCards->mutable_cards()->Add();
             c->mutable_card()->CopyFrom(*itCard);
-            loadPackages(db, t, itCard->id(), c->mutable_packages());
+            c->mutable_packages()->CopyFrom(pkgs);
             loadPropertiesWithName(db, t, itCard->id(), c->mutable_properties(), dictionaries);
         }
     } catch (const odb::exception &e) {
@@ -523,25 +526,33 @@ bool RCQueryProcessor::hasAllProperties2(
     return cnt == props.size();
 }
 
-void RCQueryProcessor::loadPackages(
+bool RCQueryProcessor::loadPackages(
     odb::database *db,
     odb::transaction *transaction,
+    uint64_t boxId, // 0- all
     uint64_t cardId,
     google::protobuf::RepeatedPtrField<rcr::Package> *retPackages
 ) {
+    bool r = false;
     try {
         odb::result<rcr::Package> q(db->query<rcr::Package>(
                 odb::query<rcr::Package>::card_id == cardId
         ));
         for (odb::result<rcr::Package>::iterator it(q.begin()); it != q.end(); it++) {
+            if (!StockOperation::isBoxInBoxes(it->box(), boxId))
+                continue;
+            std::cerr << std::hex << it->box() << " " << boxId << " : "
+                << StockOperation::isBoxInBoxes(it->box(), boxId) << std::endl;
             auto p = retPackages->Add();
             p->CopyFrom(*it);
+            r = true;
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "loadPackages error: " << e.what();
     } catch (...) {
         LOG(ERROR) << "loadPackages unknown error";
     }
+    return r;
 }
 
 void RCQueryProcessor::loadProperties(

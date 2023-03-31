@@ -101,6 +101,8 @@ public:
         uint64_t minBox,
         int &depth
     );
+
+    static bool isBoxInBoxes(uint64_t innerBox, uint64_t outerBox);
 };
 
 #endif //RCR_STOCKOPERATION_H

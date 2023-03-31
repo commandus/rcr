@@ -131,9 +131,10 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    void loadPackages(
+    bool loadPackages(
         odb::database *db,
         odb::transaction *transaction,
+        uint64_t boxId, // 0- all
         uint64_t cardId,
         google::protobuf::RepeatedPtrField<rcr::Package> *retPackages
     );

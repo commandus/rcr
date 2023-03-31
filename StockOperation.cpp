@@ -351,6 +351,12 @@ uint64_t StockOperation::maxBox(
     }
 }
 
+/**
+ * "Put" box in outer boxes
+ * @param boxes outer boxes
+ * @param box box inside outer boxes
+ * @return boxes identifier
+ */
 uint64_t StockOperation::boxAppendBox(
     uint64_t boxes,
     int box
@@ -370,4 +376,24 @@ uint64_t StockOperation::boxAppendBox(
     if (boxes & 0xffff000000000000)
         boxCnt = 2;
     return boxes | (box << boxCnt * 16);
+}
+
+bool StockOperation::isBoxInBoxes(
+    uint64_t innerBox,
+    uint64_t outerBox
+) {
+    if (!outerBox)
+        return true;
+    uint64_t out4 = outerBox & 0xffff000000000000;
+    uint64_t out3 = outerBox & 0x0000ffff00000000;
+    uint64_t out2 = outerBox & 0x00000000ffff0000;
+    uint64_t out1 = outerBox & 0x000000000000ffff;
+    return
+        (out4 == 0 || ((innerBox & 0xffff000000000000) == out4))
+        &&
+        (out3 == 0 || ((innerBox & 0x0000ffff00000000) == out3))
+        &&
+        (out2 == 0 || ((innerBox & 0x00000000ffff0000) == out2))
+        &&
+        (out1 == 0 || ((innerBox & 0x000000000000ffff) == out1));
 }

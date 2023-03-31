@@ -35,14 +35,14 @@ int RCQuery::parse(
 }
 
 RCQuery::RCQuery(
-        MEASURE_LOCALE locale,
-        COMPONENT measure,
-        uint64_t nominal,
-        const std::string &componentName,
-        const std::map<std::string, std::string> &properties,
-        STOCK_OPERATION_CODE code,
-        uint64_t boxes,
-        size_t count
+    MEASURE_LOCALE locale,
+    COMPONENT measure,
+    uint64_t nominal,
+    const std::string &componentName,
+    const std::map<std::string, std::string> &properties,
+    STOCK_OPERATION_CODE code,
+    uint64_t boxes,
+    size_t count
 )
     : locale(locale), measure(measure), nominal(nominal),
     componentName(componentName), properties(properties), code(code),
@@ -58,5 +58,35 @@ std::string RCQuery::toString()
         ss << componentName;
     else
         ss << MeasureUnit::value(ML_RU, measure, nominal);
+
+    for (auto p(properties.begin()); p != properties.end(); p++) {
+        ss << " " << p->first << ":" << p->second;
+    }
+    if (boxes) {
+        ss << " " << StockOperation::boxes2string(boxes);
+    }
+
+    switch (code) {
+        case SO_COUNT:
+            ss << " count";
+            break;
+        case SO_SUM:
+            ss << " sum";
+            break;
+        case SO_SET:
+            ss << "=" << count;
+            break;
+        case SO_ADD:
+            ss << "+" << count;
+            break;
+        case SO_SUB:
+            ss << "-" << count;
+            break;
+        case SO_RM:
+            ss << " rm";
+            break;
+        default: // SO_NONE SO_LIST SO_LIST_NO_BOX:
+            break;
+    }
     return ss.str();
 }
