@@ -40,6 +40,11 @@ typedef enum {
     COMPONENT_Z     // Кварцевые фильтры
 } COMPONENT;
 
+#define FLAG_COMPONENT(X)   ((1 << (int) X) - 1)
+#define FLAG_ALL_COMPONENTS ((1 << (int) COMPONENT_Z) - 1)
+
+COMPONENT firstComponentInFlags(uint32_t flags);
+
 class MeasureUnit {
 public:
     static std::string sym(

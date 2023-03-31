@@ -482,3 +482,14 @@ MEASURE_LOCALE pchar2MEASURE_LOCALE(
         return ML_INTL;
     return ML_RU;
 }
+
+COMPONENT firstComponentInFlags(
+    uint32_t flags
+)
+{
+    for (int c = COMPONENT_A; c <= COMPONENT_Z; c++) {
+        if (flags & (1 << c))
+            return (COMPONENT) c;
+    }
+    return COMPONENT_A;
+}

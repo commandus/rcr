@@ -19,10 +19,10 @@ int RCQuery::parse(
     MEASURE_LOCALE aLocale,
     const std::string &value,
     size_t &position,
-    COMPONENT defaultMeasure
+    COMPONENT defaultComponent
 )
 {
-    int r = MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName, defaultMeasure);
+    int r = MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName, defaultComponent);
     if (r)
         return r;
     r = QueryProperties::parse(value, position, properties);

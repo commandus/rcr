@@ -21,6 +21,7 @@ public:
         const rcr::ListRequest &list,
         rcr::OperationResponse *operationResponse,
         rcr::CardResponse *cards,
+        uint32_t componentFlags,
         size_t &count,
         size_t &sum
     );
@@ -31,6 +32,7 @@ public:
         const rcr::DictionariesResponse *dictionaries,
         rcr::CardResponse *retCards,
         const RCQuery *query,
+        uint32_t componentFlags,
         const rcr::ListRequest &list
     );
 
@@ -156,6 +158,7 @@ public:
         odb::transaction *t,
         const rcr::DictionariesResponse *dictionaries,
         const RCQuery *query,
+        uint32_t componentFlags,
         size_t *sum
     );
 };

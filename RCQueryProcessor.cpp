@@ -41,6 +41,7 @@ void RCQueryProcessor::exec(
     const rcr::ListRequest &list,
     rcr::OperationResponse *operationResponse,
     rcr::CardResponse *cards,
+    uint32_t componentFlags,
     size_t &count,
     size_t &sum
 )
@@ -58,13 +59,13 @@ void RCQueryProcessor::exec(
     switch (query->code) {
         case SO_LIST_NO_BOX:
         case SO_LIST:
-            loadCards(db, t, dictionaries,cards, query, list);
+            loadCards(db, t, dictionaries,cards, query, componentFlags, list);
             break;
         case SO_SET:
         case SO_ADD:
         case SO_SUB:
         case SO_SUM:
-            count = setCards(db, t, dictionaries, query, &sum);
+            count = setCards(db, t, dictionaries, query, componentFlags, &sum);
             break;
     }
 }
@@ -74,10 +75,15 @@ static void mkCardQuery(
     odb::transaction *t,
     const rcr::DictionariesResponse *dictionaries,
     odb::result<rcr::Card> &retVal,
-    const RCQuery *query
+    const RCQuery *query,
+    uint32_t componentFlags
 )
 {
-    uint64_t symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+    uint64_t symbId;
+    if (componentFlags == FLAG_ALL_COMPONENTS)
+        symbId = 0;
+    else
+        symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
     std::string cn = toUpperCase(query->componentName);
     if (cn.empty() || cn == "*") {  // just all
         if (symbId)
@@ -132,13 +138,14 @@ void RCQueryProcessor::loadCards(
     const rcr::DictionariesResponse *dictionaries,
     rcr::CardResponse *retCards,
     const RCQuery *query,
+    uint32_t componentFlags,
     const rcr::ListRequest &list
 ) {
     size_t cnt = 0;
     size_t sz = 0;
     try {
         odb::result<rcr::Card> q;
-        mkCardQuery(db, t, dictionaries, q, query);
+        mkCardQuery(db, t, dictionaries, q, query, componentFlags);
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;
@@ -588,12 +595,13 @@ size_t RCQueryProcessor::setCards(
     odb::transaction *t,
     const rcr::DictionariesResponse *dictionaries,
     const RCQuery *query,
+    uint32_t componentFlags,
     size_t *sum
 ) {
     size_t cnt = 0;
     try {
         odb::result<rcr::Card> q;
-        mkCardQuery(db, t, dictionaries, q, query);
+        mkCardQuery(db, t, dictionaries, q, query, componentFlags);
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;

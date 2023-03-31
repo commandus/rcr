@@ -13,6 +13,7 @@
 
 #include "svcImpl.h"
 #include "passphrase.h"
+#include "MeasureUnit.h"
 #include "RCQuery.h"
 #include "RCQueryProcessor.h"
 
@@ -252,21 +253,28 @@ struct ServiceConfig *RcrImpl::getConfig()
     r = loadDictionaries(&dictionaries);
     if (!r) {
         const rcr::Symbol *measureSym = RCQueryProcessor::findSymbol(&dictionaries, request->measure_symbol());
-        if (measureSym) {
-            size_t position = 0;
-            RCQuery q;
-            int r = q.parse(ML_RU, request->query(), position, (COMPONENT) (measureSym->id() - 1));
-            if (!r) {
-                RCQueryProcessor p(q);
-                rcr::CardQueryResponse qr;
-                uint64_t cnt = 0;
-                uint64_t sum = 0;
-                p.exec(mDb, &t, &dictionaries, request->list(), response->mutable_rslt(), response->mutable_cards(), cnt, sum);
-                response->mutable_rslt()->set_count(cnt);
-                response->mutable_rslt()->set_sum(sum);
-            } else {
-                response->mutable_rslt()->set_code(r);
-            }
+        uint32_t componentFlags;
+        if (measureSym)
+            componentFlags = FLAG_COMPONENT(measureSym->id() - 1);
+        else
+            componentFlags = FLAG_ALL_COMPONENTS;
+
+        size_t position = 0;
+        RCQuery q;
+        int r = q.parse(ML_RU, request->query(), position, firstComponentInFlags(componentFlags));
+        if (!r) {
+            RCQueryProcessor p(q);
+            rcr::CardQueryResponse qr;
+            uint64_t cnt = 0;
+            uint64_t sum = 0;
+            p.exec(mDb, &t, &dictionaries, request->list(),
+                   response->mutable_rslt(), response->mutable_cards(),
+                   componentFlags,
+                   cnt, sum);
+            response->mutable_rslt()->set_count(cnt);
+            response->mutable_rslt()->set_sum(sum);
+        } else {
+            response->mutable_rslt()->set_code(r);
         }
     }
     END_GRPC_METHOD("cardQuery", request, response, t)

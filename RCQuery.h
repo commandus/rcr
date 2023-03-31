@@ -49,7 +49,7 @@ public:
         MEASURE_LOCALE aLocale,
         const std::string &value,
         size_t &position,
-        COMPONENT defaultMeasure = COMPONENT_D
+        COMPONENT defaultComponent = COMPONENT_D
     );
 
     std::string toString();
