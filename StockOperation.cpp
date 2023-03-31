@@ -425,4 +425,5 @@ int StockOperation::box2Array(
         return 2;
     if (retVal.a[3] == 0)
         return 3;
+    return 4;
 }
