@@ -226,6 +226,22 @@ message BoxResponse
     repeated Box box = 1;
 }
 
+message ServiceSettings
+{
+    uint64 id = 1;                              ///< identifier
+    string name = 2;
+    string addr = 3;
+    uint32 port = 4;
+    string last_component_symbol = 5;
+    uint64 last_box = 6;
+    string last_query = 7;
+}
+
+message Settings
+{
+    repeated ServiceSettings service = 1;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -239,4 +255,6 @@ service Rcr
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
     rpc getBox(BoxRequest) returns (BoxResponse) {}
+    rpc getSettings(Settings) returns (Settings) {}
+    rpc setSettings(Settings) returns (Settings) {}
 }

@@ -133,4 +133,14 @@ namespace rcr {
 		ODB_STRING(Box, name)
 		ODB_STRING(Box, uname)
 		#pragma db index(Box) members(box_id)
+
+	ODB_TABLE(ServiceSettings)
+		ODB_STRING(ServiceSettings, name)
+		ODB_STRING(ServiceSettings, addr)
+		ODB_NUMBER(ServiceSettings, port, uint32_t)
+		ODB_STRING(ServiceSettings, last_component_symbol)
+		ODB_NUMBER(ServiceSettings, last_box, uint64_t)
+		ODB_STRING(ServiceSettings, last_query)
+
+
 }
