@@ -413,7 +413,10 @@ int StockOperation::box2Array(
 {
     // retVal.a[0] - outer box, retVal.a[3]- inner box
 #if BYTE_ORDER == BIG_ENDIAN
-    retVal.b = SWAP_BYTES_8(boxId);
+    retVal.a[0] = ((BoxArray*)&boxId)->a[3];
+    retVal.a[1] = ((BoxArray*)&boxId)->a[2];
+    retVal.a[2] = ((BoxArray*)&boxId)->a[1];
+    retVal.a[3] = ((BoxArray*)&boxId)->a[0];
 #else
     retVal.b = boxId;
 #endif

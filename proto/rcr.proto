@@ -54,6 +54,7 @@ message Package
     uint64 card_id = 2;
     uint64 box = 3;                          ///< 4 * 2 bytes
     uint64 qty = 4;
+    string box_name = 5;                     ///< for debug purposes only
 }
 
 message Box
@@ -251,7 +252,6 @@ service Rcr
     rpc version(VersionRequest) returns (VersionResponse) {}
 
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
-
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
     rpc getBox(BoxRequest) returns (BoxResponse) {}

@@ -543,6 +543,7 @@ bool RCQueryProcessor::loadPackages(
                 continue;
             auto p = retPackages->Add();
             p->CopyFrom(*it);
+            p->set_box_name(StockOperation::boxes2string(it->box()));
             r = true;
         }
     } catch (const odb::exception &e) {
