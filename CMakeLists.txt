@@ -4,8 +4,6 @@
 # -DENABLE_PG=on 		enable PostgreSQL
 #
 
-set(Protobuf_DIR "~/src-old/third_party/protobuf")
-set(gRPC_DIR "third-party/grpc-1.24.3")
 set(VCPKG_INC "/git/vcpkg/installed/x64-windows/include")
 #
 # -------------------- Do not edit below this line --------------------
@@ -15,8 +13,7 @@ cmake_minimum_required(VERSION 3.9)
 set(PROJECT_NAME "rcr")
 project(${PROJECT_NAME} VERSION 1.0)
 
-set(MQTTAPP_CMAKE_DIR ${CMAKE_SOURCE_DIR}/cmake)
-set(CMAKE_MODULE_PATH ${MQTTAPP_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 #
 # Unicode toUpper()

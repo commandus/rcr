@@ -6,9 +6,14 @@
 #define RCR_STRING_HELPER_H
 
 #include <string>
+#include <google/protobuf/message.h>
 
 #include "MeasureUnit.h"
 
 std::string toUpperCase(const std::string &value);
+
+std::string pb2JsonString(
+    const google::protobuf::Message &message
+);
 
 #endif //RCR_STRING_HELPER_H
