@@ -395,7 +395,7 @@ grpc::Status RcrImpl::getBox(
     size_t offset = request->list().offset();
     size_t size = request->list().size();
     if (size == 0)
-        size  = DEF_LIST_SIZE;
+        size = DEF_LIST_SIZE;
     size_t cnt = 0;
     size_t sz = 0;
 
@@ -414,6 +414,10 @@ grpc::Status RcrImpl::getBox(
                 break;
             rcr::Box *op = response->add_box();
             op->CopyFrom(*i);
+#if CMAKE_BUILD_TYPE == Debug
+            if (op->name().empty())
+                op->set_name(StockOperation::boxes2string(op->box_id()));
+#endif
         }
     } catch (const odb::exception &e) {
         r = -1;

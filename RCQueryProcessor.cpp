@@ -543,7 +543,9 @@ bool RCQueryProcessor::loadPackages(
                 continue;
             auto p = retPackages->Add();
             p->CopyFrom(*it);
+#if CMAKE_BUILD_TYPE == Debug
             p->set_box_name(StockOperation::boxes2string(it->box()));
+#endif
             r = true;
         }
     } catch (const odb::exception &e) {
