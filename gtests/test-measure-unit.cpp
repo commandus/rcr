@@ -8,6 +8,12 @@
 #include "RCQuery.h"
 #include "BoxName.h"
 
+TEST(Box, Append) {
+    uint64_t b = 0;
+    b = StockOperation::boxAppendBox(b, 0xdd);
+    ASSERT_EQ(b, 0x00dd000000000000);
+}
+
 TEST(BoxName, FileName) {
     uint64_t b = BoxName::extractFromFileName("221 Мксх_Золотовский_1");
     ASSERT_EQ(b, 0x00dd000100000000);

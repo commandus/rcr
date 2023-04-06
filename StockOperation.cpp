@@ -364,7 +364,7 @@ uint64_t StockOperation::boxAppendBox(
 )
 {
     box &= 0xffff;
-    int boxCnt = 0;
+    int boxCnt = 3;
     if (boxes & 0xffff)
         return boxes;   // no room
     else
@@ -376,7 +376,7 @@ uint64_t StockOperation::boxAppendBox(
     else
     if (boxes & 0xffff000000000000)
         boxCnt = 2;
-    return boxes | (box << boxCnt * 16);
+    return boxes | ((uint64_t) box << (boxCnt * 16));
 }
 
 /**
