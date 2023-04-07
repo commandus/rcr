@@ -91,4 +91,10 @@ public:
  */
 MEASURE_LOCALE pchar2MEASURE_LOCALE(const char *value);
 
+void listUnitNParticle(
+    std::vector<std::string> &retVal,
+    MEASURE_LOCALE locale,
+    COMPONENT measure
+);
+
 #endif //RCR_MEASUREUNIT_H

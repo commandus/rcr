@@ -296,6 +296,14 @@ int MeasureUnit::pow10(COMPONENT measure)
     return measurePow10[measure];
 }
 
+/**
+ * Print values with 1000 precision with particles
+ * For instance, 1000 Ohm = 1kOhm
+ * @param locale
+ * @param value
+ * @param initialPow10
+ * @return
+ */
 std::string val1000(MEASURE_LOCALE locale, uint64_t value, int initialPow10) {
     uint64_t v = value;
     int initialPowIdx = initialPow10 / 3;
@@ -492,4 +500,22 @@ COMPONENT firstComponentInFlags(
             return (COMPONENT) c;
     }
     return COMPONENT_A;
+}
+
+void listUnitNParticle(
+    std::vector<std::string> &retVal,
+    MEASURE_LOCALE locale,
+    COMPONENT measure
+)
+{
+    std::string un = unitNames[locale][measure];
+    if (un.empty())
+        return;
+    int mp = measurePow10[measure];
+    for (int i = 0; i < MAX_POW10; i++) {
+        if (mp < 0)
+            retVal.push_back(prefixesPart[locale][i] + un);
+        else
+            retVal.push_back(prefixes[locale][i] + un);
+    }
 }
