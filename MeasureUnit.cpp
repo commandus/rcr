@@ -7,7 +7,6 @@
 #include "MeasureUnit.h"
 #include "string-helper.h"
 
-#define MAX_POW10 11
 #define LOCALES 2
 static const std::string prefixes[LOCALES][MAX_POW10] {
     "",
@@ -54,7 +53,7 @@ static const std::string prefixesPart[LOCALES][MAX_POW10] {
     "н",    // nano
     "п",    // pico
     "ф",    // femto
-    "ф",
+    "а",
     "з",
     "и",
     "р",
@@ -86,7 +85,7 @@ static int measurePow10[MEASURE_COUNT] {
     0    // M_Z Кварцевые фильтры
 };
 
-static const std::string symNames[LOCALES][MEASURE_COUNT] {
+static const std::string symNames[MEASURE_COUNT] {
         "A",   // M_A Устройства
         "B",   // M_B Микрофоны, громкоговорители
         "C",   // M_C Конденсаторы
@@ -108,30 +107,7 @@ static const std::string symNames[LOCALES][MEASURE_COUNT] {
         "W",   // M_W Антенны
         "X",   // M_X Гнезда
         "Y",   // M_Y Электромагнитный привод
-        "Z",   // M_Z Кварцевые фильтры
-
-        "A",   // M_A Устройства
-        "B",   // M_B Микрофоны, громкоговорители
-        "C",   // M_C Конденсаторы
-        "D",   // M_D Интегральные схемы
-        "E",   // M_E Разные элементы
-        "F",   // M_F Плавкие предохранители
-        "G",   // M_G Источники питания
-        "H",   // M_H Индикаторы
-        "K",   // M_K Реле
-        "L",   // M_L Дроссели
-        "M",   // M_M Двигатели
-        "P",   // M_P Счетчики
-        "Q",   // M_Q Выключатели
-        "R",   // M_R Резисторы
-        "S",   // M_S Переключатели
-        "T",   // M_T Трансформаторы
-        "U",   // M_U Выпрямители
-        "V",   // M_V Диоды, тиристоры, транзисторы
-        "W",   // M_W Антенны
-        "X",   // M_X Гнезда
-        "Y",   // M_Y Электромагнитный привод
-        "Z",   // M_Z Кварцевые фильтры
+        "Z"
 };
 
 static const std::string symDescriptions[LOCALES][MEASURE_COUNT] {
@@ -278,8 +254,8 @@ static const std::string unitNamesUpperCase[LOCALES][MEASURE_COUNT] {
         ""    // M_Z Кварцевые фильтры
 };
 
-std::string MeasureUnit::sym(MEASURE_LOCALE locale, COMPONENT measure) {
-    return symNames[locale][measure];
+std::string MeasureUnit::sym(COMPONENT measure) {
+    return symNames[measure];
 }
 
 std::string MeasureUnit::description(MEASURE_LOCALE locale, COMPONENT measure) {
@@ -505,17 +481,34 @@ COMPONENT firstComponentInFlags(
 void listUnitNParticle(
     std::vector<std::string> &retVal,
     MEASURE_LOCALE locale,
-    COMPONENT measure
+    COMPONENT component
 )
 {
-    std::string un = unitNames[locale][measure];
+    std::string un = unitNames[locale][component];
     if (un.empty())
         return;
-    int mp = measurePow10[measure];
+    int mp = measurePow10[component];
     for (int i = 0; i < MAX_POW10; i++) {
         if (mp < 0)
             retVal.push_back(prefixesPart[locale][i] + un);
         else
             retVal.push_back(prefixes[locale][i] + un);
     }
+}
+
+/**
+ * Return COMPONENT_A by default
+ * @param symbol "D" for IC
+ * @return
+ */
+COMPONENT getComponentBySymbol(
+    const std::string &symbol,
+    const COMPONENT defaultComponent
+) {
+    for (int m = 0; m < MEASURE_COUNT; m++) {
+        if (symNames[m] == symbol) {
+            return (COMPONENT) m;
+        }
+    }
+    return defaultComponent;
 }

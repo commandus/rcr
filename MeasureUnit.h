@@ -14,6 +14,7 @@ typedef enum {
 } MEASURE_LOCALE;
 
 #define MEASURE_COUNT 22
+#define MAX_POW10 11
 
 typedef enum {
     COMPONENT_A,    // Устройства
@@ -43,12 +44,16 @@ typedef enum {
 #define FLAG_COMPONENT(X)   (1 << (int) X)
 #define FLAG_ALL_COMPONENTS (1 << (((int) COMPONENT_Z) + 1) - 1)
 
+/**
+ * Flags is an component set
+ * @param flags
+ * @return first found in the set (flags) component id
+ */
 COMPONENT firstComponentInFlags(uint32_t flags);
 
 class MeasureUnit {
 public:
     static std::string sym(
-        MEASURE_LOCALE locale,
         COMPONENT measure
     );
     static std::string description(
@@ -94,7 +99,17 @@ MEASURE_LOCALE pchar2MEASURE_LOCALE(const char *value);
 void listUnitNParticle(
     std::vector<std::string> &retVal,
     MEASURE_LOCALE locale,
-    COMPONENT measure
+    COMPONENT component
+);
+
+/**
+ * Return COMPONENT_A by default
+ * @param symbol "D" for IC
+ * @return
+ */
+COMPONENT getComponentBySymbol(
+    const std::string &symbol,
+    const COMPONENT defaultComponent = COMPONENT_A
 );
 
 #endif //RCR_MEASUREUNIT_H

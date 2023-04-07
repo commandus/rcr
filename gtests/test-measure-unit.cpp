@@ -8,6 +8,21 @@
 #include "RCQuery.h"
 #include "BoxName.h"
 
+TEST(Measure, List) {
+    std::vector<std::string> r;
+    listUnitNParticle(r, ML_RU, COMPONENT_R);
+    ASSERT_EQ(r.size(), MAX_POW10);
+    ASSERT_EQ(r[0], "Ом");
+    ASSERT_EQ(r[1], "кОм");
+
+    r.clear();
+    listUnitNParticle(r, ML_RU, COMPONENT_C);
+    ASSERT_EQ(r.size(), MAX_POW10);
+    ASSERT_EQ(r[0], "Ф");
+    ASSERT_EQ(r[1], "мФ");
+    ASSERT_EQ(r[2], "мкФ");
+}
+
 TEST(Box, Append) {
     uint64_t b = 0;
     b = StockOperation::boxAppendBox(b, 0xdd);
