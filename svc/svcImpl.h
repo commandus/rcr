@@ -50,6 +50,13 @@ protected:
 	/// return to client status: method not implemented yet
 	static const grpc::Status& STATUS_NOT_IMPLEMENTED;
     template <class T> std::unique_ptr<T> load(uint64_t id);
+    void importExcelFile(
+        odb::transaction &t,
+        odb::database *db,
+        const std::string &symbol,
+        const rcr::ExcelFile &file,
+        const std::string &prefixBox = ""
+    );
 public:
 	/// ODB database
 	odb::database *mDb;
@@ -61,15 +68,20 @@ public:
 
     // ------------------ front office ------------------
 
-    ::grpc::Status version(::grpc::ServerContext* context, const ::rcr::VersionRequest* request, ::rcr::VersionResponse* response) override;
-    ::grpc::Status cardSearchEqual(::grpc::ServerContext* context, const ::rcr::EqualSearchRequest* request, ::rcr::CardResponse* response) override;
-    ::grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
-    ::grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
-    ::grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
-    ::grpc::Status getDictionaries(::grpc::ServerContext* context, const ::rcr::DictionariesRequest* request, ::rcr::DictionariesResponse* response) override;
-    ::grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
+    grpc::Status version(::grpc::ServerContext* context, const ::rcr::VersionRequest* request, ::rcr::VersionResponse* response) override;
+    grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
+    grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
+    grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
+    grpc::Status getDictionaries(::grpc::ServerContext* context, const ::rcr::DictionariesRequest* request, ::rcr::DictionariesResponse* response) override;
+    grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
     // ------------------ back office ------------------
     int loadDictionaries(rcr::DictionariesResponse *pResponse);
+    grpc::Status importExcel(
+            grpc::ServerContext* context,
+            const rcr::ImportExcelRequest* request,
+            rcr::OperationResponse* response
+    );
+
 };
 
 #endif

@@ -142,5 +142,21 @@ namespace rcr {
 		ODB_NUMBER(ServiceSettings, last_box, uint64_t)
 		ODB_STRING(ServiceSettings, last_query)
 
+	ODB_TABLE(User)
+		ODB_STRING(User, name)
+		ODB_STRING(User, password)
+        ODB_NUMBER(User, token, uint64_t)
+		ODB_NUMBER(User, rights, uint32_t)
+
+	ODB_TABLE(Group)
+		ODB_STRING(Group, name)
+
+	ODB_TABLE(GroupUser)
+		ODB_NUMBER(GroupUser, group_id, uint64_t)
+		ODB_NUMBER(GroupUser, user_id, uint64_t)
+
+	ODB_TABLE(BoxGroup)
+		ODB_NUMBER(BoxGroup, group_id, uint64_t)
+		ODB_NUMBER(BoxGroup, box_id, uint64_t)
 
 }

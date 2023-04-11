@@ -253,7 +253,7 @@ int main(int argc, char** argv)
             uint64_t box = BoxName::extractFromFileName(
                     config.box + " " + *it); //  <- add if filename contains boxes
             std::cout << *it << " box " << StockOperation::boxes2string(box);
-            SpreadSheetHelper spreadSheet(*it, box);
+            SpreadSheetHelper spreadSheet(*it);
             std::cout << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
 
             for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {

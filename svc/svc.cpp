@@ -17,6 +17,7 @@
 
 #include <grpc++/server.h>
 #include <grpc++/server_builder.h>
+#include <grpcpp/create_channel.h>
 
 #include "svcconfig.h"
 #include "daemonize.h"
@@ -68,34 +69,22 @@ void runSSL()
 	ss << config.address << ":" << config.port;
 	RcrImpl service(&config);
 
-	ServerBuilder builder;
-	builder.SetMaxMessageSize(2147483647);
-	builder.SetMaxSendMessageSize(2147483647);
+    if (config.verbosity > 0) {
+        std::cerr << "SSL on" << std::endl;
+    }
 
 	// Create server metadata  processor
-	SSLValidator *validator = new SSLValidator(&config);
-	std::shared_ptr<RcrAuthMetadataProcessor> processor(new RcrAuthMetadataProcessor(true, true, validator));
-	std::shared_ptr<ServerCredentials> serverCredentials;
+    std::shared_ptr<RcrAuthMetadataProcessor> processor(new RcrAuthMetadataProcessor(true, true,
+        new SSLValidator(&config)));
 
-	if (config.verbosity > 0) {
-			std::cerr << "SSL on" << std::endl;
-	}
+    std::shared_ptr<grpc::ServerCredentials> serverCredentials = grpc::SslServerCredentials(grpc::SslServerCredentialsOptions());
 
-    grpc::SslServerCredentialsOptions::PemKeyCertPair pkcp = { AppSettings::key_server(), AppSettings::certificate_server() };
-    grpc::SslServerCredentialsOptions sslOpts;
-    sslOpts.pem_key_cert_pairs.push_back(pkcp);
-    // sslOpts.pem_root_certs required to invalidate client certificates.
-    sslOpts.pem_root_certs = AppSettings::certificate_ca();
-    sslOpts.force_client_auth = false;
-
-    serverCredentials = SslServerCredentials(sslOpts);
     serverCredentials->SetAuthMetadataProcessor(processor);
-
-	// sslOpts.pem_root_certs required to invalidate client certificates.
-	serverCredentials = SslServerCredentials(sslOpts);
-	serverCredentials->SetAuthMetadataProcessor(processor);
 	// start
-	builder.AddListeningPort(ss.str(), serverCredentials);
+    ServerBuilder builder;
+    builder.SetMaxMessageSize(2147483647);
+    builder.SetMaxSendMessageSize(2147483647);
+    builder.AddListeningPort(ss.str(), serverCredentials);
 	builder.RegisterService(&service);
 	server = builder.BuildAndStart();
 	if (server)	{
@@ -109,24 +98,24 @@ void runSSL()
 
 void run()
 {
-	std::stringstream ss;
-	ss << config.address << ":" << config.port;
+    std::stringstream ss;
+    ss << config.address << ":" << config.port;
     std::cout << ss.str() << std::endl;
 
-	RcrImpl service(&config);
+    RcrImpl service(&config);
 
-	ServerBuilder builder;
-	builder.SetMaxMessageSize(2147483647);
-	builder.SetMaxSendMessageSize(2147483647);
-	builder.AddListeningPort(ss.str(), grpc::InsecureServerCredentials());
-	builder.RegisterService(&service);
-	server = builder.BuildAndStart();
-	if (server)	{
-		if (config.verbosity > 0)
-			std::cout << "Server listening on " << ss.str() << "." << std::endl;
-		server->Wait();
-	} else
-		std::cerr << "Can not start server." << std::endl;
+    ServerBuilder builder;
+    builder.SetMaxMessageSize(2147483647);
+    builder.SetMaxSendMessageSize(2147483647);
+    builder.AddListeningPort(ss.str(), grpc::InsecureServerCredentials());
+    builder.RegisterService(&service);
+    server = builder.BuildAndStart();
+    if (server)	{
+        if (config.verbosity > 0)
+            std::cout << "Server listening on " << ss.str() << "." << std::endl;
+        server->Wait();
+    } else
+        std::cerr << "Can not start server." << std::endl;
 }
 
 void signalHandler(int signal)

@@ -1,10 +1,11 @@
-#
+	#
 # Options:
 # -DENABLE_SQLITE=on   	enable Sqlite3
 # -DENABLE_PG=on 		enable PostgreSQL
 #
 
 set(VCPKG_INC "/git/vcpkg/installed/x64-windows/include")
+
 #
 # -------------------- Do not edit below this line --------------------
 #
@@ -28,9 +29,10 @@ find_package(Xlnt CONFIG REQUIRED)
 set(XLSX_LIBS xlnt::xlnt)
 
 #
-# ODB requires 11, 14?, not compile 17
+# ODB requires 11, 14?, not compile 17 (on Windows)
+# gRPC 1.24 requires 11, gRPC 1.53 requires 17
 # 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 option(ENABLE_SQLITE "Build with Sqlite3" ON)
 option(ENABLE_PG "Build with PostgreSQL}" OFF)
@@ -40,6 +42,8 @@ find_package(Threads REQUIRED)
 
 find_package(Protobuf REQUIRED)
 find_package(gRPC REQUIRED)
+
+set(GRPC_LIBS gRPC::grpc++)
 
 if(ENABLE_SQLITE)
 	find_package(ODB REQUIRED OPTIONAL_COMPONENTS sqlite)
@@ -77,6 +81,8 @@ if(ENABLE_PG)
 	endif ()
 endif ()
 
+set(DEFS ${DEFS} gRPC_SSL_PROVIDER:STRING=package)
+	
 set(GEN ${CMAKE_CURRENT_SOURCE_DIR}/gen)
 set(GEN_GRPC_SRC ${GEN}/rcr.grpc.pb.cc ${GEN}/rcr.pb.cc)
 set(GEN_SRC ${GEN_GRPC_SRC} ${GEN}/rcr.pb-odb.cxx)
@@ -102,7 +108,7 @@ set(MKDB_SRC
 )
 add_executable(mkdb ${MKDB_SRC})
 target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES}
-	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} gRPC::grpc++
+	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} ${GRPC_LIBS}
 )
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -122,6 +128,7 @@ add_executable(rcr-svc ${RCR_SVC_SRC})
 target_link_libraries(rcr-svc PRIVATE
 	${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
 	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}
+	${SSL_LIBS}
 )
 target_compile_definitions(rcr-svc PRIVATE ${DEFS})
 target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -139,7 +146,9 @@ set(RCR_CLI_SRC
 	BoxName.cpp
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})
-target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS})
+target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
+	${SSL_LIBS}
+)
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})
 target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 

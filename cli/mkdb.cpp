@@ -98,14 +98,17 @@ std::ifstream *openUtf8BOM(const std::string &fn)
 	return ret;
 }
 
-static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &db)
+static bool sqliteFillOutDatabase(
+    MEASURE_LOCALE locale,
+    odb::sqlite::database &db
+)
 {
     bool r;
     try {
         MeasureUnit unit;
         for (COMPONENT v = COMPONENT_A; v <= COMPONENT_Z;) {
             rcr::Symbol symbol;
-            symbol.set_sym(MeasureUnit::sym(locale, v));
+            symbol.set_sym(MeasureUnit::sym(v));
             symbol.set_description(MeasureUnit::description(locale, v));
             symbol.set_unit(MeasureUnit::unit(locale, v));
             symbol.set_pow10(MeasureUnit::pow10(v));
@@ -127,6 +130,24 @@ static bool sqliteFillOutDatabase(MEASURE_LOCALE locale, odb::sqlite::database &
         propertyType.set_key("K");
         propertyType.set_description("корпус");
         db.persist(propertyType);
+
+        // user
+        rcr::User user;
+        user.set_name("SYSDBA");
+        user.set_password("masterkey");
+        user.set_rights(1);
+        db.persist(user);
+
+        // group
+        rcr::Group group;
+        group.set_name("Group 1");
+        db.persist(group);
+
+        // groupuser
+        rcr::GroupUser groupUser;
+        groupUser.set_group_id(1);
+        groupUser.set_user_id(1);
+        db.persist(groupUser);
 
         r = true;
     } catch (odb::exception &ex) {

@@ -32,11 +32,21 @@ public:
 };
 
 class SpreadSheetHelper {
-private:
-    std::string fileName;
 public:
-    explicit SpreadSheetHelper(const std::string &fileName, uint64_t box);
-    int load(const std::string &fileName, uint64_t box);
+    explicit SpreadSheetHelper(
+        const std::string &fileName
+    );
+    explicit SpreadSheetHelper(
+        const std::string &fileName,
+        const std::string &content
+    );
+    int loadFile(
+        const std::string &fileName
+    );
+    int loadString(
+        const std::string &content
+    );
+
     // result
     std::vector <SheetRow> items;
     // statistics

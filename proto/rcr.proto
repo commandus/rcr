@@ -65,6 +65,34 @@ message Box
     string uname = 4;   ///< uppercase name for search
 }
 
+message User
+{
+    uint64 id = 1;
+    uint64 token = 2;
+    string name = 3;
+    string password = 4;
+    uint32 rights = 5;      ///< 1- root, 0- ordinal user
+}
+
+message Group
+{
+    uint64 id = 1;
+    string name = 2;
+}
+
+message GroupUser
+{
+    uint64 id = 1;
+    uint64 group_id = 2;
+    uint64 user_id = 3;
+}
+
+message BoxGroup
+{
+    uint64 id = 1;
+    uint64 group_id = 2;
+    uint64 box_id = 3;
+}
 
 message Card
 {
@@ -99,12 +127,27 @@ message Journal
     repeated JournalEntry entries = 1;          ///< record
 }
 
+message SearchCriteria
+{
+    string compareSign = 1;                      ///< =- equal, >=- greatr or equal,..
+    Card card = 2;                               ///< e.g. 100
+}
+
+message List
+{
+    uint64 offset = 1;                           ///< 0..
+    uint64 size = 2;                             ///< e.g. 100
+}
+
 // Requests
 
-message VersionRequest 
+message VersionRequest
 {
     uint64 value = 1;                           ///<
 }
+
+
+// Responses
 
 message VersionResponse 
 {
@@ -112,42 +155,6 @@ message VersionResponse
     string name = 2;
 }
 
-message ListRequest
-{
-    uint64 offset = 1;                           ///< 0..
-    uint64 size = 2;                             ///< e.g. 100
-}
-
-message SearchCriteria
-{
-    string compareSign = 1;                      ///< =- equal, >=- greatr or equal,..
-    Card card = 2;                               ///< e.g. 100
-}
-
-// Search Requests
-
-message AdvancedSearchRequest 
-{
-    repeated SearchCriteria searchCriterias = 1;    ///< all "AND"
-    ListRequest listrequest = 2;
-}
-
-// equals
-message EqualSearchRequest 
-{
-    string value = 1;                           ///<
-    ListRequest listrequest = 2;
-}
-
-// >= and <=
-message RangeSearchRequest 
-{
-    string first = 1;                           ///<
-    string last = 2;                            ///<
-    ListRequest listrequest = 3;
-}
-
-// Responses
 message CardResponse 
 {
     repeated CardNPropetiesPackages cards = 3;  ///< dataset
@@ -162,17 +169,20 @@ message OperationResponse
     uint64 sum = 5;
 }
 
+// Requests
 message ChPropertyTypeRequest
 {
-    string operationSymbol = 1;
-    PropertyType value = 2;
+    User user = 1;
+    string operationSymbol = 2;
+    PropertyType value = 3;
 }
 
 message CardQueryRequest
 {
-    string query = 1;
-    string measure_symbol = 2;
-    ListRequest list = 3;
+    User user = 1;
+    string query = 2;
+    string measure_symbol = 3;
+    List list = 4;
 }
 
 message CardQueryResponse
@@ -201,25 +211,41 @@ message PropertyRequest
 
 message CardRequest
 {
+    User user = 1;
     // what to do
-    string operation_symbol = 1;
+    string operation_symbol = 2;
     // search criterias
-    uint64 id = 2;  // usually I dont know id, but..
-    string symbol_name = 3;
-    string name = 4;
-    uint64 nominal = 5;
-    repeated PropertyRequest properties = 6;
+    uint64 id = 3;  // usually I dont know id, but..
+    string symbol_name = 4;
+    string name = 5;
+    uint64 nominal = 6;
+    repeated PropertyRequest properties = 7;
     // in which box
-    uint64 box = 7;
+    uint64 box = 8;
     // quantity
-    uint64 qty = 8;
+    uint64 qty = 9;
 }
 
 message BoxRequest
 {
-    uint64 start = 1;
-    uint32 depth = 2;
-    ListRequest list = 3;
+    User user = 1;
+    uint64 start = 2;
+    uint32 depth = 3;
+    List list = 4;
+}
+
+message ExcelFile
+{
+    string name = 1;
+    string content = 2;
+}
+
+message ImportExcelRequest
+{
+    User user = 1;
+    string symbol = 2;
+    string prefix_box = 3; // firsr box, e.g. "219"
+    repeated ExcelFile file = 4;
 }
 
 message BoxResponse
@@ -240,21 +266,51 @@ message ServiceSettings
 
 message Settings
 {
-    repeated ServiceSettings service = 1;
+    User user = 1;
+    repeated ServiceSettings service = 2;
+}
+
+message UserRequest
+{
+    User user = 1;
+    string operationSymbol = 2; // +, -, =
+    User value = 3;
+}
+
+message GroupRequest
+{
+    User user = 1;
+    string operationSymbol = 2; // +, -, =
+    Group value = 3;
+}
+
+message GroupUserRequest
+{
+    User user = 1;
+    string operationSymbol = 2; // +, -, =
+    GroupUser value = 3;
 }
 
 // ------------ RPC -------------
 
 service Rcr
 {
-    rpc cardSearchEqual(EqualSearchRequest) returns (CardResponse) {}
-    rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc version(VersionRequest) returns (VersionResponse) {}
+    rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
+    rpc getSettings(Settings) returns (Settings) {}
+    rpc setSettings(Settings) returns (Settings) {}
+
+    rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
 
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
-    rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
     rpc getBox(BoxRequest) returns (BoxResponse) {}
-    rpc getSettings(Settings) returns (Settings) {}
-    rpc setSettings(Settings) returns (Settings) {}
+    //
+    rpc chUser(UserRequest) returns (OperationResponse) {}
+    //
+    rpc chGroup(GroupRequest) returns (OperationResponse) {}
+    //
+    rpc chGroupUser(GroupUserRequest) returns (OperationResponse) {}
+    //
+    rpc importExcel(ImportExcelRequest) returns (OperationResponse) {}
 }

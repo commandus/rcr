@@ -522,8 +522,25 @@ Then call ./tools/generate-code.ps1
 
 ### Dependencies
 
-tools/install-grpc.sh installs libgrpc++.so.1.24.3
+[Build and install gRPC and Protocol Buffers instructions](https://grpc.io/docs/languages/cpp/quickstart/)
 
+tools/install-grpc.sh script installs libgrpc++.so.1.24.3
+
+libprotoc 3.12.4
+```
+sudo apt install --reinstall grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev
+```
+
+```
+git clone --recurse-submodules -b v1.24.3 --depth 1 --shallow-submodules https://github.com/grpc/grpc
+cd grpc
+mkdir -p cmake/build
+pushd cmake/build
+cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_SSL_PROVIDER:STRING=package ../..
+make -j 1
+sudo make install
+popd
+```
 
 gRPC depends on c-ares
 ```

@@ -26,6 +26,8 @@
 #include <odb/pgsql/database.hxx>
 #endif
 #include "gen/rcr.pb-odb.hxx"
+#include "SpreadSheetHelper.h"
+#include "BoxName.h"
 
 using namespace odb::core;
 using grpc::StatusCode;
@@ -203,20 +205,6 @@ struct ServiceConfig *RcrImpl::getConfig()
     response->set_name(getRandomName());
     END_GRPC_METHOD("version", request, response, t)
     return grpc::Status::OK;
-}
-
-::grpc::Status RcrImpl::cardSearchEqual(
-    ::grpc::ServerContext* context,
-    const ::rcr::EqualSearchRequest* request,
-    ::rcr::CardResponse* response
-)
-{
-	if (request == nullptr) {
-        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
-    }
-	BEGIN_GRPC_METHOD("cardSearchEqual", request, t)
-	END_GRPC_METHOD("cardSearchEqual", request, response, t)
-    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }
 
 ::grpc::Status RcrImpl::chPropertyType(
@@ -428,4 +416,37 @@ grpc::Status RcrImpl::getBox(
     }
     END_GRPC_METHOD("getBox", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+
+grpc::Status RcrImpl::importExcel(
+    grpc::ServerContext* context,
+    const rcr::ImportExcelRequest* request,
+    rcr::OperationResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r = 0;
+    BEGIN_GRPC_METHOD("importExcel", request, t)
+        for (auto f = request->file().begin(); f != request->file().end(); f++) {
+            importExcelFile(t, mDb, request->symbol(), *f, request->prefix_box());
+        }
+
+    END_GRPC_METHOD("importExcel", response, response, t)
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+void RcrImpl::importExcelFile(
+    odb::transaction &t,
+    odb::database *db,
+    const std::string &symbol,
+    const rcr::ExcelFile &file,
+    const std::string &prefixBox
+) {
+    uint64_t box = BoxName::extractFromFileName(prefixBox + " " + file.name()); //  <- add if filename contains boxes
+    SpreadSheetHelper spreadSheet(file.name(), file.content());
+
 }

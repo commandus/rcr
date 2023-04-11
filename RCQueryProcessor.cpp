@@ -38,7 +38,7 @@ void RCQueryProcessor::exec(
     odb::database *db,
     odb::transaction *t,
     const rcr::DictionariesResponse *dictionaries,
-    const rcr::ListRequest &list,
+    const rcr::List &list,
     rcr::OperationResponse *operationResponse,
     rcr::CardResponse *cards,
     uint32_t componentFlags,
@@ -139,7 +139,7 @@ void RCQueryProcessor::loadCards(
     rcr::CardResponse *retCards,
     const RCQuery *query,
     uint32_t componentFlags,
-    const rcr::ListRequest &list
+    const rcr::List &list
 ) {
     size_t cnt = 0;
     size_t sz = 0;
@@ -449,7 +449,7 @@ uint64_t RCQueryProcessor::measure2symbolId(
     if (!dictionaries)
         return 0;
 
-    const std::string &mn = MeasureUnit::sym(ML_RU, measure);
+    const std::string &mn = MeasureUnit::sym(measure);
     for (auto it = dictionaries->symbol().begin(); it != dictionaries->symbol().end(); it++) {
         if (it->sym() == mn)
             return it->id();

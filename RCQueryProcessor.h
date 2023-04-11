@@ -18,7 +18,7 @@ public:
         odb::database *db,
         odb::transaction *t,
         const rcr::DictionariesResponse *dictionaries,
-        const rcr::ListRequest &list,
+        const rcr::List &list,
         rcr::OperationResponse *operationResponse,
         rcr::CardResponse *cards,
         uint32_t componentFlags,
@@ -33,7 +33,7 @@ public:
         rcr::CardResponse *retCards,
         const RCQuery *query,
         uint32_t componentFlags,
-        const rcr::ListRequest &list
+        const rcr::List &list
     );
 
     int saveCard(

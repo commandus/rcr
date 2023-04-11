@@ -31,27 +31,34 @@ void SheetRow::toCardRequest(
 }
 
 SpreadSheetHelper::SpreadSheetHelper(
-    const std::string &aFileName,
-    uint64_t box
+    const std::string &aFileName
 )
     : total(0)
 {
-    int r = load(aFileName, box);
+    int r = loadFile(aFileName);
+}
+
+SpreadSheetHelper::SpreadSheetHelper(
+    const std::string &aFileName,
+    const std::string &content
+)
+    : total(0)
+{
+    int r = loadString(content);
 }
 
 /**
  * A    B        C  D
  * -    name     qty remark
  *      SSH6N70  10	 KOREA 810
- * @param aFileName
+ * @param fileName
  * @return
  */
-int SpreadSheetHelper::load(
-    const std::string &aFileName,
-    uint64_t box
+int SpreadSheetHelper::loadFile(
+    const std::string &fileName
 ) {
     xlnt::workbook book;
-    book.load(aFileName);
+    book.load(fileName);
     int boxId = 1;
     for (size_t i = 0; i < book.sheet_count(); i++) {
         xlnt::worksheet wsheet = book.sheet_by_index(i);
@@ -68,6 +75,51 @@ int SpreadSheetHelper::load(
             // name and properties
             if (!row[1].has_value())
                continue;
+            sr.name = row[1].to_string();
+            sr.name = trim(sr.name);
+            // qty
+            if ((!row[2].has_value()) || (row[2].data_type() != xlnt::cell_type::number))
+                continue;
+            sr.qty = std::strtoull(row[2].to_string().c_str(), nullptr, 10);
+            if (sr.qty <= 0)
+                continue;
+            // property: case
+            sr.property_dip = row[3].to_string();
+            sr.property_dip = trim(sr.property_dip);
+            // remarks
+            sr.remarks = row[4].to_string();
+            sr.remarks = trim(sr.remarks);
+            items.push_back(sr);
+            // update statistic counters
+            total += sr.qty;
+            boxItemCount[sr.id] += sr.qty;
+        }
+    }
+    return 0;
+}
+
+int SpreadSheetHelper::loadString(
+    const std::string &content
+) {
+    xlnt::workbook book;
+    std::vector<uint8_t> cont(content.begin(), content.end());
+    book.load(cont);
+    int boxId = 1;
+    for (size_t i = 0; i < book.sheet_count(); i++) {
+        xlnt::worksheet wsheet = book.sheet_by_index(i);
+        for (auto row : wsheet.rows()) {
+            SheetRow sr;
+            sr.id = boxId;
+            // id
+            if (row[0].has_value()) {
+                if (row[0].data_type() != xlnt::cell_type::number)
+                    continue;
+                boxId = std::strtoull(row[0].to_string().c_str(), nullptr, 10);
+                sr.id = boxId;
+            }
+            // name and properties
+            if (!row[1].has_value())
+                continue;
             sr.name = row[1].to_string();
             sr.name = trim(sr.name);
             // qty
