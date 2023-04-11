@@ -444,9 +444,10 @@ void RcrImpl::importExcelFile(
     odb::database *db,
     const std::string &symbol,
     const rcr::ExcelFile &file,
-    const std::string &prefixBox
+    uint64_t prefixBox
 ) {
-    uint64_t box = BoxName::extractFromFileName(prefixBox + " " + file.name()); //  <- add if filename contains boxes
+    std::string pb = StockOperation::boxes2string(prefixBox);
+    uint64_t box = BoxName::extractFromFileName(pb + " " + file.name()); //  <- add if filename contains boxes
     SpreadSheetHelper spreadSheet(file.name(), file.content());
 
 }

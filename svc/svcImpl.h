@@ -55,7 +55,7 @@ protected:
         odb::database *db,
         const std::string &symbol,
         const rcr::ExcelFile &file,
-        const std::string &prefixBox = ""
+        uint64_t prefixBox
     );
 public:
 	/// ODB database
@@ -77,9 +77,9 @@ public:
     // ------------------ back office ------------------
     int loadDictionaries(rcr::DictionariesResponse *pResponse);
     grpc::Status importExcel(
-            grpc::ServerContext* context,
-            const rcr::ImportExcelRequest* request,
-            rcr::OperationResponse* response
+        grpc::ServerContext* context,
+        const rcr::ImportExcelRequest* request,
+        rcr::OperationResponse* response
     );
 
 };

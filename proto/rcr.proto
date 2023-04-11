@@ -244,7 +244,7 @@ message ImportExcelRequest
 {
     User user = 1;
     string symbol = 2;
-    string prefix_box = 3; // firsr box, e.g. "219"
+    uint64 prefix_box = 3; // first box, e.g. 219
     repeated ExcelFile file = 4;
 }
 
