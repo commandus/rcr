@@ -50,7 +50,7 @@ public:
     // result
     std::vector <SheetRow> items;
     // statistics
-    size_t total;
+    size_t total;   // total items count
     std::map<int, size_t> boxItemCount;
 };
 

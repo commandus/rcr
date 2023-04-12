@@ -431,23 +431,39 @@ grpc::Status RcrImpl::importExcel(
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r = 0;
     BEGIN_GRPC_METHOD("importExcel", request, t)
-        for (auto f = request->file().begin(); f != request->file().end(); f++) {
-            importExcelFile(t, mDb, request->symbol(), *f, request->prefix_box());
-        }
+    rcr::DictionariesResponse dictionaries;
+    loadDictionaries(&dictionaries);
 
+        size_t cnt = 0;
+    size_t r = 0;
+    for (auto f = request->file().begin(); f != request->file().end(); f++) {
+        r += importExcelFile(t, mDb, request->symbol(), *f, request->prefix_box(),
+            dictionaries);
+        cnt++;
+    }
+    response->set_count(cnt);   // files
+    response->set_sum(r);     // entries
     END_GRPC_METHOD("importExcel", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
 }
 
-void RcrImpl::importExcelFile(
+size_t RcrImpl::importExcelFile(
     odb::transaction &t,
     odb::database *db,
     const std::string &symbol,
     const rcr::ExcelFile &file,
-    uint64_t prefixBox
+    uint64_t prefixBox,
+    rcr::DictionariesResponse &dictionaries
 ) {
     std::string pb = StockOperation::boxes2string(prefixBox);
     uint64_t box = BoxName::extractFromFileName(pb + " " + file.name()); //  <- add if filename contains boxes
     SpreadSheetHelper spreadSheet(file.name(), file.content());
 
+    for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
+        rcr::CardRequest cardRequest;
+        item->toCardRequest("+", symbol, box, cardRequest);
+        RCQueryProcessor p;
+        p.saveCard(mDb, &t, cardRequest, &dictionaries);
+    }
+    return spreadSheet.total;   // total count of items
 }

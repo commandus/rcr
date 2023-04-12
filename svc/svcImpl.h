@@ -50,12 +50,13 @@ protected:
 	/// return to client status: method not implemented yet
 	static const grpc::Status& STATUS_NOT_IMPLEMENTED;
     template <class T> std::unique_ptr<T> load(uint64_t id);
-    void importExcelFile(
+    size_t importExcelFile(
         odb::transaction &t,
         odb::database *db,
         const std::string &symbol,
         const rcr::ExcelFile &file,
-        uint64_t prefixBox
+        uint64_t prefixBox,
+        rcr::DictionariesResponse &dictionaries
     );
 public:
 	/// ODB database
