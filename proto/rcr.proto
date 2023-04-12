@@ -237,7 +237,7 @@ message BoxRequest
 message ExcelFile
 {
     string name = 1;
-    string content = 2;
+    bytes content = 2;
 }
 
 message ImportExcelRequest
