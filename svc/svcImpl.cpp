@@ -434,7 +434,7 @@ grpc::Status RcrImpl::importExcel(
     rcr::DictionariesResponse dictionaries;
     loadDictionaries(&dictionaries);
 
-        size_t cnt = 0;
+    size_t cnt = 0;
     size_t r = 0;
     for (auto f = request->file().begin(); f != request->file().end(); f++) {
         r += importExcelFile(t, mDb, request->symbol(), *f, request->prefix_box(),
@@ -455,8 +455,10 @@ size_t RcrImpl::importExcelFile(
     uint64_t prefixBox,
     rcr::DictionariesResponse &dictionaries
 ) {
-    std::string pb = StockOperation::boxes2string(prefixBox);
-    uint64_t box = BoxName::extractFromFileName(pb + " " + file.name()); //  <- add if filename contains boxes
+    std::string pb;
+    if (prefixBox)
+        pb = StockOperation::boxes2string(prefixBox) + " ";
+    uint64_t box = BoxName::extractFromFileName(pb + file.name()); //  <- add if filename contains boxes
     SpreadSheetHelper spreadSheet(file.name(), file.content());
 
     for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
