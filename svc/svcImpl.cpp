@@ -3,6 +3,7 @@
  */
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 #include <grpc++/server_context.h>
 #include <grpc++/security/credentials.h>
@@ -28,6 +29,7 @@
 #include "gen/rcr.pb-odb.hxx"
 #include "SpreadSheetHelper.h"
 #include "BoxName.h"
+#include "string-helper.h"
 
 using namespace odb::core;
 using grpc::StatusCode;
@@ -126,7 +128,7 @@ std::string logString (
 
 #define END_GRPC_METHOD(signature, requestMessage, responseMessage, transaction) \
 		transaction.commit(); \
-        LOG(INFO) << logString(signature, "", "", responseMessage); \
+        if (responseMessage) LOG(INFO) << logString(signature, "", "", responseMessage); \
 	} \
 	catch (const odb::exception& oe) { \
 		LOG(ERROR) << logString(signature, "odb::exception", oe.what(), requestMessage); \
@@ -173,6 +175,7 @@ uint64_t VERSION_MAJOR = 0x010000;
 
 RcrImpl::RcrImpl(struct ServiceConfig *config)
 {
+    srand(time(nullptr));    //
 	mConfig = config;
 	mDb = odbconnect(config);
 
@@ -191,19 +194,21 @@ struct ServiceConfig *RcrImpl::getConfig()
 	return mConfig;
 }
 
-::grpc::Status RcrImpl::version(
+::grpc::Status RcrImpl::login(
     ::grpc::ServerContext* context,
-    const ::rcr::VersionRequest* request,
-    ::rcr::VersionResponse* response
+    const ::rcr::LoginRequest* request,
+    ::rcr::LoginResponse* response
 )
 {
-    BEGIN_GRPC_METHOD("version", request, t)
+    BEGIN_GRPC_METHOD("login", request, t)
     if (response == nullptr) {
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     }
-    response->set_value(VERSION_MAJOR);
-    response->set_name(getRandomName());
-    END_GRPC_METHOD("version", request, response, t)
+    *response->mutable_user() = request->user();
+    response->set_success(checkCredentialsNSetToken(t, mDb, response->mutable_user()));
+    response->set_version(VERSION_MAJOR);
+    response->set_version_name(getRandomName());
+    END_GRPC_METHOD("login", request, response, t)
     return grpc::Status::OK;
 }
 
@@ -469,3 +474,91 @@ size_t RcrImpl::importExcelFile(
     }
     return spreadSheet.total;   // total count of items
 }
+
+int RcrImpl::checkUserRights(
+    odb::transaction &t,
+    odb::database *db,
+    const rcr::User &user
+) {
+    try {
+        odb::result<rcr::User> qs(mDb->query<rcr::User>(
+            odb::query<rcr::User>::name == user.name()
+            &&
+            odb::query<rcr::User>::password == user.password()
+        ));
+        odb::result<rcr::User>::iterator it(qs.begin());
+        if (it != qs.end()) {
+            return it->rights();
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "Check credentials error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "Check credentials unknown error";
+    }
+    return -1;
+}
+
+bool RcrImpl::checkCredentialsNSetToken(
+    odb::transaction &t,
+    odb::database *db,
+    rcr::User *retVal
+) {
+    if (!retVal)
+        return false;
+    try {
+        odb::result<rcr::User> qs(mDb->query<rcr::User>(odb::query<rcr::User>::name == retVal->name()
+        &&
+        odb::query<rcr::User>::password == retVal->password()
+        ));
+        odb::result<rcr::User>::iterator it(qs.begin());
+        if (it == qs.end())
+            return false;
+        *retVal = *it;
+        retVal->set_token(generateNewToken());
+        db->persist(*retVal);   // save token
+        return true;
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "Check credentials & set token error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "Check credentials & set token unknown error";
+    }
+    return false;
+}
+
+uint64_t RcrImpl::generateNewToken() {
+    return rand();
+}
+
+grpc::Status RcrImpl::lsUser(
+    grpc::ServerContext* context,
+    const rcr::UserRequest* request,
+    grpc::ServerWriter< rcr::User>* writer)
+{
+    int r = 0;
+    BEGIN_GRPC_METHOD("lsUser", request, t)
+    // std::cerr << pb2JsonString(request->user()) << std::endl;
+    int rights = checkUserRights(t, mDb, request->user());
+    try {
+        odb::result<rcr::User> qs(mDb->query<rcr::User>(
+            odb::query<rcr::User>::id != 0
+        ));
+        for (odb::result<rcr::User>::iterator it(qs.begin()); it != qs.end(); it++) {
+            rcr::User u = *it;
+            if (rights != 1) {
+                u.set_token(0);
+                u.set_password("");
+            }
+            writer->Write(u);
+        }
+    } catch (const odb::exception &e) {
+        r = 1;
+        LOG(ERROR) << "list user error: " << e.what();
+    } catch (...) {
+        r = 2;
+        LOG(ERROR) << "list user unknown error";
+    }
+
+    END_GRPC_METHOD("lsUser", request, nullptr, t)
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+

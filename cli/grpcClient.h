@@ -23,7 +23,9 @@ public:
 	virtual ~RcrClient();
 
 	// method wrappers
-    uint64_t version();
+    bool login(
+        const rcr::User *user
+    );
     int32_t addPropertyType(
         const std::string &key,
         const std::string &description
@@ -53,6 +55,8 @@ public:
     );
 
     void printBox(std::ostream &strm, uint64_t boxId, size_t offset, size_t size);
+
+    void printUser(std::ostream &strm, rcr::User *user);
 };
 
 #endif /* GRPCCLIENT_H_ */

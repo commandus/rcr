@@ -44,6 +44,34 @@ public:
 class RcrImpl : public rcr::Rcr::Service {
 private:
 	struct ServiceConfig *mConfig;
+    int loadDictionaries(rcr::DictionariesResponse *pResponse);
+    grpc::Status importExcel(
+        grpc::ServerContext* context,
+        const rcr::ImportExcelRequest* request,
+        rcr::OperationResponse* response
+    );
+
+    /**
+     *
+     * @param t
+     * @param db
+     * @param user
+     * @return -1 if user not found or password is incorrect
+     */
+    int checkUserRights(
+        odb::transaction &t,
+        odb::database *db,
+        const rcr::User &user
+    );
+
+    bool checkCredentialsNSetToken(
+        odb::transaction &t,
+        odb::database *db,
+        rcr::User *retVal
+    );
+
+    uint64_t generateNewToken();
+
 protected:
 	/// return to client status: no permission
 	static const grpc::Status& STATUS_NO_GRANTS;
@@ -69,20 +97,14 @@ public:
 
     // ------------------ front office ------------------
 
-    grpc::Status version(::grpc::ServerContext* context, const ::rcr::VersionRequest* request, ::rcr::VersionResponse* response) override;
+    grpc::Status login(::grpc::ServerContext* context, const ::rcr::LoginRequest* request, ::rcr::LoginResponse* response) override;
     grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
     grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
     grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
     grpc::Status getDictionaries(::grpc::ServerContext* context, const ::rcr::DictionariesRequest* request, ::rcr::DictionariesResponse* response) override;
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
     // ------------------ back office ------------------
-    int loadDictionaries(rcr::DictionariesResponse *pResponse);
-    grpc::Status importExcel(
-        grpc::ServerContext* context,
-        const rcr::ImportExcelRequest* request,
-        rcr::OperationResponse* response
-    );
-
+    grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
 };
 
 #endif

@@ -66,8 +66,10 @@ int parseCmd
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>",
-            "card|box|version|dictionaries|xlsx|xlsx-list|xlsx-add-u");
+            "card|box|login|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command parameter(request)");
+    struct arg_str *a_user_name = arg_str0("u", "user", "<user-name>", "User login");
+    struct arg_str *a_user_password = arg_str0("p", "password", "<password>", "User password");
     struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
     struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
     struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 100");
@@ -79,7 +81,7 @@ int parseCmd
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port, a_sslon,
-        a_command, a_request, a_box,
+        a_command, a_request, a_box, a_user_name, a_user_password,
         a_offset, a_size,
 		a_repeats, a_verbose,
 		a_help, a_end };
@@ -134,6 +136,15 @@ int parseCmd
         value->box = *a_box->sval;
     else
         value->box = "";
+
+    if (a_user_name->count)
+        value->username = *a_user_name->sval;
+    else
+        value->username = "";
+    if (a_user_password->count)
+        value->password = *a_user_password->sval;
+    else
+        value->password = "";
 
     if (a_offset->count)
         value->offset = *a_offset->ival;
@@ -223,8 +234,19 @@ int main(int argc, char** argv)
         }
     }
 
-    if (config.command == "version")
-        std::cout << "version " << std::hex << "0x" << rpc.version() << std::endl;
+    if (config.command == "login") {
+        rcr::User u;
+        u.set_name(config.username);
+        u.set_password(config.password);
+        std::cout << (rpc.login(&u) ? "success" : "fail") << std::endl;
+    }
+    if (config.command == "users") {
+        rcr::User u;
+        u.set_name(config.username);
+        u.set_password(config.password);
+        rpc.printUser(std::cout, &u);
+        std::cout << std::endl;
+    }
     if (config.command == "dictionaries") {
         std::cout << rpc.getDictionariesJson() << std::endl;
     }

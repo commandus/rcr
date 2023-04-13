@@ -39,18 +39,20 @@ RcrClient::~RcrClient()
 {
 }
 
-uint64_t RcrClient::version()
+bool RcrClient::login(
+    const rcr::User *user
+)
 {
     std::string r;
     grpc::ClientContext ctx;
-    rcr::VersionRequest request;
-    request.set_value(1);
-    rcr::VersionResponse response;
+    rcr::LoginRequest request;
+    *request.mutable_user() = *user;
+    rcr::LoginResponse response;
 
-    grpc::Status status = stub->version(&ctx, request, &response);
+    grpc::Status status = stub->login(&ctx, request, &response);
     if (!status.ok())
-        return 0;
-    return response.value();
+        return false;
+    return response.success();
 }
 
 /**
@@ -240,3 +242,20 @@ std::string RcrClient::getDictionariesJson() {
     return message2Json(response);
 }
 
+void RcrClient::printUser(
+    std::ostream &strm,
+    rcr::User *user
+) {
+    grpc::ClientContext context;
+    rcr::UserRequest request;
+    request.mutable_user()->set_name(user->name());
+    request.mutable_user()->set_password(user->password());
+    auto reader = stub->lsUser(&context, request);
+    rcr::User u;
+    while (reader->Read(&u)) {
+        strm << u.name() << "\t" << (u.rights() & 1 ? "Admin" : "");
+        if (!u.password().empty())
+            strm << "\t" << u.password();
+        strm << std::endl;
+    }
+}

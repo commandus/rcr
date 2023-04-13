@@ -202,5 +202,7 @@ int main(int argc, char** argv)
     sqliteCreateSchemaIfExists(config);
 #else
 #endif
-	return 0;
+    std::cout << "Admin user SYSDBA created with password \"masterkey\"" << std::endl;
+
+    return 0;
 }

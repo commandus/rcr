@@ -141,18 +141,19 @@ message List
 
 // Requests
 
-message VersionRequest
+message LoginRequest
 {
-    uint64 value = 1;                           ///<
+    User user = 1;                          ///< user credentials
 }
-
 
 // Responses
 
-message VersionResponse 
+message LoginResponse
 {
-    uint64 value = 1;                           ///<
-    string name = 2;
+    User user = 1;                          ///< returns token
+    bool success = 2;
+    uint64 version = 3;                     ///< service version
+    string version_name = 4;                ///< service version name
 }
 
 message CardResponse 
@@ -295,7 +296,7 @@ message GroupUserRequest
 
 service Rcr
 {
-    rpc version(VersionRequest) returns (VersionResponse) {}
+    rpc login(LoginRequest) returns (LoginResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
     rpc getSettings(Settings) returns (Settings) {}
     rpc setSettings(Settings) returns (Settings) {}
@@ -306,6 +307,7 @@ service Rcr
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getBox(BoxRequest) returns (BoxResponse) {}
     //
+    rpc lsUser(UserRequest) returns (stream User) {}
     rpc chUser(UserRequest) returns (OperationResponse) {}
     //
     rpc chGroup(GroupRequest) returns (OperationResponse) {}
