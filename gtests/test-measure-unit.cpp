@@ -27,6 +27,12 @@ TEST(Box, Append) {
     uint64_t b = 0;
     b = StockOperation::boxAppendBox(b, 0xdd);
     ASSERT_EQ(b, 0x00dd000000000000);
+    b = StockOperation::boxAppendBox(b, 0xcc);
+    ASSERT_EQ(b, 0x00dd00cc00000000);
+    b = StockOperation::boxAppendBox(b, 0xbb);
+    ASSERT_EQ(b, 0x00dd00cc00bb0000);
+    b = StockOperation::boxAppendBox(b, 0xaa);
+    ASSERT_EQ(b, 0x00dd00cc00bb00aa);
 }
 
 TEST(BoxName, FileName) {
