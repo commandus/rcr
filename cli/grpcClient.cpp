@@ -89,6 +89,7 @@ int32_t RcrClient::addPropertyType(
 
 int32_t RcrClient::cardQuery(
     std::ostream &ostream,
+    const rcr::User &user,
     const std::string &query,
     const std::string &measureSymbol,
     size_t offset,
@@ -99,6 +100,7 @@ int32_t RcrClient::cardQuery(
     grpc::ClientContext context;
     rcr::CardQueryResponse response;
     rcr::CardQueryRequest request;
+    *request.mutable_user() = user;
     request.set_query(query);
     request.set_measure_symbol(measureSymbol);
     request.mutable_list()->set_offset(offset);
@@ -258,4 +260,41 @@ void RcrClient::printUser(
             strm << "\t" << u.password();
         strm << std::endl;
     }
+}
+
+void RcrClient::printSymbols(
+        std::ostream &strm
+) {
+    grpc::ClientContext context;
+    rcr::DictionariesResponse response;
+    rcr::DictionariesRequest request;
+    request.set_flags(0);
+
+    grpc::Status status = stub->getDictionaries(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    for (auto s(response.symbol().begin()); s != response.symbol().end(); s++) {
+        strm << s->sym() << "\t" << s->description() << std::endl;
+    }
+}
+
+void RcrClient::printProperty(
+        std::ostream &strm
+) {
+    grpc::ClientContext context;
+    rcr::DictionariesResponse response;
+    rcr::DictionariesRequest request;
+    request.set_flags(0);
+
+    grpc::Status status = stub->getDictionaries(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    for (auto p(response.property_type().begin()); p != response.property_type().end(); p++) {
+        strm << p->key() << "\t" << p->description() << std::endl;
+    }
+
 }

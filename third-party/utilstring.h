@@ -43,7 +43,7 @@ bool append2file(
 // write file
 bool string2file(const std::string &filename, const std::string &value);
 
-std::string &trim(std::string &s);
+std::string &trim(std::string s);
 
 bool isHex(const std::string &value);
 

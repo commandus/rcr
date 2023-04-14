@@ -7,7 +7,6 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
-#include <sstream>
 
 #include "argtable3/argtable3.h"
 #include <grpc++/grpc++.h>
@@ -16,17 +15,35 @@
 
 #include "AppSettings.h"
 #include "RcrCredentials.h"
-#include "SpreadSheetHelper.h"
 #include "BoxName.h"
 #include "StockOperation.h"
 #include "utilfile.h"
 #include "string-helper.h"
+#include "utilstring.h"
 
 const char* progname = "rcr-cli";
 const char* DEF_COMMAND = "stream-query";
 
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
+
+static const char *GREETING_STRING = "Enter help to see command list\n";
+
+static const char *HELP_STRING =
+    "help               Help screen\n"
+    "symbol list        Component type and symbol list\n"
+    "symbol             Set all component types\n"
+    "symbol D           Set component symbol D (integrated circuits)\n"
+    "property list      Properties list\n"
+    "user list          Registered users\n"
+    "import <path>      Preview spreadsheets in the path\n"
+    "import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n"
+    "D*                 Search by name starting with 'D'\n"
+    "100 kOhm           Search resistors by nominal\n"
+    "10 µF 119          Search capacitor by nominal in boxes 119-..\n"
+    "* 119              Search all in boxes 119-..\n"
+    "* 119-1 K:DIP      Search all in box 119-1 DIP\n"
+    ;
 
 class ClientConfig {
 public:
@@ -46,6 +63,58 @@ public:
     std::string componentSymbol;
 };
 
+void printSpreadSheets(
+    const std::string &path,
+    const std::string &boxName,
+    int verbosity
+) {
+    std::vector<std::string> spreadSheets;
+    util::filesInPath(path, ".xlsx", 0, &spreadSheets);
+    std::cout << spreadSheets.size() << " *.xlsx files found in '" << path << "'" << std::endl;
+    for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
+        uint64_t box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        SpreadSheetHelper spreadSheet(*it);
+        if (verbosity) {
+            std::cout << *it << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
+            for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
+                if (bx->second) {
+                    std::cout << StockOperation::boxes2string(StockOperation::boxAppendBox(box, bx->first)) << ": "
+                          << bx->second << "\t";
+                }
+            }
+            std::cout << std::endl;
+            if (verbosity > 1) {
+                // print data itself
+                for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
+                    std::cout
+                        << StockOperation::boxes2string(StockOperation::boxAppendBox(box, item->id))
+                        << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t"
+                        << std::endl;
+                }
+            }
+        }
+    }
+}
+
+void importSpreadSheets(
+    RcrClient &rpc,
+    const std::string &path,
+    const std::string &symbol,
+    const std::string &boxName
+) {
+    std::vector<std::string> spreadSheets;
+    util::filesInPath(path, ".xlsx", 0, &spreadSheets);
+    for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
+        uint64_t box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        SpreadSheetHelper spreadSheet(*it);
+        // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+        int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
+        if (r) {
+            std::cerr << "Error: " << r << std::endl;
+            break;
+        }
+    }
+}
 /**
  * Parse command line into struct ClientConfig
  * Return 0- success
@@ -156,9 +225,6 @@ int parseCmd
     else
         value->size = 100;
 
-    size_t offset;
-    size_t size;
-
     if (a_repeats->count)
 		value->repeats = *a_repeats->ival;
 	else
@@ -203,6 +269,10 @@ int main(int argc, char** argv)
     RcrClient rpc(channel, config.username, config.password);
     // rpc.addPropertyType("ptkey", "pt desc");
 
+    rcr::User u;
+    u.set_name(config.username);
+    u.set_password(config.password);
+
     if (config.command.find("card") == 0) {
         // component symbol card-d -> D card-r -> R card-c -> C card-l -> L
         std::string cs;
@@ -211,7 +281,7 @@ int main(int argc, char** argv)
         if (cs.empty())
             cs = config.componentSymbol;
         cs = toUpperCase(cs);
-        int32_t r = rpc.cardQuery(std::cout, config.request, cs, config.offset, config.size, true);
+        int32_t r = rpc.cardQuery(std::cout, u, config.request, cs, config.offset, config.size, true);
         if (r) {
             exit(r);
         }
@@ -235,15 +305,9 @@ int main(int argc, char** argv)
     }
 
     if (config.command == "login") {
-        rcr::User u;
-        u.set_name(config.username);
-        u.set_password(config.password);
         std::cout << (rpc.login(&u) ? "success" : "fail") << std::endl;
     }
     if (config.command == "users") {
-        rcr::User u;
-        u.set_name(config.username);
-        u.set_password(config.password);
         rpc.printUser(std::cout, &u);
         std::cout << std::endl;
     }
@@ -256,9 +320,100 @@ int main(int argc, char** argv)
             cs = config.command.substr(7);
         if (cs == "query") {
             std::string line;
-            std::string symbol = "D";
+            std::string symbol = "";
+            std::cerr << GREETING_STRING << std::endl;
             while (std::getline(std::cin, line)) {
-                int32_t r = rpc.cardQuery(std::cout, line, symbol, config.offset, config.size, false);
+                if (line.find("help") == 0) {
+                    std::cerr << HELP_STRING << std::endl;
+                    continue;
+                }
+                if (line.find("symbol") == 0) {
+                    auto verb = line.find("list");
+                    if (verb != std::string::npos && verb >= 6) {   // symbollist, symbol-list, symbol list
+                        rpc.printSymbols(std::cout);
+                        std::cout << std::endl;
+                        continue;
+                    }
+                    symbol = toUpperCase(trim(line.substr(6)));
+                }
+                if (line.find("user") == 0) {
+                    auto verb = line.find("list");
+                    if (verb != std::string::npos && verb >= 4) {   // userlist, user-list, user list
+                        rpc.printUser(std::cout, &u);
+                        std::cout << std::endl;
+                        continue;
+                    }
+                }
+                if (line.find("property") == 0) {
+                    auto verb = line.find("list");
+                    if (verb != std::string::npos && verb >= 8) {   // propertylist, property-list, property list
+                        rpc.printProperty(std::cout);
+                        std::cout << std::endl;
+                        continue;
+                    }
+                }
+
+                if (line.find("import") == 0) {
+                    std::string symbol;
+                    std::string path;
+                    size_t start = 6;
+                    size_t eolp = line.size();
+                    size_t finish = eolp;
+                    // skip spaces
+                    for (auto p = start; p < eolp; p++) {
+                        if (!std::isspace(line[p])) {
+                            start = p;
+                            break;
+                        }
+                    }
+                    // try read path
+                    for (auto p = start; p < eolp; p++) {
+                        if (std::isspace(line[p])) {
+                            finish = p;
+                            break;
+                        }
+                    }
+                    path = line.substr(start, finish - start);
+                    start = finish;
+                    // skip spaces
+                    for (auto p = start; p < eolp; p++) {
+                        if (!std::isspace(line[p])) {
+                            start = p;
+                            break;
+                        }
+                    }
+                    // try read symbol
+                    for (auto p = start; p < eolp; p++) {
+                        if (std::isspace(line[p])) {
+                            finish = p;
+                            break;
+                        }
+                    }
+                    symbol = line.substr(start, finish - start);
+                    start = finish;
+                    // skip spaces
+                    for (auto p = start; p < eolp; p++) {
+                        if (!std::isspace(line[p])) {
+                            start = p;
+                            break;
+                        }
+                    }
+                    // try read box
+                    for (auto p = start; p < eolp; p++) {
+                        if (std::isspace(line[p])) {
+                            finish = p;
+                            break;
+                        }
+                    }
+                    std::string boxName = line.substr(start, finish - start);
+                    if (symbol.empty() || boxName.empty())
+                        printSpreadSheets(path, "", 1);
+                    else
+                        importSpreadSheets(rpc, path, symbol, boxName);
+                    continue;
+                }
+
+                int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);
                 std::cout << std::endl;
                 if (r) {
                     exit(r);
@@ -268,45 +423,18 @@ int main(int argc, char** argv)
     }
 
     if (config.command.find("xlsx") == 0) {
-        std::vector<std::string> spreadSheets;
-        util::filesInPath(config.request, ".xlsx", 0, &spreadSheets);
-        std::cout << "Found " << spreadSheets.size() << " *.xlsx files in " << config.request << std::endl;
-        for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
-            uint64_t box = BoxName::extractFromFileName(
-                    config.box + " " + *it); //  <- add if filename contains boxes
-            std::cout << *it << " box " << StockOperation::boxes2string(box);
-            SpreadSheetHelper spreadSheet(*it);
-            std::cout << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
-
-            for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
-                if (bx->second) {
-                    std::cout << StockOperation::boxes2string(StockOperation::boxAppendBox(box, bx->first))  << ": " << bx->second << "\t";
-                }
-            }
-            std::cout << std::endl;
-
-            // print data itself
-            if (config.command.find("xlsx-list") == 0) {
-                for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
-                    std::cout
-                        << StockOperation::boxes2string(StockOperation::boxAppendBox(box, item->id))
-                        << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t"
-                        << std::endl;
-                }
-            }
-
-            // load data
-            if (config.command.find("xlsx-add") == 0) {
-                // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-                std::string cs;
-                if (config.command.size() > 9)
-                    cs = config.command.substr(9);
-                if (cs.empty())
-                    cs = config.componentSymbol;
-                cs = toUpperCase(cs);
-                int r = rpc.saveSpreadsheet(box, cs, spreadSheet.items);
-            }
+        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1);
+        if (config.command.find("xlsx-add") == 0) {
+            std::string cs;
+            if (config.command.size() > 9)
+                cs = config.command.substr(9);
+            if (cs.empty())
+                cs = config.componentSymbol;
+            cs = toUpperCase(cs);
+            // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+            importSpreadSheets(rpc, config.request, config.box, cs);
         }
     }
 	return 0;
 }
+

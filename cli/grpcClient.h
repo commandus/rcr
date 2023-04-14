@@ -33,6 +33,7 @@ public:
 
     int32_t cardQuery(
         std::ostream &ostream,
+        const rcr::User &user,
         const std::string &query,
         const std::string &measureSymbol,
         size_t offset,
@@ -57,6 +58,10 @@ public:
     void printBox(std::ostream &strm, uint64_t boxId, size_t offset, size_t size);
 
     void printUser(std::ostream &strm, rcr::User *user);
+
+    void printSymbols(std::ostream &strm);
+
+    void printProperty(std::ostream &strm);
 };
 
 #endif /* GRPCCLIENT_H_ */
