@@ -543,13 +543,14 @@ grpc::Status RcrImpl::lsUser(
     int r = 0;
     BEGIN_GRPC_METHOD("lsUser", request, t)
     // std::cerr << pb2JsonString(request->user()) << std::endl;
+    rcr::User u;
     int rights = checkUserRights(t, mDb, request->user());
     try {
         odb::result<rcr::User> qs(mDb->query<rcr::User>(
             odb::query<rcr::User>::id != 0
         ));
         for (odb::result<rcr::User>::iterator it(qs.begin()); it != qs.end(); it++) {
-            rcr::User u = *it;
+            u = *it;
             if (rights != 1) {
                 u.set_token(0);
                 u.set_password("");
@@ -564,7 +565,6 @@ grpc::Status RcrImpl::lsUser(
         LOG(ERROR) << "list user unknown error";
     }
 
-    END_GRPC_METHOD("lsUser", request, nullptr, t)
+    END_GRPC_METHOD("lsUser", request, &u, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
 }
-
