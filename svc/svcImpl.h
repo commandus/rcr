@@ -84,6 +84,7 @@ protected:
         const std::string &symbol,
         const rcr::ExcelFile &file,
         uint64_t prefixBox,
+        bool numberInFilename,
         rcr::DictionariesResponse &dictionaries
     );
 public:

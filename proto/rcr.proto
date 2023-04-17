@@ -246,7 +246,8 @@ message ImportExcelRequest
     User user = 1;
     string symbol = 2;
     uint64 prefix_box = 3; // first box, e.g. 219
-    repeated ExcelFile file = 4;
+    bool number_in_filename = 4;
+    repeated ExcelFile file = 5;
 }
 
 message BoxResponse
@@ -263,6 +264,7 @@ message ServiceSettings
     string last_component_symbol = 5;
     uint64 last_box = 6;
     string last_query = 7;
+    bool number_in_filename = 8;
 }
 
 message Settings

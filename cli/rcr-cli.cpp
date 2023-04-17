@@ -38,6 +38,7 @@ static const char *HELP_STRING =
     "user list          Registered users\n"
     "import <path>      Preview spreadsheets in the path\n"
     "import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n"
+    "   .. no-num       Do not read box number from Excel file name\n"
     "D*                 Search by name starting with 'D'\n"
     "100 kOhm           Search resistors by nominal\n"
     "10 µF 119          Search capacitor by nominal in boxes 119-..\n"
@@ -61,18 +62,24 @@ public:
     std::string password;
     std::string box;
     std::string componentSymbol;
+    bool numberInFileName;
 };
 
 void printSpreadSheets(
     const std::string &path,
     const std::string &boxName,
-    int verbosity
+    int verbosity,
+    bool numberInFilename
 ) {
     std::vector<std::string> spreadSheets;
     util::filesInPath(path, ".xlsx", 0, &spreadSheets);
     std::cout << spreadSheets.size() << " *.xlsx files found in '" << path << "'" << std::endl;
     for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
-        uint64_t box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        uint64_t box;
+        if (numberInFilename)
+            box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        else
+            box = BoxName::extractFromFileName(boxName);
         SpreadSheetHelper spreadSheet(*it);
         if (verbosity) {
             std::cout << *it << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
@@ -100,12 +107,17 @@ void importSpreadSheets(
     RcrClient &rpc,
     const std::string &path,
     const std::string &symbol,
-    const std::string &boxName
+    const std::string &boxName,
+    bool numberInFilename
 ) {
     std::vector<std::string> spreadSheets;
     util::filesInPath(path, ".xlsx", 0, &spreadSheets);
     for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
-        uint64_t box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        uint64_t box;
+        if (numberInFilename)
+            box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        else
+            box = BoxName::extractFromFileName(boxName);
         SpreadSheetHelper spreadSheet(*it);
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
@@ -144,6 +156,8 @@ int parseCmd
     struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 100");
 
     struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
+
+    struct arg_lit *a_no_number_in_filename = arg_lit0(nullptr, "no_box_number_in_filename", "do not read box from Excel file name");
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
 
 	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
@@ -229,6 +243,11 @@ int parseCmd
 		value->repeats = *a_repeats->ival;
 	else
 		value->repeats = 1;
+
+    if (a_no_number_in_filename->count)
+        value->numberInFileName = false;
+    else
+        value->numberInFileName = true;
 
 	value->verbose = a_verbose->count;
 
@@ -406,10 +425,38 @@ int main(int argc, char** argv)
                         }
                     }
                     std::string boxName = line.substr(start, finish - start);
+
+                    bool numberInFilename = true;
+                    // skip spaces
+                    for (auto p = start; p < eolp; p++) {
+                        if (!std::isspace(line[p])) {
+                            start = p;
+                            break;
+                        }
+                    }
+                    // try boolean numberInFilename
+                    for (auto p = start; p < eolp; p++) {
+                        if (std::isspace(line[p])) {
+                            finish = p;
+                            break;
+                        }
+                    }
+                    std::string sNumberInFilename = line.substr(start, finish - start);
+                    if (!sNumberInFilename.empty()) {
+                        switch(sNumberInFilename[0]) {
+                            case 'F':
+                            case 'f':
+                            case 'N':
+                            case 'n':
+                                numberInFilename = false;
+                                break;
+                        }
+                    }
+
                     if (symbol.empty() || boxName.empty())
-                        printSpreadSheets(path, "", 1);
+                        printSpreadSheets(path, boxName, 1, numberInFilename);
                     else
-                        importSpreadSheets(rpc, path, symbol, boxName);
+                        importSpreadSheets(rpc, path, symbol, boxName, numberInFilename);
                     continue;
                 }
 
@@ -423,7 +470,8 @@ int main(int argc, char** argv)
     }
 
     if (config.command.find("xlsx") == 0) {
-        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1);
+        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
+                          config.numberInFileName);
         if (config.command.find("xlsx-add") == 0) {
             std::string cs;
             if (config.command.size() > 9)
@@ -432,7 +480,8 @@ int main(int argc, char** argv)
                 cs = config.componentSymbol;
             cs = toUpperCase(cs);
             // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-            importSpreadSheets(rpc, config.request, config.box, cs);
+            importSpreadSheets(rpc, config.request, config.box, cs,
+                               config.numberInFileName);
         }
     }
 	return 0;
