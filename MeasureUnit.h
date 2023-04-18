@@ -13,7 +13,7 @@ typedef enum {
     ML_RU = 1        ///< Russian
 } MEASURE_LOCALE;
 
-#define MEASURE_COUNT 22
+#define MEASURE_COUNT 26
 #define MAX_POW10 11
 
 typedef enum {
@@ -25,9 +25,13 @@ typedef enum {
     COMPONENT_F,    // Плавкие предохранители
     COMPONENT_G,    // Источники питания
     COMPONENT_H,    // Индикаторы
+    COMPONENT_I,    // == Крепления
+    COMPONENT_J,    // == Провода
     COMPONENT_K,    // Реле
     COMPONENT_L,    // Дроссели
     COMPONENT_M,    // Двигатели
+    COMPONENT_N,    // == На выброс
+    COMPONENT_O,    // == Проекты
     COMPONENT_P,    // Счетчики
     COMPONENT_Q,    // Выключатели
     COMPONENT_R,    // Резисторы
