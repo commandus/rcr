@@ -64,6 +64,7 @@ void RCQueryProcessor::exec(
         case SO_SET:
         case SO_ADD:
         case SO_SUB:
+        case SO_COUNT:
         case SO_SUM:
             count = setCards(db, t, dictionaries, query, componentFlags, &sum);
             break;
@@ -354,19 +355,27 @@ uint64_t RCQueryProcessor::getQuantity(
     uint64_t cardId,
     uint64_t box
 ) {
-    uint64_t r;
+    uint64_t r = 0;
+    uint64_t lastBox = StockOperation::lastBox(box);
+#ifdef ENABLE_SQLITE
+    // SQLite3 does not support uimt64 but int64
+    if (lastBox == 0xffffffffffffffff)
+        lastBox = 0x7fffffffffffffff;
+#endif
     retPackageId = 0;
     try {
         odb::result<rcr::Package> q(db->query<rcr::Package>(
-                odb::query<rcr::Package>::card_id == cardId
-                &&
-                odb::query<rcr::Package>::box == box
+            odb::query<rcr::Package>::card_id == cardId
+            &&
+            odb::query<rcr::Package>::box >= box
+            &&
+            odb::query<rcr::Package>::box <= lastBox
         ));
         odb::result<rcr::Package>::iterator it(q.begin());
-        if (it == q.end())
-            return 0;
-        retPackageId = it->id();
-        r = it->qty();
+        if (it != q.end()) {
+            retPackageId = it->id();
+            r = it->qty();
+        }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "Get box qty error: " << e.what();
     } catch (...) {
@@ -621,6 +630,9 @@ size_t RCQueryProcessor::setCards(
             uint64_t packageId;
             // get packageId, if not, ret 0
             uint64_t q = getQuantity(db, t, packageId, itCard->id(), query->boxes);
+            if (sum)
+                *sum += q;
+
             if (query->code == SO_SET)
                 setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
             if (query->code == SO_ADD)
@@ -633,8 +645,6 @@ size_t RCQueryProcessor::setCards(
                     d = 0;
                 setQuantity(db, t, packageId, itCard->id(), query->boxes, d);
             }
-            if (sum)
-                *sum += query->count;
             cnt++;
         }
     } catch (const odb::exception &e) {

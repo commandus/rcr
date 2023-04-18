@@ -31,6 +31,7 @@ static const char *GREETING_STRING = "Enter help to see command list\n";
 
 static const char *HELP_STRING =
     "help               Help screen\n"
+    "quit               Exit\n"
     "symbol list        Component type and symbol list\n"
     "symbol             Set all component types\n"
     "symbol D           Set component symbol D (integrated circuits)\n"
@@ -153,7 +154,7 @@ int parseCmd
     struct arg_str *a_user_password = arg_str0("p", "password", "<password>", "User password");
     struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
     struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
-    struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 100");
+    struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 10000");
 
     struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
 
@@ -237,7 +238,7 @@ int parseCmd
     if (a_size->count)
         value->size = *a_offset->ival;
     else
-        value->size = 100;
+        value->size = 10000;
 
     if (a_repeats->count)
 		value->repeats = *a_repeats->ival;
@@ -333,6 +334,23 @@ int main(int argc, char** argv)
     if (config.command == "dictionaries") {
         std::cout << rpc.getDictionariesJson() << std::endl;
     }
+
+    if (config.command.find("xlsx") == 0) {
+        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
+                          config.numberInFileName);
+        if (config.command.find("xlsx-add") == 0) {
+            std::string cs;
+            if (config.command.size() > 9)
+                cs = config.command.substr(9);
+            if (cs.empty())
+                cs = config.componentSymbol;
+            cs = toUpperCase(cs);
+            // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+            importSpreadSheets(rpc, config.request, config.box, cs,
+                               config.numberInFileName);
+        }
+    }
+
     if (config.command.find("stream") == 0) {
         std::string cs;
         if (config.command.size() > 7)
@@ -345,6 +363,9 @@ int main(int argc, char** argv)
                 if (line.find("help") == 0) {
                     std::cerr << HELP_STRING << std::endl;
                     continue;
+                }
+                if (line.find("quit") == 0) {
+                    break;
                 }
                 if (line.find("symbol") == 0) {
                     auto verb = line.find("list");
@@ -469,21 +490,5 @@ int main(int argc, char** argv)
         }
     }
 
-    if (config.command.find("xlsx") == 0) {
-        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
-                          config.numberInFileName);
-        if (config.command.find("xlsx-add") == 0) {
-            std::string cs;
-            if (config.command.size() > 9)
-                cs = config.command.substr(9);
-            if (cs.empty())
-                cs = config.componentSymbol;
-            cs = toUpperCase(cs);
-            // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-            importSpreadSheets(rpc, config.request, config.box, cs,
-                               config.numberInFileName);
-        }
-    }
-	return 0;
+    return 0;
 }
-

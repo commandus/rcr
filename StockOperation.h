@@ -112,6 +112,15 @@ public:
     static bool isBoxInBoxes(uint64_t innerBox, uint64_t outerBox);
 
     static int box2Array(BoxArray& retVal, uint64_t boxId);
+
+    std::string toString();
+
+    /**
+     * Return last nested box in the box
+     * @param box forst box
+     * @return last nested box in the box
+     */
+    static uint64_t lastBox(const uint64_t &box);
 };
 
 #endif //RCR_STOCKOPERATION_H

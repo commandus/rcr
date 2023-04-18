@@ -123,6 +123,11 @@ int32_t RcrClient::cardQuery(
         formattingOptions.always_print_primitive_fields = true;
         formattingOptions.preserve_proto_field_names = true;
 
+        if (response.cards().cards_size() == 0) {
+            // it can be aggregate sum or count
+            if (response.rslt().count() || response.rslt().sum())
+                ostream << response.rslt().count() << " " << response.rslt().sum() << std::endl;
+        }
         // print cards if exists
         for (auto card = response.cards().cards().begin(); card != response.cards().cards().end(); card++) {
             std::string r;

@@ -430,3 +430,50 @@ int StockOperation::box2Array(
         return 3;
     return 4;
 }
+
+std::string StockOperation::toString()
+{
+    std::stringstream ss;
+    ss << boxes2string(boxes);
+    switch (code) {
+        case SO_COUNT:
+            ss << " count";
+            break;
+        case SO_SUM:
+            ss << " sum";
+            break;
+        case SO_SET:
+            ss << "=" << count;
+            break;
+        case SO_ADD:
+            ss << "+" << count;
+            break;
+        case SO_SUB:
+            ss << "-" << count;
+            break;
+        case SO_RM:
+            ss << " rm";
+            break;
+        default:
+            break;
+    }
+    return ss.str();
+}
+
+uint64_t StockOperation::lastBox(
+    const uint64_t &box
+) {
+    uint64_t r = box;
+    if (box & 0xffff)
+        return box;
+    else
+    if (box & 0xffff0000)
+        return box | 0xffff;
+    else
+    if (box & 0xffff00000000)
+        return box | 0xffffffff;
+    else
+    if (box & 0xffff000000000000)
+        return box | 0xffffffffffff;
+    return 0xffffffffffffffff;
+}

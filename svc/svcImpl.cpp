@@ -256,6 +256,9 @@ struct ServiceConfig *RcrImpl::getConfig()
         RCQuery q;
         int r = q.parse(ML_RU, request->query(), position, firstComponentInFlags(componentFlags));
         if (!r) {
+#if CMAKE_BUILD_TYPE == Debug
+    LOG(INFO) << "card query: " << q.toString() << std::endl;
+#endif
             RCQueryProcessor p(q);
             rcr::CardQueryResponse qr;
             uint64_t cnt = 0;
