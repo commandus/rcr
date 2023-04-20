@@ -11,6 +11,10 @@
 #include "argtable3/argtable3.h"
 #include <grpc++/grpc++.h>
 
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
+
 #include "grpcClient.h"
 
 #include "AppSettings.h"
@@ -27,25 +31,21 @@ const char* DEF_COMMAND = "stream-query";
 #define DEF_PORT		        50051
 #define DEF_ADDRESS			    "127.0.0.1"
 
-static const char *GREETING_STRING = "Enter help to see command list\n";
-
-static const char *HELP_STRING =
-    "help               Help screen\n"
-    "quit               Exit\n"
-    "symbol list        Component type and symbol list\n"
-    "symbol             Set all component types\n"
-    "symbol D           Set component symbol D (integrated circuits)\n"
-    "property list      Properties list\n"
-    "user list          Registered users\n"
-    "import <path>      Preview spreadsheets in the path\n"
-    "import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n"
-    "   .. no-num       Do not read box number from Excel file name\n"
-    "D*                 Search by name starting with 'D'\n"
-    "100 kOhm           Search resistors by nominal\n"
-    "10 µF 119          Search capacitor by nominal in boxes 119-..\n"
-    "* 119              Search all in boxes 119-..\n"
-    "* 119-1 K:DIP      Search all in box 119-1 DIP\n"
-    ;
+#define HELP_STRING _("help               Help screen\n\
+quit               Exit\n\
+symbol list        Component type and symbol list\n\
+symbol             Set all component types\n\
+symbol D           Set component symbol D (integrated circuits)\n\
+property list      Properties list\n\
+user list          Registered users\n\
+import <path>      Preview spreadsheets in the path\n\
+import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n\
+.. no-num       Do not read box number from Excel file name\n\
+        D*                 Search by name starting with 'D'\n\
+100 kOhm           Search resistors by nominal\n\
+1 mF 119           Search capacitor by nominal in boxes 119-..\n\
+* 119              Search all in boxes 119-..\n\
+* 119-1 K:DIP      Search all in box 119-1 DIP\n")
 
 class ClientConfig {
 public:
@@ -74,7 +74,7 @@ void printSpreadSheets(
 ) {
     std::vector<std::string> spreadSheets;
     util::filesInPath(path, ".xlsx", 0, &spreadSheets);
-    std::cout << spreadSheets.size() << " *.xlsx files found in '" << path << "'" << std::endl;
+    std::cout << spreadSheets.size() << _(" *.xlsx files found in '") << path << "'" << std::endl;
     for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
         uint64_t box;
         if (numberInFilename)
@@ -83,7 +83,7 @@ void printSpreadSheets(
             box = BoxName::extractFromFileName(boxName);
         SpreadSheetHelper spreadSheet(*it);
         if (verbosity) {
-            std::cout << *it << ": " << spreadSheet.items.size() << " names, " << spreadSheet.total << " items" << std::endl;
+            std::cout << *it << ": " << spreadSheet.items.size() << _(" names, ") << spreadSheet.total << _(" items") << std::endl;
             for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
                 if (bx->second) {
                     std::cout << StockOperation::boxes2string(StockOperation::boxAppendBox(box, bx->first)) << ": "
@@ -123,7 +123,7 @@ void importSpreadSheets(
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
         if (r) {
-            std::cerr << "Error: " << r << std::endl;
+            std::cerr << _("Error: ") << r << std::endl;
             break;
         }
     }
@@ -141,33 +141,31 @@ int parseCmd
 	ClientConfig *value
 )
 {
-	struct arg_str *a_interface = arg_str0("i", "hostname", "<service host name>", "service host name.");
-	struct arg_int *a_port = arg_int0("l", "listen", "<port>", "service port. Default 50051");
+	struct arg_str *a_interface = arg_str0("i", "hostname", _("<service host name>"), _("service host name or IP address."));
+	struct arg_int *a_port = arg_int0("l", "listen", "<port>", _("service port. Default 50051"));
 	// SSL
-	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", "SSL on");
+	struct arg_lit *a_sslon = arg_lit0("s", "sslOn", _("SSL on"));
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
-	struct arg_str *a_command = arg_str0(nullptr, nullptr, "<command>",
+	struct arg_str *a_command = arg_str0(nullptr, nullptr, _("<command>"),
             "card|box|login|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
-    struct arg_str *a_request = arg_str0(nullptr, nullptr, "<request>", "command parameter(request)");
-    struct arg_str *a_user_name = arg_str0("u", "user", "<user-name>", "User login");
-    struct arg_str *a_user_password = arg_str0("p", "password", "<password>", "User password");
-    struct arg_str *a_box = arg_str0("b", "box", "<box>", "box prefix e.g. 221-2");
-    struct arg_int *a_offset = arg_int0("o", "offset", "<number>", "List offset 0.. Default 0");
-    struct arg_int *a_size = arg_int0("s", "size", "<number>", "List size. Default 10000");
+    struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<request>"), _("command parameter(request)"));
+    struct arg_str *a_user_name = arg_str0("u", "user", _("<user-name>"), _("User login"));
+    struct arg_str *a_user_password = arg_str0("p", "password", _("<password>"), _("User password"));
+    struct arg_str *a_box = arg_str0("b", "box", _("<box>"), _("box prefix e.g. 221-2"));
+    struct arg_int *a_offset = arg_int0("o", "offset", _("<number>"), _("List offset 0.. Default 0"));
+    struct arg_int *a_size = arg_int0("s", "size", _("<number>"), _("List size. Default 10000"));
 
-    struct arg_int *a_repeats = arg_int0("n", "repeat", "<number>", "Default 1");
+    struct arg_lit *a_no_number_in_filename = arg_lit0(nullptr, "no_box_number_in_filename", _("do not read box from Excel file name"));
+	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
 
-    struct arg_lit *a_no_number_in_filename = arg_lit0(nullptr, "no_box_number_in_filename", "do not read box from Excel file name");
-	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
-
-	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
+	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port, a_sslon,
         a_command, a_request, a_box, a_user_name, a_user_password,
         a_offset, a_size,
-		a_repeats, a_verbose,
+		a_verbose,
 		a_help, a_end };
 
 	int nerrors;
@@ -185,10 +183,10 @@ int parseCmd
 	{
 		if (nerrors)
 			arg_print_errors(stderr, a_end, progname);
-		printf("Usage: %s\n",  progname);
-		arg_print_syntax(stdout, argtable, "\n");
-		printf("rcr CLI client\n");
-		arg_print_glossary(stdout, argtable, "  %-25s %s\n");
+		std::cerr << _("Usage: ") << progname << std::endl;
+		arg_print_syntax(stderr, argtable, "\n");
+		std::cerr << _("rcr CLI client") << std::endl;
+		arg_print_glossary(stderr, argtable, "  %-25s %s\n");
 		arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 		return 1;
 	}
@@ -240,11 +238,6 @@ int parseCmd
     else
         value->size = 10000;
 
-    if (a_repeats->count)
-		value->repeats = *a_repeats->ival;
-	else
-		value->repeats = 1;
-
     if (a_no_number_in_filename->count)
         value->numberInFileName = false;
     else
@@ -258,6 +251,12 @@ int parseCmd
 
 int main(int argc, char** argv)
 {
+    // I18N
+    setlocale(LC_ALL, "");
+    // bindtextdomain(progname, "/usr/share/locale");
+    // bind_textdomain_codeset(progname, "UTF-8");
+    textdomain(progname);
+
 	ClientConfig config;
 	int r;
 	if (r = parseCmd(argc, argv, &config))
@@ -287,7 +286,6 @@ int main(int argc, char** argv)
     }
 
     RcrClient rpc(channel, config.username, config.password);
-    // rpc.addPropertyType("ptkey", "pt desc");
 
     rcr::User u;
     u.set_name(config.username);
@@ -325,7 +323,7 @@ int main(int argc, char** argv)
     }
 
     if (config.command == "login") {
-        std::cout << (rpc.login(&u) ? "success" : "fail") << std::endl;
+        std::cout << (rpc.login(&u) ? _("success") : _("fail")) << std::endl;
     }
     if (config.command == "users") {
         rpc.printUser(std::cout, &u);
@@ -358,7 +356,7 @@ int main(int argc, char** argv)
         if (cs == "query") {
             std::string line;
             std::string symbol = "";
-            std::cerr << GREETING_STRING << std::endl;
+            std::cerr << _("Enter help to see command list") << std::endl;
             while (std::getline(std::cin, line)) {
                 if (line.find("help") == 0) {
                     std::cerr << HELP_STRING << std::endl;

@@ -845,3 +845,20 @@ cd python
 python3 rcr_client.py
 cp
 ``` 
+
+
+# I18N
+
+После правки po/rcr-cli.ru_RU.UTF-8.po запустите
+```
+tools/update-translation.sh
+```
+Созданный файл скопируйте в /usr/share/locale/ru/LC_MESSAGES/: 
+
+```
+msgfmt -o locale/ru/LC_MESSAGES/rcr-cli.mo po/rcr-cli.ru_RU.UTF-8.po
+sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/ru/LC_MESSAGES/rcr-cli.mo
+sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/ru/LC_MESSAGES/rcr-cli.mo
+```
+
+Скрипт tools/l10n создает начальный файл
