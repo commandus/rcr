@@ -9,8 +9,9 @@ for f in $(ls po/rcr-cli.*.po) ; do
     echo -n Merge ${code} ..
     msgmerge -U $f $TEMPLATE
     echo Copying ${code} ..
+    mkdir -p locale/${code}/LC_MESSAGES
     msgfmt -o locale/${code}/LC_MESSAGES/rcr-cli.mo $f
-#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/ru/LC_MESSAGES/rcr-cli.mo
-#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/ru/LC_MESSAGES/rcr-cli.mo
+#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/${code}/LC_MESSAGES/rcr-cli.mo
+#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/${code}/LC_MESSAGES/rcr-cli.mo
   fi
 done
