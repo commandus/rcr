@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-20 17:04+0900\n"
+"POT-Creation-Date: 2023-04-25 14:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,134 +17,120 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: cli/rcr-cli.cpp:34
-msgid ""
-"help               Help screen\n"
-"quit               Exit\n"
-"symbol list        Component type and symbol list\n"
-"symbol             Set all component types\n"
-"symbol D           Set component symbol D (integrated circuits)\n"
-"property list      Properties list\n"
-"user list          Registered users\n"
-"import <path>      Preview spreadsheets in the path\n"
-"import <path> R 42 Import resistors (symbol R) from spreadsheets in the path "
-"to box 42\n"
-".. no-num       Do not read box number from Excel file name\n"
-"        D*                 Search by name starting with 'D'\n"
-"100 kOhm           Search resistors by nominal\n"
-"1 mF 119           Search capacitor by nominal in boxes 119-..\n"
-"* 119              Search all in boxes 119-..\n"
-"* 119-1 K:DIP      Search all in box 119-1 DIP\n"
-msgstr ""
-
-#: cli/rcr-cli.cpp:77
-msgid " *.xlsx files found in '"
-msgstr ""
-
-#: cli/rcr-cli.cpp:86
-msgid " names, "
-msgstr ""
-
-#: cli/rcr-cli.cpp:86
-msgid " items"
-msgstr ""
-
-#: cli/rcr-cli.cpp:126
-msgid "Error: "
-msgstr ""
-
-#: cli/rcr-cli.cpp:144
-msgid "<service host name>"
-msgstr ""
-
-#: cli/rcr-cli.cpp:144
-msgid "service host name or IP address."
-msgstr ""
-
-#: cli/rcr-cli.cpp:145
-msgid "service port. Default 50051"
-msgstr ""
-
-#: cli/rcr-cli.cpp:147
+#: svc/svc.cpp:75
 msgid "SSL on"
 msgstr ""
 
-#: cli/rcr-cli.cpp:150
-msgid "<command>"
+#: svc/svc.cpp:93 svc/svc.cpp:116
+msgid "Server listening on "
 msgstr ""
 
-#: cli/rcr-cli.cpp:152
-msgid "<request>"
+#: svc/svc.cpp:97 svc/svc.cpp:119
+msgid "Can not start server"
 msgstr ""
 
-#: cli/rcr-cli.cpp:152
-msgid "command parameter(request)"
+#: svc/svc.cpp:127
+msgid "Interrupted.."
 msgstr ""
 
-#: cli/rcr-cli.cpp:153
-msgid "<user-name>"
+#: svc/svc.cpp:130
+msgid "exit"
 msgstr ""
 
-#: cli/rcr-cli.cpp:153
-msgid "User login"
+#: svc/svc.cpp:133
+msgid "Signal "
 msgstr ""
 
-#: cli/rcr-cli.cpp:154
-msgid "<password>"
+#: svc/svc.cpp:149
+msgid "<address>"
 msgstr ""
 
-#: cli/rcr-cli.cpp:154
-msgid "User password"
+#: svc/svc.cpp:149
+msgid "service IPv4 network interface address. Default 0.0.0.0 (all)"
 msgstr ""
 
-#: cli/rcr-cli.cpp:155
-msgid "<box>"
+#: svc/svc.cpp:150
+msgid "<port>"
 msgstr ""
 
-#: cli/rcr-cli.cpp:155
-msgid "box prefix e.g. 221-2"
+#: svc/svc.cpp:150
+msgid "service port. Default 50051"
 msgstr ""
 
-#: cli/rcr-cli.cpp:156 cli/rcr-cli.cpp:157
-msgid "<number>"
+#: svc/svc.cpp:152
+msgid "<SQLite# database>"
 msgstr ""
 
-#: cli/rcr-cli.cpp:156
-msgid "List offset 0.. Default 0"
+#: svc/svc.cpp:152
+msgid "database, default \"rcr.db\""
 msgstr ""
 
-#: cli/rcr-cli.cpp:157
-msgid "List size. Default 10000"
+#: svc/svc.cpp:156
+msgid "database connection"
 msgstr ""
 
-#: cli/rcr-cli.cpp:159
-msgid "do not read box from Excel file name"
+#: svc/svc.cpp:157
+msgid "database login"
 msgstr ""
 
-#: cli/rcr-cli.cpp:160
-msgid "Verbose level"
+#: svc/svc.cpp:158
+msgid "database scheme"
 msgstr ""
 
-#: cli/rcr-cli.cpp:162
+#: svc/svc.cpp:159
+msgid "database user password"
+msgstr ""
+
+#: svc/svc.cpp:160
+msgid "database host. Default localhost"
+msgstr ""
+
+#: svc/svc.cpp:161
+msgid "database port. Default 5432"
+msgstr ""
+
+#: svc/svc.cpp:162
+msgid "database options file"
+msgstr ""
+
+#: svc/svc.cpp:163
+msgid "database socket. Default none."
+msgstr ""
+
+#: svc/svc.cpp:164
+msgid "database client charset. Default utf8."
+msgstr ""
+
+#: svc/svc.cpp:165
+msgid "database client flags. Default 0."
+msgstr ""
+
+#: svc/svc.cpp:167
+msgid "enable SSL"
+msgstr ""
+
+#: svc/svc.cpp:168
+msgid "start as daemon/service"
+msgstr ""
+
+#: svc/svc.cpp:170
 msgid "Show this help"
 msgstr ""
 
-#: cli/rcr-cli.cpp:186
+#: svc/svc.cpp:198
 msgid "Usage: "
 msgstr ""
 
-#: cli/rcr-cli.cpp:188
-msgid "rcr CLI client"
+#: svc/svc.cpp:200
+msgid "rcr GRPC service"
 msgstr ""
 
-#: cli/rcr-cli.cpp:326
-msgid "success"
+#: svc/svc.cpp:260
+msgid ""
+"database connection error.\n"
+"Usage: "
 msgstr ""
 
-#: cli/rcr-cli.cpp:326
-msgid "fail"
-msgstr ""
-
-#: cli/rcr-cli.cpp:359
-msgid "Enter help to see command list"
+#: svc/svc.cpp:309
+msgid "Start as daemon, use syslog"
 msgstr ""

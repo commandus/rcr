@@ -685,7 +685,8 @@ size_t RCQueryProcessor::setCards(
         if (cnt == 0 && itCard == q.end() && query->code == SO_SET) {
             // special case, "=" if no exists
             rcr::Card card;
-            card.set_symbol_id(query->measure);
+            uint64_t symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+            card.set_symbol_id(symbId);
             card.set_name(query->componentName);
             card.set_nominal(query->nominal);
             uint64_t cid = db->persist(card);

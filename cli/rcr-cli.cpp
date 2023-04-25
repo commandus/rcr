@@ -481,9 +481,8 @@ int main(int argc, char** argv)
 
                 int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);
                 std::cout << std::endl;
-                if (r) {
+                if (r)
                     exit(r);
-                }
             }
         }
     }

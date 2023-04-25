@@ -23,9 +23,11 @@
 #include "daemonize.h"
 #include "svcImpl.h"
 #include "SSLValidator.h"
-#include "AppSettings.h"
 
 #include "passphrase.h"
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
 
 const char* progname = "rcr-svc";
 const char* DEF_DB_SQLITE = "rcr.db";
@@ -69,9 +71,8 @@ void runSSL()
 	ss << config.address << ":" << config.port;
 	RcrImpl service(&config);
 
-    if (config.verbosity > 0) {
-        std::cerr << "SSL on" << std::endl;
-    }
+    if (config.verbosity > 0)
+        std::cerr << _("SSL on") << std::endl;
 
 	// Create server metadata  processor
     std::shared_ptr<RcrAuthMetadataProcessor> processor(new RcrAuthMetadataProcessor(true, true,
@@ -89,11 +90,11 @@ void runSSL()
 	server = builder.BuildAndStart();
 	if (server)	{
 		if (config.verbosity > 0)
-			std::cout << "Server listening on " << ss.str() << "." << std::endl;
+			std::cout << _("Server listening on ") << ss.str() << std::endl;
 		server->Wait();
 	}
 	else
-		std::cerr << "Can not start server." << std::endl;
+		std::cerr << _("Can not start server") << std::endl;
 }
 
 void run()
@@ -112,10 +113,10 @@ void run()
     server = builder.BuildAndStart();
     if (server)	{
         if (config.verbosity > 0)
-            std::cout << "Server listening on " << ss.str() << "." << std::endl;
+            std::cout << _("Server listening on ") << ss.str() << std::endl;
         server->Wait();
     } else
-        std::cerr << "Can not start server." << std::endl;
+        std::cerr << _("Can not start server") << std::endl;
 }
 
 void signalHandler(int signal)
@@ -123,13 +124,13 @@ void signalHandler(int signal)
 	switch(signal)
 	{
 	case SIGINT:
-		std::cerr << "Interrupted..";
+		std::cerr << _("Interrupted..");
 		stopNWait();
 		done();
-		std::cerr << "exit." << std::endl;
+		std::cerr << _("exit") << std::endl;
 		break;
 	default:
-		std::cerr << "Signal " << signal << std::endl;
+		std::cerr << _("Signal ") << signal << std::endl;
 	}
 }
 
@@ -139,35 +140,34 @@ void signalHandler(int signal)
  *        1- show help and exit, or command syntax error
  *        2- output file does not exists or can not open to write
  **/
-int parseCmd
-(
+int parseCmd(
 	int argc,
 	char* argv[],
 	struct ServiceConfig *value
 )
 {
-	struct arg_str *a_interface = arg_str0("i", "ip4", "<address>", "service IPv4 network interface address. Default 0.0.0.0 (all)");
-	struct arg_int *a_port = arg_int0("l", "listen", "<port>", "service port. Default 50051");
+	struct arg_str *a_interface = arg_str0("i", "ip4", _("<address>"), _("service IPv4 network interface address. Default 0.0.0.0 (all)"));
+	struct arg_int *a_port = arg_int0("l", "listen", _("<port>"), _("service port. Default 50051"));
 #ifdef ENABLE_SQLITE
-    struct arg_str *a_sqliteDbName = arg_str0(nullptr, "db", "<SQLite# database>", "database, default \"rcr.db\"");
+    struct arg_str *a_sqliteDbName = arg_str0(nullptr, "db", _("<SQLite# database>"), _("database, default \"rcr.db\""));
 #endif
 #ifdef ENABLE_PG
 	// database connection
-	struct arg_str *a_conninfo = arg_str0(NULL, "conninfo", "<string>", "database connection");
-	struct arg_str *a_user = arg_str0(NULL, "user", "<login>", "database login");
-	struct arg_str *a_database = arg_str0(NULL, "database", "<scheme>", "database scheme");
-	struct arg_str *a_password = arg_str0(NULL, "password", "<password>", "database user password");
-	struct arg_str *a_host = arg_str0(NULL, "host", "<host>", "database host. Default localhost");
-	struct arg_str *a_dbport = arg_str0(NULL, "port", "<integer>", "database port. Default 5432");
-	struct arg_file *a_optionsfile = arg_file0(NULL, "options-file", "<file>", "database options file");
-	struct arg_str *a_dbsocket = arg_str0(NULL, "dbsocket", "<socket>", "database socket. Default none.");
-	struct arg_str *a_dbcharset = arg_str0(NULL, "dbcharset", "<charset>", "database client charset. Default utf8.");
-	struct arg_int *a_dbclientflags = arg_int0(NULL, "dbclientflags", "<number>", "database client flags. Default 0.");
+	struct arg_str *a_conninfo = arg_str0(NULL, "conninfo", "<string>", _("database connection"));
+	struct arg_str *a_user = arg_str0(NULL, "user", "<login>", _("database login"));
+	struct arg_str *a_database = arg_str0(NULL, "database", "<scheme>", _("database scheme"));
+	struct arg_str *a_password = arg_str0(NULL, "password", "<password>", _("database user password"));
+	struct arg_str *a_host = arg_str0(NULL, "host", "<host>", _("database host. Default localhost"));
+	struct arg_str *a_dbport = arg_str0(NULL, "port", "<integer>", _("database port. Default 5432"));
+	struct arg_file *a_optionsfile = arg_file0(NULL, "options-file", "<file>", _("database options file"));
+	struct arg_str *a_dbsocket = arg_str0(NULL, "dbsocket", "<socket>", _("database socket. Default none."));
+	struct arg_str *a_dbcharset = arg_str0(NULL, "dbcharset", "<charset>", _("database client charset. Default utf8."));
+	struct arg_int *a_dbclientflags = arg_int0(NULL, "dbclientflags", "<number>", _("database client flags. Default 0."));
 #endif
-    struct arg_lit *a_ssl = arg_lit0("s", "ssl", "enable SSL");
-	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", "start as daemon/service");
+    struct arg_lit *a_ssl = arg_lit0("s", "ssl", _("enable SSL"));
+	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", _("start as daemon/service"));
 
-	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
+	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help");
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port,
@@ -195,9 +195,9 @@ int parseCmd
 	if ((a_help->count) || nerrors)	{
 		if (nerrors)
 			arg_print_errors(stderr, a_end, progname);
-		printf("Usage: %s\n",  progname);
+		std::cout << _("Usage: ") << progname << std::endl;
 		arg_print_syntax(stdout, argtable, "\n");
-		printf("One way ticket GRPC service\n");
+		std::cout << _("rcr GRPC service") << std::endl;
 		arg_print_glossary(stdout, argtable, "  %-25s %s\n");
 		arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 		return 1;
@@ -257,7 +257,7 @@ int parseCmd
 	// check database connection
 	PGconn *conn = dbconnect(value);
 	if (PQstatus(conn) != CONNECTION_OK) {
-        std::cerr << "database connection error.\nUsage: " << progname << std::endl);
+        std::cerr << _("database connection error.\nUsage: ") << progname << std::endl);
         arg_print_syntax(stdout, argtable, "\n");
         return 2;
     }
@@ -292,7 +292,13 @@ void setSignalHandler(
 
 int main(int argc, char* argv[])
 {
-	initRandomName();
+    // I18N
+    setlocale(LC_ALL, "");
+    // bindtextdomain(progname, "/usr/share/locale");
+    // bind_textdomain_codeset(progname, "UTF-8");
+    textdomain(progname);
+
+    initRandomName();
 	// Signal handler
 	setSignalHandler(SIGINT);
 	reslt = 0;
@@ -300,7 +306,7 @@ int main(int argc, char* argv[])
 		exit(CODE_WRONG_OPTIONS);
 	if (config.daemonize) {
 		if (config.verbosity)
-			std::cerr << "Start as daemon, use syslog" << std::endl;
+			std::cerr << _("Start as daemon, use syslog") << std::endl;
 		Daemonize daemonize(progname, config.path, config.sslOn ? runSSL : run, stopNWait, done);
 	}
 	else {

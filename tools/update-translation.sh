@@ -1,17 +1,26 @@
 #!/bin/bash
 # po/rcr-cli.ru_RU.UTF-8.po
 TEMPLATE=po/rcr-cli.pot
-for f in $(ls po/rcr-cli.*.po) ; do
-  regex="\.([a-z][a-z])_..\.UTF-8\.po"
+for f in $(ls po/*.po) ; do
+  regex="\/(.*)\.([a-z][a-z])_..\.UTF-8\.po"
   if [[ $f =~ $regex ]]; then
-    code="${BASH_REMATCH[1]}"
-    xgettext -k_ -o $TEMPLATE cli/*.cpp svc/*.cpp
-    echo -n Merge ${code} ..
+    fn="${BASH_REMATCH[1]}"
+    code="${BASH_REMATCH[2]}"
+
+    case $fn in
+      'box') FM='cli/box.cpp';;
+      'mkdb') FM='cli/mkdb.cpp';;
+      'rcr-cli') FM='cli/rcr-cli.cpp';;
+      'rcr-svc') FM='svc/*';;
+      *) FM='cli/grpcClient.cpp';;
+    esac
+
+    xgettext -k_ -o $TEMPLATE $FM
+    echo -n Merge $fn $FM ${code} ..
     msgmerge -U $f $TEMPLATE
-    echo Copying ${code} ..
     mkdir -p locale/${code}/LC_MESSAGES
-    msgfmt -o locale/${code}/LC_MESSAGES/rcr-cli.mo $f
-#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/${code}/LC_MESSAGES/rcr-cli.mo
-#   sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/${code}/LC_MESSAGES/rcr-cli.mo
+    msgfmt -o locale/${code}/LC_MESSAGES/$fn.mo $f
+#   sudo cp locale/${code}/LC_MESSAGES/*.mo /usr/share/locale/${code}/LC_MESSAGES/
+#   sudo cp locale/${code}/LC_MESSAGES/*.mo /usr/local/share/locale/${code}/LC_MESSAGES/
   fi
 done

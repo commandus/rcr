@@ -1,0 +1,47 @@
+# Russian translations for PACKAGE package.
+# Copyright (C) 2023 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# andrei <andrei@office221>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-04-25 12:49+0900\n"
+"PO-Revision-Date: 2023-04-19 15:23+0900\n"
+"Last-Translator: andrei <andrei@office221>\n"
+"Language-Team: Russian <gnu@d07.ru>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: cli/box.cpp:36
+msgid "<box path>"
+msgstr "<путь коробки>"
+
+#: cli/box.cpp:36
+msgid "print box number"
+msgstr "вывести идентификатор коробки"
+
+#: cli/box.cpp:37
+msgid "No output end of line"
+msgstr "Не добавлять перевод строки"
+
+#: cli/box.cpp:38
+msgid "print box path for number"
+msgstr "вывести путь коробки по идентификатору"
+
+#: cli/box.cpp:39
+msgid "Show this help"
+msgstr "Показать эту справку"
+
+#: cli/box.cpp:58
+msgid "Usage: "
+msgstr "Использование: "
+
+#: cli/box.cpp:60
+msgid "Print box path from box identifier and vice versa"
+msgstr "Dывести путь коробки по ее идентификатору, и наоборот"

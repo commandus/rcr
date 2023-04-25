@@ -160,6 +160,12 @@ target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
 #
+# box
+#
+add_executable(box cli/box.cpp	${ARGTABLE}	StockOperation.cpp)
+target_link_libraries(box PRIVATE ${ICU_LIBS})
+
+#
 # rcr-svc
 #
 set(RCR_SVC_SRC

@@ -17,6 +17,9 @@
 
 #include "MeasureUnit.h"
 
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
 
 const char* progname = "mkdb";
 const char* DEF_CONNECTION = "rcr.db";
@@ -41,12 +44,12 @@ int parseCmd(
 	ClientConfig &value
 )
 {
-	struct arg_str *a_connection = arg_str0("c", "connection", "<connection-string>",
-            "Set database connection string");
+	struct arg_str *a_connection = arg_str0("c", "connection", _("<connection-string>"),
+        _("Set database connection string"));
     struct arg_str *a_locale = arg_str0("l", "locale", "intl|ru",
-                                            "Set locale. Default ru");
-    struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, "Verbose level");
-	struct arg_lit *a_help = arg_lit0("h", "help", "Show this help");
+        _("Set locale. Default ru"));
+    struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
+	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_connection, a_locale, a_verbose, a_help, a_end };
@@ -64,9 +67,9 @@ int parseCmd(
 	if ((a_help->count) || nerrors)	{
 		if (nerrors)
 			arg_print_errors(stderr, a_end, progname);
-		std::cerr << "Usage: " <<  progname << std::endl;
+		std::cerr << _("Usage: ") <<  progname << std::endl;
 		arg_print_syntax(stdout, argtable, "\n");
-        std::cerr << "make database utility" << std::endl;
+        std::cerr << _("make database utility") << std::endl;
 		arg_print_glossary(stdout, argtable, "  %-25s %s\n");
 		arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 		return 1;
@@ -131,7 +134,7 @@ static bool sqliteFillOutDatabase(
 
         rcr::PropertyType propertyType;
         propertyType.set_key("K");
-        propertyType.set_description("корпус");
+        propertyType.set_description(_("housing"));
         db.persist(propertyType);
 
         // user
@@ -154,10 +157,10 @@ static bool sqliteFillOutDatabase(
 
         r = true;
     } catch (odb::exception &ex) {
-        std::cerr << "Error filling schema : " << ex.what() << std::endl;
+        std::cerr << _("Error filling schema :") << ex.what() << std::endl;
         r = false;
     } catch (...) {
-        std::cerr << "Unknown error filling schema" << std::endl;
+        std::cerr << _("Unknown error filling schema") << std::endl;
     }
 
     return r;
@@ -179,9 +182,9 @@ static bool sqliteCreateSchemaIfExists(ClientConfig &config)
         try {
             odb::schema_catalog::create_schema(*db);
         } catch (odb::exception &ex) {
-            std::cerr << "Error create schema " << ex.what() << std::endl;
+            std::cerr << _("Error create schema: ") << ex.what() << std::endl;
         } catch (...) {
-            std::cerr << "Unknown error create schema" << std::endl;
+            std::cerr << _("Unknown error create schema") << std::endl;
         }
     }
 
@@ -192,9 +195,14 @@ static bool sqliteCreateSchemaIfExists(ClientConfig &config)
     return created;
 }
 
-int main(int argc, char** argv)
-{
-	ClientConfig config;
+int main(int argc, char** argv) {
+    // I18N
+    setlocale(LC_ALL, "");
+    // bindtextdomain(progname, "/usr/share/locale");
+    // bind_textdomain_codeset(progname, "UTF-8");
+    textdomain(progname);
+
+    ClientConfig config;
 	int r;
 	if (r = parseCmd(argc, argv, config))
 		exit(r);
@@ -205,7 +213,6 @@ int main(int argc, char** argv)
     sqliteCreateSchemaIfExists(config);
 #else
 #endif
-    std::cout << "Admin user SYSDBA created with password \"masterkey\"" << std::endl;
-
+    std::cout << _("Admin user SYSDBA created with password \"masterkey\"") << std::endl;
     return 0;
 }
