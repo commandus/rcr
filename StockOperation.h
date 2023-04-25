@@ -23,7 +23,8 @@ typedef enum {
     SO_SET = 5,
     SO_ADD = 6,
     SO_SUB = 7,
-    SO_RM = 8
+    SO_MOV = 8,
+    SO_RM = 9
 } STOCK_OPERATION_CODE;
 
 class StockOperation {
@@ -32,14 +33,15 @@ protected:
      * Parse command +1, -1, -1, sum, count, rm
      * @param value
      * @param start
-     * @param finish
+     * @param eolp
      * @return
      */
     static STOCK_OPERATION_CODE parseCommand(
         size_t &retCount,
+        uint64_t &retDestinationBox,
         const std::string &value,
         size_t start,
-        size_t finish
+        size_t eolp
     );
 
 public:
@@ -47,6 +49,7 @@ public:
     int boxBlocks;
     uint64_t boxes;
     size_t count;
+    uint64_t destinationBox;
 
     StockOperation(const std::string &value);
     StockOperation() = default;
@@ -58,7 +61,10 @@ public:
         STOCK_OPERATION_CODE &code,
         int &boxBlocks,
         uint64_t &boxes,
-        size_t &count
+        // operation count
+        size_t &count,
+        // operation destination
+        uint64_t &destinationBox
     );
     /**
      * Parse [box]<SEPARATOR>[cmd][value]
@@ -71,6 +77,7 @@ public:
      *  "+1" -> SO_ADD 1
      *  "-1" -> SO_SUB 1
      *  "=1" -> SO_SET 1
+     *  "/1" -> SO_MOV 1
      *  "sum" -> SO_SUM
      *  "count" -> SO_COUNT
      * @param value

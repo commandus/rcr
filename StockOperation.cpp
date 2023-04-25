@@ -4,6 +4,7 @@
 
 #include <sstream>
 #include <limits>
+#include <iostream>
 #include "StockOperation.h"
 #include "platform.h"
 
@@ -21,7 +22,10 @@ int StockOperation::parse(
     STOCK_OPERATION_CODE &retCode,
     int &retBoxBlocks,
     uint64_t &retBoxes,
-    size_t &retCount
+    // operation count
+    size_t &retCount,
+    // operation destination
+    uint64_t &retDestinationBox
 )
 {
     // set default
@@ -62,7 +66,7 @@ int StockOperation::parse(
     bool hasSecondPart = (finishSecond > startSecond);
 
     if (hasSecondPart) {
-        if (hasFirstPart) {
+        if (hasFirstPart) { // has boxes
             retBoxBlocks = parseBoxes(retBoxes, value, start, finish);
             if (retBoxBlocks == 0) {
                 return -1;
@@ -71,11 +75,11 @@ int StockOperation::parse(
             retBoxBlocks = 0;
             retBoxes = 0;
         }
-        retCode = parseCommand(retCount, value, startSecond, finishSecond);
-        if (retCode == SO_NONE)
-            retCode = SO_LIST;
+        retCode = parseCommand(retCount, retDestinationBox, value, startSecond, finishSecond);
+        // if (retCode == SO_NONE) retCode = SO_LIST;
     } else {
-        retCode = parseCommand(retCount, value, start, finish);
+        // no boxes specified
+        retCode = parseCommand(retCount, retDestinationBox, value, start, finish);
         // return SO_NONE- invalid command
         if (retCode == SO_NONE) {
             retBoxBlocks = parseBoxes(retBoxes, value, start, finish);
@@ -161,11 +165,11 @@ int StockOperation::parseString(
         if (boxBlocks == 0) {
             return -1;
         }
-        code = parseCommand(count, value, startSecond, finishSecond);
+        code = parseCommand(count, destinationBox, value, startSecond, finishSecond);
         if (code == SO_NONE)
             code = SO_LIST;
     } else {
-        code = parseCommand(count, value, start, finish);
+        code = parseCommand(count, destinationBox,value, start, finish);
         // return SO_NONE- invalid command
         if (code == SO_NONE) {
             boxBlocks = parseBoxes(boxes, value, start, finish);
@@ -244,17 +248,18 @@ int StockOperation::parseBoxes(
  * Parse command +1, -1, =1, sum, count, rm
  * @param value
  * @param start
- * @param finish
+ * @param eolp
  * @return
  */
 STOCK_OPERATION_CODE StockOperation::parseCommand(
     size_t &retCount,
+    uint64_t &retDestinationBox,
     const std::string &value,
     size_t start,
-    size_t finish
+    size_t eolp
 )
 {
-    if (finish <= start)
+    if (eolp <= start)
         return SO_NONE;
 
     STOCK_OPERATION_CODE r;
@@ -267,6 +272,9 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
             break;
         case '=':
             r = SO_SET;
+            break;
+        case '/':
+            r = SO_MOV;
             break;
         case 'C':
         case 'c':
@@ -283,11 +291,33 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
         default:
             r = SO_NONE;
     }
-    if (r >= SO_SET && r <= SO_SUB) {
+    if (r >= SO_SET && r <= SO_MOV) {
         // try to read number
         start++;    // command takes 1 byte
+        size_t finish = eolp;
         try {
+            // skip separator(s)
+            for (auto p = start; p < finish; p++) {
+                if (std::isdigit(value[p])) {
+                    start = p;
+                    break;
+                }
+            }
+            // find out end of the number block
+            for (auto p = start; p < finish; p++) {
+                if (!std::isdigit(value[p])) {
+                    finish = p;
+                    break;
+                }
+            }
             retCount = std::stoull(value.substr(start, finish - start));
+            start = finish;
+            if (r == SO_MOV) {
+                // try get destination box
+                int blocks = parseBoxes(retDestinationBox, value, start, eolp);
+                if (blocks == 0)
+                    r = SO_NONE;    // invalid command
+            }
         } catch (std::exception &e) {
             retCount = 0;
             r = SO_NONE;    // invalid command
@@ -463,7 +493,6 @@ std::string StockOperation::toString()
 uint64_t StockOperation::lastBox(
     const uint64_t &box
 ) {
-    uint64_t r = box;
     if (box & 0xffff)
         return box;
     else

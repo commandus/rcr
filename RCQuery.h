@@ -25,6 +25,7 @@ public:
     int boxBlocks;
     uint64_t boxes;
     size_t count;
+    uint64_t destinationBox;
 
     RCQuery() = default;
 

@@ -64,6 +64,7 @@ void RCQueryProcessor::exec(
         case SO_SET:
         case SO_ADD:
         case SO_SUB:
+        case SO_MOV:
         case SO_COUNT:
         case SO_SUM:
             count = setCards(db, t, dictionaries, query, componentFlags, &sum);
@@ -268,6 +269,26 @@ const rcr::PropertyType* RCQueryProcessor::findPropertyType(
             return &*it;
     }
     return nullptr;
+}
+
+// return nullptr if failed
+const rcr::PropertyType* RCQueryProcessor::findPropertyTypeOrAdd(
+    rcr::DictionariesResponse *dictionaries,
+    odb::database *db,
+    odb::transaction *transaction,
+    const std::string &key
+)
+{
+    const rcr::PropertyType* r = findPropertyType(dictionaries, key);
+    if (r)
+        return r;
+    rcr::PropertyType pt;
+    pt.set_key(key);
+    pt.set_description("");
+    pt.set_id(db->persist(pt));
+    rcr::PropertyType *ra = dictionaries->add_property_type();
+    *ra = pt;
+    return ra;
 }
 
 const std::string& RCQueryProcessor::findPropertyTypeName(
@@ -623,7 +644,8 @@ size_t RCQueryProcessor::setCards(
     try {
         odb::result<rcr::Card> q;
         mkCardQuery(db, t, dictionaries, q, query, componentFlags);
-        for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
+        odb::result<rcr::Card>::iterator itCard(q.begin());
+        for (; itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;
             //
@@ -633,24 +655,63 @@ size_t RCQueryProcessor::setCards(
             if (sum)
                 *sum += q;
 
-            if (query->code == SO_SET)
-                setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
-            if (query->code == SO_ADD)
-                setQuantity(db, t, packageId, itCard->id(), query->boxes, q + query->count);
-            if (query->code == SO_SUB) {
-                uint64_t d;
-                if (q > query->count)
-                    d = q - query->count;
-                else
-                    d = 0;
-                setQuantity(db, t, packageId, itCard->id(), query->boxes, d);
+            switch(query->code) {
+                case SO_SET:
+                    setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
+                    break;
+                case SO_ADD:
+                    setQuantity(db, t, packageId, itCard->id(), query->boxes, q + query->count);
+                    break;
+                case SO_SUB:
+                    setQuantity(db, t, packageId, itCard->id(), query->boxes,
+                                q > query->count ? q - query->count : 0);
+                    break;
+                case SO_MOV: {
+                    // remove from the source box
+                    setQuantity(db, t, packageId, itCard->id(), query->boxes,
+                                q > query->count ? q - query->count : 0);
+                    // put to destination box
+                    uint64_t destCardId = itCard->id(); // same card
+                    // get destination packageId, if not, ret 0
+                    uint64_t qDest = getQuantity(db, t, packageId, destCardId, query->destinationBox);
+                    setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);
+                }
+                    break;
+                default:
+                    break;
             }
             cnt++;
         }
+        if (cnt == 0 && itCard == q.end() && query->code == SO_SET) {
+            // special case, "=" if no exists
+            rcr::Card card;
+            card.set_symbol_id(query->measure);
+            card.set_name(query->componentName);
+            card.set_nominal(query->nominal);
+            uint64_t cid = db->persist(card);
+
+            // set properties
+            for (std::map <std::string, std::string>::const_iterator it = query->properties.begin(); it != query->properties.end(); it++) {
+                rcr::Property property;
+                property.set_card_id(cid);
+                const rcr::PropertyType *pt = findPropertyType(dictionaries, it->first);
+                if (!pt)
+                    continue;   // unknown
+                property.set_property_type_id(pt->id());
+                property.set_value(it->second);
+                uint64_t ppid = db->persist(property);
+            }
+
+            rcr::Package package;
+            package.set_card_id(cid);
+            package.set_box(query->boxes);
+            package.set_qty(query->count);
+            uint64_t pid = db->persist(package);
+        }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+        LOG(ERROR) << "setCards error: " << e.what();
     } catch (...) {
-        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
+        LOG(ERROR) << "setCards unknown error";
     }
     return cnt;
 }

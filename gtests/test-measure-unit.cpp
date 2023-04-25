@@ -78,6 +78,37 @@ TEST(RCQuery, Count) {
 
     ASSERT_EQ(q.code, SO_COUNT);
     ASSERT_EQ(q.count, 0);
+
+
+    position = 0;
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 /1234   221-2   ", position, COMPONENT_V);
+    ASSERT_EQ(q.measure, COMPONENT_V);
+    ASSERT_EQ(q.nominal, 0);
+    ASSERT_EQ(q.componentName, "К555ЛА7");
+    ASSERT_EQ(q.properties["key1"], "value1");
+    ASSERT_EQ(q.properties["key2"], "value2");
+
+    ASSERT_EQ(q.boxBlocks, 2);
+    ASSERT_EQ(q.boxes, 0x00dd000100000000);
+    ASSERT_EQ(q.destinationBox, 0x00dd000200000000);
+
+    ASSERT_EQ(q.code, SO_MOV);
+    ASSERT_EQ(q.count, 1234);
+
+    position = 0;
+    q.parse(ML_RU, " К555ЛА7 key1:value1 key2:value2 221-1 /1234", position, COMPONENT_V);
+    ASSERT_EQ(q.measure, COMPONENT_V);
+    ASSERT_EQ(q.nominal, 0);
+    ASSERT_EQ(q.componentName, "К555ЛА7");
+    ASSERT_EQ(q.properties["key1"], "value1");
+    ASSERT_EQ(q.properties["key2"], "value2");
+
+    ASSERT_EQ(q.boxBlocks, 2);
+    ASSERT_EQ(q.boxes, 0x00dd000100000000);
+    ASSERT_EQ(q.destinationBox, 0);
+
+    ASSERT_EQ(q.code, SO_NONE);
+    ASSERT_EQ(q.count, 1234);
 }
 
 TEST(RCQuery, Parse) {

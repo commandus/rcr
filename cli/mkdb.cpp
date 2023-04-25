@@ -125,6 +125,9 @@ static bool sqliteFillOutDatabase(
         operation.set_symbol("=");
         operation.set_description("");
         db.persist(operation);
+        operation.set_symbol("/");
+        operation.set_description("");
+        db.persist(operation);
 
         rcr::PropertyType propertyType;
         propertyType.set_key("K");

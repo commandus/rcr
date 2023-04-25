@@ -60,10 +60,19 @@ public:
         const rcr::DictionariesResponse *dictionaries,
         const std::string &key
     );
+
     // return nullptr if not found
     static const std::string& findPropertyTypeName(
-            const rcr::DictionariesResponse *dictionaries,
-            uint64_t key
+        const rcr::DictionariesResponse *dictionaries,
+        uint64_t key
+    );
+
+    // return nullptr if failed
+    static const rcr::PropertyType* findPropertyTypeOrAdd(
+        rcr::DictionariesResponse *dictionaries,
+        odb::database *db,
+        odb::transaction *transaction,
+        const std::string &key
     );
 
     // return nullptr if not found

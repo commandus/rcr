@@ -28,7 +28,7 @@ int RCQuery::parse(
     r = QueryProperties::parse(value, position, properties);
     if (r)
         return r;
-    r = StockOperation::parse(value, position, code, boxBlocks, boxes, count);
+    r = StockOperation::parse(value, position, code, boxBlocks, boxes, count, destinationBox);
     if (r)
         return r;
     return r;
