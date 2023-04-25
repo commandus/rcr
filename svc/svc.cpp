@@ -167,7 +167,7 @@ int parseCmd(
     struct arg_lit *a_ssl = arg_lit0("s", "ssl", _("enable SSL"));
 	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", _("start as daemon/service"));
 
-	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help");
+	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port,

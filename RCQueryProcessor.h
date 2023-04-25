@@ -43,11 +43,17 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    int updateBox1(
+    int updateBoxOnInsert(
         odb::database *db,
         odb::transaction *t,
         uint64_t boxId,
         const std::string &name
+    );
+
+    int updateBoxOnRemove(
+        odb::database *db,
+        odb::transaction *t,
+        uint64_t boxId
     );
 
     // return nullptr if not found

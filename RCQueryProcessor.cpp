@@ -214,7 +214,15 @@ int RCQueryProcessor::saveCard(
     return 0;
 }
 
-int RCQueryProcessor::updateBox1(
+/**
+ * Update box reference
+ * @param db database
+ * @param t transaction
+ * @param boxId box to be updated
+ * @param name name of the box
+ * @return 0- success, != 0 - error
+ */
+int RCQueryProcessor::updateBoxOnInsert(
     odb::database *db,
     odb::transaction *t,
     uint64_t boxId,
@@ -234,9 +242,37 @@ int RCQueryProcessor::updateBox1(
             db->persist(box);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+        LOG(ERROR) << "updateBoxOnInsert error: " << e.what();
     } catch (...) {
-        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
+        LOG(ERROR) << "updateBoxOnInsert unknown error";
+    }
+    return 0;
+}
+
+int RCQueryProcessor::updateBoxOnRemove(
+    odb::database *db,
+    odb::transaction *t,
+    uint64_t boxId
+)
+{
+    try {
+        odb::result<rcr::Package> q(db->query<rcr::Package>(
+                odb::query<rcr::Package>::box == boxId
+        ));
+        odb::result<rcr::Package>::iterator itPackage(q.begin());
+        if (itPackage == q.end()) {
+            // remove from reference if exists
+            odb::result<rcr::Box> qb(db->query<rcr::Box>(
+                    odb::query<rcr::Box>::box_id == boxId
+            ));
+            odb::result<rcr::Box>::iterator itBox(qb.begin());
+            if (itBox != qb.end())
+                db->erase(*itBox);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "updateBoxOnRemove error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "updateBoxOnRemove unknown error";
     }
     return 0;
 }
@@ -423,7 +459,6 @@ uint64_t RCQueryProcessor::setQuantity(
     try {
         if (packageId == 0) {
             packageId = db->persist(p);
-            updateBox1(db, transaction, box, "");
         }
         else
             db->update(p);
@@ -658,23 +693,28 @@ size_t RCQueryProcessor::setCards(
             switch(query->code) {
                 case SO_SET:
                     setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
+                    updateBoxOnInsert(db, t, query->boxes, "");
                     break;
                 case SO_ADD:
                     setQuantity(db, t, packageId, itCard->id(), query->boxes, q + query->count);
+                    updateBoxOnInsert(db, t, query->boxes, "");
                     break;
                 case SO_SUB:
                     setQuantity(db, t, packageId, itCard->id(), query->boxes,
-                                q > query->count ? q - query->count : 0);
+                    q > query->count ? q - query->count : 0);
+                    updateBoxOnRemove(db, t, query->boxes);
                     break;
                 case SO_MOV: {
                     // remove from the source box
                     setQuantity(db, t, packageId, itCard->id(), query->boxes,
-                                q > query->count ? q - query->count : 0);
+                        q > query->count ? q - query->count : 0);
+                    updateBoxOnRemove(db, t, query->boxes);
                     // put to destination box
                     uint64_t destCardId = itCard->id(); // same card
                     // get destination packageId, if not, ret 0
                     uint64_t qDest = getQuantity(db, t, packageId, destCardId, query->destinationBox);
                     setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);
+                    updateBoxOnInsert(db, t, query->destinationBox, "");
                 }
                     break;
                 default:
@@ -708,6 +748,8 @@ size_t RCQueryProcessor::setCards(
             package.set_box(query->boxes);
             package.set_qty(query->count);
             uint64_t pid = db->persist(package);
+            // update bi=ox reference
+            updateBoxOnInsert(db, t, query->boxes, "");
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << "setCards error: " << e.what();
