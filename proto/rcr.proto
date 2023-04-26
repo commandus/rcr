@@ -194,7 +194,8 @@ message CardQueryResponse
 
 message DictionariesRequest
 {
-    int32 flags = 1;
+    int32 locale_id = 1;
+    int32 flags = 2;
 }
 
 message DictionariesResponse

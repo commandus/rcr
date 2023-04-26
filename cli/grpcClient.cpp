@@ -268,11 +268,13 @@ void RcrClient::printUser(
 }
 
 void RcrClient::printSymbols(
-        std::ostream &strm
+    std::ostream &strm,
+    MEASURE_LOCALE locale
 ) {
     grpc::ClientContext context;
     rcr::DictionariesResponse response;
     rcr::DictionariesRequest request;
+    request.set_locale_id(locale);
     request.set_flags(0);
 
     grpc::Status status = stub->getDictionaries(&context, request, &response);
@@ -301,5 +303,31 @@ void RcrClient::printProperty(
     for (auto p(response.property_type().begin()); p != response.property_type().end(); p++) {
         strm << p->key() << "\t" << p->description() << std::endl;
     }
+}
 
+void RcrClient::printBoxes(
+    std::ostream &strm,
+    size_t offset,
+    size_t size,
+    const std::string &user,
+    const std::string &password
+) {
+    grpc::ClientContext context;
+    rcr::BoxResponse response;
+    rcr::BoxRequest request;
+    request.mutable_list()->set_offset(offset);
+    request.mutable_list()->set_size(size);
+    request.mutable_user()->set_name(user);
+    request.mutable_user()->set_name(password);
+
+    grpc::Status status = stub->getBox(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    for (auto box(response.box().begin()); box != response.box().end(); box++) {
+        strm
+//        << StockOperation::boxes2string(box->box_id()) << "\t"
+        << box->name() << std::endl;
+    }
 }

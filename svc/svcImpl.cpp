@@ -17,6 +17,7 @@
 #include "MeasureUnit.h"
 #include "RCQuery.h"
 #include "RCQueryProcessor.h"
+#include "MeasureUnit.h"
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
@@ -31,12 +32,15 @@
 #include "BoxName.h"
 #include "string-helper.h"
 
-using namespace odb::core;
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
+
 using grpc::StatusCode;
 using odb::query;
 
 const int DEF_LIST_SIZE = 1000;
-const std::string ERR_SVC_INVALID_ARGS = "Invalid arguments";
+const std::string ERR_SVC_INVALID_ARGS = _("Invalid arguments");
 
 // default list size
 #define DEF_LABEL_LIST_SIZE		100
@@ -76,7 +80,7 @@ std::unique_ptr<T> RcrImpl::load(
     }
     catch (const std::exception &e)
     {
-        LOG(ERROR) << "load object " << id << " error: " << e.what();
+        LOG(ERROR) << _("Loading object error, id: ") << id << e.what();
         // return nullptr
         std::unique_ptr<T> r;
         return r;
@@ -102,14 +106,14 @@ std::string logString (
         ss << signature;
 
     if (!cause.empty())
-        ss << " cause(" << cause << ")";
+        ss << _(" cause(") << cause << ")";
     if (!what.empty())
-        ss << " what(" << what << ")";
+        ss << _(" what(") << what << ")";
 
     if (msg) {
         std::string s;
         google::protobuf::util::MessageToJsonString(*msg, &s, printJSONOptions);
-        ss << " message: " << s;
+        ss << _(" message: ") << s;
     }
     return ss.str();
 }
@@ -121,7 +125,7 @@ std::string logString (
 		return Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
 
 #define BEGIN_GRPC_METHOD(signature, requestMessage, transact) \
-		transaction transact; \
+		odb::transaction transact; \
 		try { \
 			LOG(INFO) << logString(signature, "", "", requestMessage); \
 	        t.reset(mDb->begin());
@@ -165,8 +169,8 @@ std::string logString (
 
 // --------------------- RcrImpl ---------------------
 
-const grpc::string ERR_NO_GRANTS("No grants to call");
-const grpc::string ERR_NOT_IMPLEMENTED("Not implemented");
+const grpc::string ERR_NO_GRANTS(_("No grants to call"));
+const grpc::string ERR_NOT_IMPLEMENTED(_("Not implemented"));
 
 const grpc::Status& RcrImpl::STATUS_NO_GRANTS = grpc::Status(StatusCode::PERMISSION_DENIED, ERR_NO_GRANTS);
 const grpc::Status& RcrImpl::STATUS_NOT_IMPLEMENTED = grpc::Status(StatusCode::UNIMPLEMENTED, ERR_NOT_IMPLEMENTED);
@@ -243,7 +247,7 @@ struct ServiceConfig *RcrImpl::getConfig()
     int r = 0;
     BEGIN_GRPC_METHOD("cardQuery", request, t)
     rcr::DictionariesResponse dictionaries;
-    r = loadDictionaries(&dictionaries);
+    r = loadDictionaries(&dictionaries, ML_INTL);
     if (!r) {
         const rcr::Symbol *measureSym = RCQueryProcessor::findSymbol(&dictionaries, request->measure_symbol());
         uint32_t componentFlags;
@@ -289,7 +293,7 @@ struct ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r;
     BEGIN_GRPC_METHOD("getDictionaries", request, t)
-    r = loadDictionaries(response);
+    r = loadDictionaries(response, (MEASURE_LOCALE) request->locale_id());
     END_GRPC_METHOD("getDictionaries", request, response, t)
     return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
 }
@@ -307,7 +311,7 @@ struct ServiceConfig *RcrImpl::getConfig()
     int r;
     BEGIN_GRPC_METHOD("cardPush", response, t)
     rcr::DictionariesResponse dictionaries;
-    r = loadDictionaries(&dictionaries);
+    r = loadDictionaries(&dictionaries, ML_INTL);
     rcr::CardRequest cardRequest;
     while (reader->Read(&cardRequest)) {
         RCQueryProcessor p;
@@ -323,7 +327,8 @@ struct ServiceConfig *RcrImpl::getConfig()
 }
 
 int RcrImpl::loadDictionaries(
-    rcr::DictionariesResponse *retVal
+    rcr::DictionariesResponse *retVal,
+    MEASURE_LOCALE locale
 ) {
     try {
         odb::result<rcr::Operation> qs(mDb->query<rcr::Operation>(odb::query<rcr::Operation>::id != 0));
@@ -332,9 +337,9 @@ int RcrImpl::loadDictionaries(
             op->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "list operations error: " << e.what();
+        LOG(ERROR) << _("list operations error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << "list operations unknown error";
+        LOG(ERROR) << _("list operations unknown error");
     }
 
     try {
@@ -344,9 +349,9 @@ int RcrImpl::loadDictionaries(
             sym->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "list symbols error: " << e.what();
+        LOG(ERROR) << _("list symbols error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << "list symbols unknown error";
+        LOG(ERROR) << _("list symbols unknown error");
     }
 
     try {
@@ -356,9 +361,9 @@ int RcrImpl::loadDictionaries(
             op->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "list property type error: " << e.what();
+        LOG(ERROR) << _("list property type error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << "list property type unknown error";
+        LOG(ERROR) << _("list property type unknown error");
     }
     return 0;
 }
@@ -417,10 +422,10 @@ grpc::Status RcrImpl::getBox(
         }
     } catch (const odb::exception &e) {
         r = -1;
-        LOG(ERROR) << "list box error: " << e.what();
+        LOG(ERROR) << _("list box error: ") << e.what();
     } catch (...) {
         r = -2;
-        LOG(ERROR) << "list box unknown error";
+        LOG(ERROR) << _("list box unknown error");
     }
     END_GRPC_METHOD("getBox", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
@@ -440,7 +445,7 @@ grpc::Status RcrImpl::importExcel(
     int r = 0;
     BEGIN_GRPC_METHOD("importExcel", request, t)
     rcr::DictionariesResponse dictionaries;
-    loadDictionaries(&dictionaries);
+    loadDictionaries(&dictionaries, ML_INTL);
 
     size_t cnt = 0;
     size_t r = 0;
@@ -500,9 +505,9 @@ int RcrImpl::checkUserRights(
             return it->rights();
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "Check credentials error: " << e.what();
+        LOG(ERROR) << _("Check credentials error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << "Check credentials unknown error";
+        LOG(ERROR) << _("Check credentials unknown error");
     }
     return -1;
 }
@@ -527,9 +532,9 @@ bool RcrImpl::checkCredentialsNSetToken(
         db->persist(*retVal);   // save token
         return true;
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "Check credentials & set token error: " << e.what();
+        LOG(ERROR) << _("Check credentials & set token error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << "Check credentials & set token unknown error";
+        LOG(ERROR) << _("Check credentials & set token unknown error");
     }
     return false;
 }
@@ -562,10 +567,10 @@ grpc::Status RcrImpl::lsUser(
         }
     } catch (const odb::exception &e) {
         r = 1;
-        LOG(ERROR) << "list user error: " << e.what();
+        LOG(ERROR) << _("list user error: ") << e.what();
     } catch (...) {
         r = 2;
-        LOG(ERROR) << "list user unknown error";
+        LOG(ERROR) << _("list user unknown error");
     }
 
     END_GRPC_METHOD("lsUser", request, &u, t)

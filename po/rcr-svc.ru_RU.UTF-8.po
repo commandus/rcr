@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-25 14:22+0900\n"
+"POT-Creation-Date: 2023-04-26 11:34+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -127,12 +127,97 @@ msgid "rcr GRPC service"
 msgstr "GRPC сервис rcr"
 
 #: svc/svc.cpp:260
-#, fuzzy
 msgid ""
 "database connection error.\n"
 "Usage: "
-msgstr "ошибка соединения с СУБД\n"
+msgstr ""
+"ошибка соединения с СУБД\n"
+"Применение: "
 
 #: svc/svc.cpp:309
 msgid "Start as daemon, use syslog"
 msgstr "Запущено как демон, читайте сообщения в syslog"
+
+#: svc/svcImpl.cpp:43
+msgid "Invalid arguments"
+msgstr "Неверные аргументы"
+
+#: svc/svcImpl.cpp:83
+msgid "Loading object error, id: "
+msgstr "Ошибка загрузки объекта с идентификатором: "
+
+#: svc/svcImpl.cpp:109
+msgid " cause("
+msgstr "причина("
+
+#: svc/svcImpl.cpp:111
+msgid " what("
+msgstr " что("
+
+#: svc/svcImpl.cpp:116
+msgid " message: "
+msgstr " сообщение: "
+
+#: svc/svcImpl.cpp:172
+msgid "No grants to call"
+msgstr "Нет прав на выполнение"
+
+#: svc/svcImpl.cpp:173
+msgid "Not implemented"
+msgstr "Не реализовано"
+
+#: svc/svcImpl.cpp:340
+msgid "list operations error: "
+msgstr "ошибка списка операций: "
+
+#: svc/svcImpl.cpp:342
+msgid "list operations unknown error"
+msgstr "неизвестная ошибка списка операций"
+
+#: svc/svcImpl.cpp:352
+msgid "list symbols error: "
+msgstr "ошибка списка типов компонент: "
+
+#: svc/svcImpl.cpp:354
+msgid "list symbols unknown error"
+msgstr "неизвестная ошибка списка типов компонент"
+
+#: svc/svcImpl.cpp:364
+msgid "list property type error: "
+msgstr "ошибка списка свойств: "
+
+#: svc/svcImpl.cpp:366
+msgid "list property type unknown error"
+msgstr "неизвестная ошибка списка свойств"
+
+#: svc/svcImpl.cpp:425
+msgid "list box error: "
+msgstr "ошибка списка коробок: "
+
+#: svc/svcImpl.cpp:428
+msgid "list box unknown error"
+msgstr "неизвестная ошибка списка коробок"
+
+#: svc/svcImpl.cpp:508
+msgid "Check credentials error: "
+msgstr "ошибка проверки прав"
+
+#: svc/svcImpl.cpp:510
+msgid "Check credentials unknown error"
+msgstr "неизвестная ошибка проверки прав"
+
+#: svc/svcImpl.cpp:535
+msgid "Check credentials & set token error: "
+msgstr "ошибка проверки прав и установки токена безопасности"
+
+#: svc/svcImpl.cpp:537
+msgid "Check credentials & set token unknown error"
+msgstr "неизвестная ошибка проверки прав и установки токена безопасности"
+
+#: svc/svcImpl.cpp:570
+msgid "list user error: "
+msgstr "ошибка списка пользователей: "
+
+#: svc/svcImpl.cpp:573
+msgid "list user unknown error"
+msgstr "неизвестная ошибка списка пользователей"

@@ -10,6 +10,7 @@
 
 #include "gen/rcr.grpc.pb.h"
 #include "SpreadSheetHelper.h"
+#include "MeasureUnit.h"
 
 class RcrClient
 {
@@ -59,9 +60,17 @@ public:
 
     void printUser(std::ostream &strm, rcr::User *user);
 
-    void printSymbols(std::ostream &strm);
+    void printSymbols(std::ostream &strm, MEASURE_LOCALE locale);
 
     void printProperty(std::ostream &strm);
+
+    void printBoxes(
+        std::ostream &ostream,
+        size_t offset,
+        size_t size,
+        const std::string &user,
+        const std::string &password
+    );
 };
 
 #endif /* GRPCCLIENT_H_ */

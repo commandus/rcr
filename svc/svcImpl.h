@@ -17,6 +17,7 @@
 #include "gen/rcr.grpc.pb.h"
 #include "gen/rcr.grpc.pb.h"
 
+#include "MeasureUnit.h"
 #include "svcconfig.h"
 
 using grpc::ClientContext;
@@ -44,7 +45,10 @@ public:
 class RcrImpl : public rcr::Rcr::Service {
 private:
 	struct ServiceConfig *mConfig;
-    int loadDictionaries(rcr::DictionariesResponse *pResponse);
+    int loadDictionaries(
+        rcr::DictionariesResponse *pResponse,
+        MEASURE_LOCALE locale
+    );
     grpc::Status importExcel(
         grpc::ServerContext* context,
         const rcr::ImportExcelRequest* request,

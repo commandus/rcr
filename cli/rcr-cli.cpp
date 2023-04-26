@@ -36,6 +36,7 @@ quit               Exit\n\
 symbol list        Component type and symbol list\n\
 symbol             Set all component types\n\
 symbol D           Set component symbol D (integrated circuits)\n\
+box list           Boxes\n\
 property list      Properties list\n\
 user list          Registered users\n\
 import <path>      Preview spreadsheets in the path\n\
@@ -55,6 +56,7 @@ public:
     int repeats;
     int verbose;
 
+    MEASURE_LOCALE locale;
     std::string command;
     std::string request;
     size_t offset;
@@ -148,7 +150,7 @@ int parseCmd
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, _("<command>"),
-            "card|box|login|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
+            "card|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<request>"), _("command parameter(request)"));
     struct arg_str *a_user_name = arg_str0("u", "user", _("<user-name>"), _("User login"));
     struct arg_str *a_user_password = arg_str0("p", "password", _("<password>"), _("User password"));
@@ -157,6 +159,8 @@ int parseCmd
     struct arg_int *a_size = arg_int0("s", "size", _("<number>"), _("List size. Default 10000"));
 
     struct arg_lit *a_no_number_in_filename = arg_lit0(nullptr, "no_box_number_in_filename", _("do not read box from Excel file name"));
+    struct arg_str *a_locale = arg_str0("l", "locale", _("<loclale>"), _("Locale: intl, ru"));
+
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
 
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
@@ -165,7 +169,7 @@ int parseCmd
 	void* argtable[] = { a_interface, a_port, a_sslon,
         a_command, a_request, a_box, a_user_name, a_user_password,
         a_offset, a_size,
-		a_verbose,
+		a_locale, a_verbose,
 		a_help, a_end };
 
 	int nerrors;
@@ -244,6 +248,11 @@ int parseCmd
         value->numberInFileName = true;
 
 	value->verbose = a_verbose->count;
+
+    if (a_locale->count)
+        value->locale = pchar2MEASURE_LOCALE(*a_locale->sval);
+    else
+        value->locale = ML_INTL;
 
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 	return 0;
@@ -329,6 +338,10 @@ int main(int argc, char** argv)
         rpc.printUser(std::cout, &u);
         std::cout << std::endl;
     }
+    if (config.command == "boxes") {
+        rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
+        std::cout << std::endl;
+    }
     if (config.command == "dictionaries") {
         std::cout << rpc.getDictionariesJson() << std::endl;
     }
@@ -368,7 +381,7 @@ int main(int argc, char** argv)
                 if (line.find("symbol") == 0) {
                     auto verb = line.find("list");
                     if (verb != std::string::npos && verb >= 6) {   // symbollist, symbol-list, symbol list
-                        rpc.printSymbols(std::cout);
+                        rpc.printSymbols(std::cout, config.locale);
                         std::cout << std::endl;
                         continue;
                     }
@@ -386,6 +399,15 @@ int main(int argc, char** argv)
                     auto verb = line.find("list");
                     if (verb != std::string::npos && verb >= 8) {   // propertylist, property-list, property list
                         rpc.printProperty(std::cout);
+                        std::cout << std::endl;
+                        continue;
+                    }
+                }
+
+                if (line.find("box") == 0) {
+                    auto verb = line.find("list");
+                    if (verb != std::string::npos && verb >= 3) {   // boxlist, box-list, box list
+                        rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
                         std::cout << std::endl;
                         continue;
                     }
