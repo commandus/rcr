@@ -3,6 +3,7 @@
 //
 #include "string-helper.h"
 
+#include <sstream>
 #include <unicode/unistr.h>
 #include <google/protobuf/util/json_util.h>
 
@@ -11,6 +12,32 @@ std::string toUpperCase(const std::string &value)
     std::string r;
     icu::UnicodeString::fromUTF8(value).toUpper().toUTF8String(r);
     return r;
+}
+
+//
+// Split strings
+// https://stackoverflow.com/questions/236129/how-do-i-iterate-over-the-words-of-a-string
+//
+template <typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::istringstream iss(s);
+    std::string item;
+    while (std::getline(iss, item, delim)) {
+        size_t sz = item.size();
+        if (sz == 0 || (sz == 1 && item[0] == delim))
+            continue;
+        *result++ = item;
+    }
+}
+
+std::vector<std::string> split(
+    const std::string &s,
+    char delim
+)
+{
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
 }
 
 std::string pb2JsonString(

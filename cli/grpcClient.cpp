@@ -12,6 +12,11 @@
 #include "AppSettings.h"
 #include "MeasureUnit.h"
 #include "StockOperation.h"
+#include "string-helper.h"
+
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
 
 static std::string message2Json(
     const google::protobuf::Message& message
@@ -75,13 +80,13 @@ int32_t RcrClient::addPropertyType(
 
     grpc::Status status = stub->chPropertyType(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return status.error_code();
     }
     int32_t c = response.code();
     if (c) {
         std::string d = response.description();
-        std::cerr << "Error: " << c << " " << d << std::endl;
+        std::cerr << _("Error: ") << c << " " << d << std::endl;
         return c;
     }
 	return r;
@@ -108,14 +113,14 @@ int32_t RcrClient::cardQuery(
 
     grpc::Status status = stub->cardQuery(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return status.error_code();
     }
 
     int32_t c = response.rslt().code();
 
     if (c) {
-        std::cerr << "Error: " << c << " " << response.rslt().description() << std::endl;
+        std::cerr << _("Error: ") << c << " " << response.rslt().description() << std::endl;
         return c;
     } else {
         google::protobuf::util::JsonPrintOptions formattingOptions;
@@ -181,7 +186,7 @@ int RcrClient::saveSpreadsheet(
     writer->WritesDone();
     grpc::Status status = writer->Finish();
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return status.error_code();
     }
     return 0;
@@ -204,7 +209,7 @@ void RcrClient::printBox(
 
     grpc::Status status = stub->getBox(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return;
     }
     // print cards if exists
@@ -229,7 +234,7 @@ std::string RcrClient::getBoxJson(
 
     grpc::Status status = stub->getBox(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return "{}";
     }
     return message2Json(response);
@@ -243,7 +248,7 @@ std::string RcrClient::getDictionariesJson() {
 
     grpc::Status status = stub->getDictionaries(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return "{}";
     }
     return message2Json(response);
@@ -260,7 +265,7 @@ void RcrClient::printUser(
     auto reader = stub->lsUser(&context, request);
     rcr::User u;
     while (reader->Read(&u)) {
-        strm << u.name() << "\t" << (u.rights() & 1 ? "Admin" : "");
+        strm << u.name() << "\t" << (u.rights() & 1 ? _("Admin") : "");
         if (!u.password().empty())
             strm << "\t" << u.password();
         strm << std::endl;
@@ -279,7 +284,7 @@ void RcrClient::printSymbols(
 
     grpc::Status status = stub->getDictionaries(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return;
     }
     for (auto s(response.symbol().begin()); s != response.symbol().end(); s++) {
@@ -297,7 +302,7 @@ void RcrClient::printProperty(
 
     grpc::Status status = stub->getDictionaries(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return;
     }
     for (auto p(response.property_type().begin()); p != response.property_type().end(); p++) {
@@ -322,12 +327,45 @@ void RcrClient::printBoxes(
 
     grpc::Status status = stub->getBox(&context, request, &response);
     if (!status.ok()) {
-        std::cerr << "Error: " << status.error_code() << " " << status.error_message() << std::endl;
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return;
     }
     for (auto box(response.box().begin()); box != response.box().end(); box++) {
         strm
 //        << StockOperation::boxes2string(box->box_id()) << "\t"
         << box->name() << std::endl;
+    }
+}
+
+void RcrClient::changeProperty(
+    std::string &clause,
+    std::string &user,
+    std::string &password
+) {
+    grpc::ClientContext context;
+    rcr::OperationResponse response;
+    rcr::ChPropertyTypeRequest request;
+    std::vector <std::string> clauses = split(clause, ' ');
+    if (clauses.size() < 3) {
+        if (!(clauses[0] == "-" && clauses.size() == 2)) {
+            std::cerr << _("Error: ") << -1 << " " << _("Invalid arguments") << std::endl;
+            return;
+        }
+    }
+    request.set_operationsymbol(clauses[0]);
+    request.mutable_value()->set_key(clauses[1]);
+    if (clauses.size() >= 3)
+        request.mutable_value()->set_description(clauses[2]);
+    request.mutable_user()->set_name(user);
+    request.mutable_user()->set_name(password);
+
+    grpc::Status status = stub->chPropertyType(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    if (response.code()) {
+        std::cerr << _("Error: ") << response.code() << " " << response.description() << std::endl;
+        return;
     }
 }

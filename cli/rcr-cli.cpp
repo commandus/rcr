@@ -38,6 +38,9 @@ symbol             Set all component types\n\
 symbol D           Set component symbol D (integrated circuits)\n\
 box list           Boxes\n\
 property list      Properties list\n\
+property = A accu  Set property accu with shortkey A\n\
+property + B bat   Add property\n\
+property - A       Remove property\n\
 user list          Registered users\n\
 import <path>      Preview spreadsheets in the path\n\
 import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n\
@@ -159,7 +162,7 @@ int parseCmd
     struct arg_int *a_size = arg_int0("s", "size", _("<number>"), _("List size. Default 10000"));
 
     struct arg_lit *a_no_number_in_filename = arg_lit0(nullptr, "no_box_number_in_filename", _("do not read box from Excel file name"));
-    struct arg_str *a_locale = arg_str0("l", "locale", _("<loclale>"), _("Locale: intl, ru"));
+    struct arg_str *a_locale = arg_str0("l", "locale", _("<locale>"), _("Locale: intl, ru"));
 
 	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
 
@@ -400,6 +403,10 @@ int main(int argc, char** argv)
                     if (verb != std::string::npos && verb >= 8) {   // propertylist, property-list, property list
                         rpc.printProperty(std::cout);
                         std::cout << std::endl;
+                        continue;
+                    } else {
+                        std::string clause = line.substr(8);
+                        rpc.changeProperty(clause, config.username, config.password);
                         continue;
                     }
                 }

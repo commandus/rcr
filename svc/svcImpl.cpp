@@ -227,8 +227,57 @@ struct ServiceConfig *RcrImpl::getConfig()
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     BEGIN_GRPC_METHOD("chPropertyType", request, t)
+    char op;
+    if (request->operationsymbol().empty())
+        op = 'l';
+    else
+        op = request->operationsymbol()[0];
+
+        try {
+            odb::result<rcr::PropertyType> qs(mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::key == request->value().key()));
+            odb::result<rcr::PropertyType>::iterator it(qs.begin());
+            switch (op) {
+                case '=':
+                    if (it == qs.end()) {
+                        rcr::PropertyType pt = request->value();
+                        response->set_id(mDb->persist(pt));
+                    } else {
+                        it->set_key(request->value().key());
+                        it->set_description(request->value().description());
+                        mDb->update(*it);
+                    }
+                    response->set_code(0);
+                    break;
+                case '+':
+                    if (it != qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("Property already exists"));
+                    } else {
+                        rcr::PropertyType pt = request->value();
+                        response->set_id(mDb->persist(pt));
+                        response->set_code(0);
+                    }
+                    break;
+                case '-':
+                    if (it == qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("Property does not exists"));
+                    } else {
+                        mDb->erase(*it);
+                        response->set_code(0);
+                    }
+                    break;
+                default:
+                    response->set_code(-2);
+                    response->set_description(_("Invalid operation"));
+            }
+        } catch (const odb::exception &e) {
+            LOG(ERROR) << _("change property error: ") << e.what();
+        } catch (...) {
+            LOG(ERROR) << _("change property unknown error");
+        }
+
     response->set_id(1);
-    response->set_code(2);
     response->set_description(request->value().description());
     END_GRPC_METHOD("chPropertyType", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
@@ -361,9 +410,9 @@ int RcrImpl::loadDictionaries(
             op->CopyFrom(*i);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << _("list property type error: ") << e.what();
+        LOG(ERROR) << _("list property error: ") << e.what();
     } catch (...) {
-        LOG(ERROR) << _("list property type unknown error");
+        LOG(ERROR) << _("list property unknown error");
     }
     return 0;
 }

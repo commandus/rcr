@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <vector>
 #include "gtest/gtest.h"
 
 #include "MeasureUnit.h"
@@ -7,6 +8,15 @@
 #include "QueryProperties.h"
 #include "RCQuery.h"
 #include "BoxName.h"
+#include "string-helper.h"
+
+TEST(String, split) {
+    std::vector<std::string> r = split(" 1  2    3", ' ');
+    ASSERT_EQ(r.size(), 3);
+    ASSERT_EQ(r[0], "1");
+    ASSERT_EQ(r[1], "2");
+    ASSERT_EQ(r[2], "3");
+}
 
 TEST(Measure, List) {
     std::vector<std::string> r;
@@ -107,7 +117,7 @@ TEST(RCQuery, Count) {
     ASSERT_EQ(q.boxes, 0x00dd000100000000);
     ASSERT_EQ(q.destinationBox, 0);
 
-    ASSERT_EQ(q.code, SO_NONE);
+    ASSERT_EQ(q.code, SO_LIST); // no
     ASSERT_EQ(q.count, 1234);
 }
 

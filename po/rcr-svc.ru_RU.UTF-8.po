@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-26 11:34+0900\n"
+"POT-Creation-Date: 2023-04-26 15:57+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -166,58 +166,78 @@ msgstr "Нет прав на выполнение"
 msgid "Not implemented"
 msgstr "Не реализовано"
 
-#: svc/svcImpl.cpp:340
+#: svc/svcImpl.cpp:252
+msgid "Property already exists"
+msgstr "Свойство уже существует"
+
+#: svc/svcImpl.cpp:262
+msgid "Property does not exists"
+msgstr "Свойство не существует"
+
+#: svc/svcImpl.cpp:270
+msgid "Invalid operation"
+msgstr "ошибка списка операций: "
+
+#: svc/svcImpl.cpp:273
+msgid "change property error: "
+msgstr "ошибка списка свойств: "
+
+#: svc/svcImpl.cpp:275
+msgid "change property unknown error"
+msgstr "неизвестная ошибка списка свойств"
+
+#: svc/svcImpl.cpp:387
 msgid "list operations error: "
 msgstr "ошибка списка операций: "
 
-#: svc/svcImpl.cpp:342
+#: svc/svcImpl.cpp:389
 msgid "list operations unknown error"
 msgstr "неизвестная ошибка списка операций"
 
-#: svc/svcImpl.cpp:352
+#: svc/svcImpl.cpp:399
 msgid "list symbols error: "
 msgstr "ошибка списка типов компонент: "
 
-#: svc/svcImpl.cpp:354
+#: svc/svcImpl.cpp:401
 msgid "list symbols unknown error"
 msgstr "неизвестная ошибка списка типов компонент"
 
-#: svc/svcImpl.cpp:364
-msgid "list property type error: "
+#: svc/svcImpl.cpp:411
+msgid "list property error: "
 msgstr "ошибка списка свойств: "
 
-#: svc/svcImpl.cpp:366
-msgid "list property type unknown error"
+#: svc/svcImpl.cpp:413
+msgid "list property unknown error"
 msgstr "неизвестная ошибка списка свойств"
 
-#: svc/svcImpl.cpp:425
+#: svc/svcImpl.cpp:472
 msgid "list box error: "
 msgstr "ошибка списка коробок: "
 
-#: svc/svcImpl.cpp:428
+#: svc/svcImpl.cpp:475
 msgid "list box unknown error"
 msgstr "неизвестная ошибка списка коробок"
 
-#: svc/svcImpl.cpp:508
+#: svc/svcImpl.cpp:555
 msgid "Check credentials error: "
 msgstr "ошибка проверки прав"
 
-#: svc/svcImpl.cpp:510
+#: svc/svcImpl.cpp:557
 msgid "Check credentials unknown error"
 msgstr "неизвестная ошибка проверки прав"
 
-#: svc/svcImpl.cpp:535
+#: svc/svcImpl.cpp:582
 msgid "Check credentials & set token error: "
 msgstr "ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:537
+#: svc/svcImpl.cpp:584
 msgid "Check credentials & set token unknown error"
 msgstr "неизвестная ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:570
+#: svc/svcImpl.cpp:617
 msgid "list user error: "
 msgstr "ошибка списка пользователей: "
 
-#: svc/svcImpl.cpp:573
+#: svc/svcImpl.cpp:620
 msgid "list user unknown error"
 msgstr "неизвестная ошибка списка пользователей"

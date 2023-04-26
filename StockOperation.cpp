@@ -76,7 +76,8 @@ int StockOperation::parse(
             retBoxes = 0;
         }
         retCode = parseCommand(retCount, retDestinationBox, value, startSecond, finishSecond);
-        // if (retCode == SO_NONE) retCode = SO_LIST;
+        if (retCode == SO_NONE)
+            retCode = SO_LIST;
     } else {
         // no boxes specified
         retCode = parseCommand(retCount, retDestinationBox, value, start, finish);
