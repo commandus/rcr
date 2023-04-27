@@ -178,6 +178,15 @@ message ChPropertyTypeRequest
     PropertyType value = 3;
 }
 
+message ChCardRequest
+{
+    User user = 1;
+    string operationSymbol = 2;
+    Card value = 3;
+    repeated Property properties = 4;
+    repeated Package packages = 5;
+}
+
 message CardQueryRequest
 {
     User user = 1;
@@ -305,6 +314,7 @@ service Rcr
     rpc setSettings(Settings) returns (Settings) {}
 
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
+    rpc chCard(ChCardRequest) returns (OperationResponse) {}
 
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}

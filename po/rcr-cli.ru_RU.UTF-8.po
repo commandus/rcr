@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-26 16:06+0900\n"
+"POT-Creation-Date: 2023-04-27 15:47+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -79,7 +79,7 @@ msgstr " шт."
 #: cli/grpcClient.cpp:116 cli/grpcClient.cpp:123 cli/grpcClient.cpp:189
 #: cli/grpcClient.cpp:212 cli/grpcClient.cpp:237 cli/grpcClient.cpp:251
 #: cli/grpcClient.cpp:287 cli/grpcClient.cpp:305 cli/grpcClient.cpp:330
-#: cli/grpcClient.cpp:350 cli/grpcClient.cpp:361 cli/grpcClient.cpp:365
+#: cli/grpcClient.cpp:351 cli/grpcClient.cpp:364 cli/grpcClient.cpp:368
 msgid "Error: "
 msgstr "Ошибка: "
 
@@ -141,7 +141,7 @@ msgstr "<число>"
 
 #: cli/rcr-cli.cpp:161
 msgid "List offset 0.. Default 0"
-msgstr "смещение в списке 0.. По умолчанию 0"
+msgstr "смещение в списке (0..) По умолчанию 0"
 
 #: cli/rcr-cli.cpp:162
 msgid "List size. Default 10000"
@@ -149,7 +149,7 @@ msgstr "Размер списка. По умолчанию 10000"
 
 #: cli/rcr-cli.cpp:164
 msgid "do not read box from Excel file name"
-msgstr "не выковыривать номер коробки из имени файла Excel"
+msgstr "не искать номер коробки из имени файла Excel"
 
 #: cli/rcr-cli.cpp:165
 msgid "<locale>"
@@ -191,6 +191,6 @@ msgstr "Введите help, чтобы посмотреть список дос
 msgid "Admin"
 msgstr "Администратор"
 
-#: cli/grpcClient.cpp:350
+#: cli/grpcClient.cpp:351
 msgid "Invalid arguments"
-msgstr ""
+msgstr "Неверные аргументы"

@@ -289,7 +289,166 @@ struct ServiceConfig *RcrImpl::getConfig()
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }
 
-::grpc::Status RcrImpl::cardQuery(
+grpc::Status RcrImpl::chCard(
+    grpc::ServerContext* context,
+    const rcr::ChCardRequest* request,
+    rcr::OperationResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r = 0;
+    BEGIN_GRPC_METHOD("chCard", request, t)
+    char op = 'L';
+    if (!request->operationsymbol().empty()) {
+        op = request->operationsymbol()[0];
+    }
+    try {
+        switch (op) {
+            case '+': {
+                rcr::Card v = request->value();
+                if (v.id())
+                    v.clear_id();
+                uint64_t card_id = mDb->persist(v);
+                for (auto pr = request->properties().begin(); pr != request->properties().end(); pr++) {
+                    rcr::Property prv = *pr;
+                    prv.set_card_id(card_id);
+                    mDb->persist(prv);
+                }
+                for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
+                    rcr::Package p = *pack;
+                    p.set_card_id(card_id);
+                    mDb->persist(p);
+                }
+                response->set_id(card_id);
+                response->set_code(0);
+                }
+                response->set_code(0);
+                break;
+            case '-':
+                // remove if exists
+                if (request->value().id()) {
+                    // cascade delete mey not work
+                    odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
+                    for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
+                        mDb->erase(*it);
+                    }
+                    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
+                    for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
+                        mDb->erase(*itp);
+                    }
+                    mDb->erase(request->value());
+                }
+                response->set_code(0);
+                break;
+            case '=': {
+                rcr::Card v = request->value();
+                uint64_t id = v.id();
+                if (!id) {
+                    return grpc::Status(StatusCode::INVALID_ARGUMENT, "");
+                }
+                mDb->update(v);
+
+                // update property if changed
+                odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
+                std::vector <uint64_t> updatedProperyIds(8);
+                for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
+                    auto qit = std::find_if(request->properties().begin(), request->properties().end(),
+                                  [it] (auto v) {
+                        return it->id() == v.id();
+                    });
+                    if (qit == request->properties().end()) {
+                        // delete from database, it removed
+                        mDb->erase(*it);
+                    } else {
+                        updatedProperyIds.push_back(qit->card_id());
+                        // update if it changed
+                        if (!(it->card_id() == qit->card_id()
+                            && it->property_type_id() == qit->property_type_id()
+                            && it->value() == qit->value())) {
+                            // update
+                            mDb->update(*qit);
+                        }
+                    }
+                }
+                // insert a new ones
+                for (auto it = request->properties().begin(); it != request->properties().end(); it++) {
+                    auto alreadyIt = std::find_if(updatedProperyIds.begin(), updatedProperyIds.end(),
+                                                  [it] (auto v) {
+                            return it->id() == v;
+                        });
+                    if (alreadyIt == updatedProperyIds.end()) {
+                        // not updatedProperyIds yet, insert a new one
+                        rcr::Property p = *it;
+                        uint64_t pid = mDb->persist(p);
+                    }
+                }
+
+                // update packages if changed
+                odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
+                std::vector <uint64_t> updatedPackageIds(8);
+                for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
+                    auto qit = std::find_if(request->packages().begin(), request->packages().end(),
+                        [it] (auto v) {
+                            return it->id() == v.id();
+                        });
+                    if (qit == request->packages().end()) {
+                        // delete from database, it removed
+                        mDb->erase(*it);
+                    } else {
+                        updatedPackageIds.push_back(qit->card_id());
+                        // update if it changed
+                        if (!(it->card_id() == qit->card_id()
+                              && it->box() == qit->box()
+                              && it->qty() == qit->qty()
+                              && it->box_name() == qit->box_name())) {
+                            // update
+                            mDb->update(*qit);
+                        }
+                    }
+                }
+                // insert a new ones
+                for (auto it = request->packages().begin(); it != request->packages().end(); it++) {
+                    auto alreadyIt = std::find_if(updatedPackageIds.begin(), updatedPackageIds.end(),
+                      [it] (auto v) {
+                          return it->id() == v;
+                      });
+                    if (alreadyIt == updatedPackageIds.end()) {
+                        // not updatedPackageIds yet, insert a new one
+                        rcr::Package p = *it;
+                        uint64_t pid = mDb->persist(p);
+                    }
+                }
+
+                for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
+                    rcr::Package p = *pack;
+                    p.set_card_id(id);
+                    if (p.id())
+                        mDb->update(p);
+                    else
+                        mDb->persist(p);
+                }
+                response->set_id(id);
+                response->set_code(0);
+            }
+            break;
+        default:
+            response->set_code(-4);
+            response->set_description(_("Invalid operation"));
+
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("chCard error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("chCard unknown error");
+    }
+    END_GRPC_METHOD("chCard", request, response, t)
+    return r == 0 ? grpc::Status::OK : grpc::Status(StatusCode::INTERNAL, "");
+}
+
+grpc::Status RcrImpl::cardQuery(
     ::grpc::ServerContext* context,
     const ::rcr::CardQueryRequest* request,
     ::rcr::CardQueryResponse* response
