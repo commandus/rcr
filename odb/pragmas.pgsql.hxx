@@ -55,12 +55,6 @@
 #define IDX(C, c, m) \
     db index(C::STRINGIFY2(c ## _ ## m ## _idx)) member(m ## _)
 
-#define IDX_UNIQUE(C, c, m) \
-    db index(C::STRINGIFY2(c ## _ ## m ## _idx)) unique member(m ## _)
-
-#define ODB_IDX_UNIQUE(C, c, m) \
-    _Pragma(STRINGIFY2(IDX_UNIQUE(C, c, m)))
-
 #define ODB_IDX(C, c, m) \
     _Pragma(STRINGIFY2(IDX(C, c, m)))
 
@@ -109,6 +103,7 @@ namespace rcr {
 	ODB_TABLE(PropertyType)
 		ODB_STRING(PropertyType, key)
 		ODB_STRING(PropertyType, description)
+        #pragma db index(PropertyType) unique members(key)
 
 	ODB_TABLE(Package)
 		ODB_NUMBER(Package, card_id, uint64_t)

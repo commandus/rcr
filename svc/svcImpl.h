@@ -91,6 +91,11 @@ protected:
         bool numberInFilename,
         rcr::DictionariesResponse &dictionaries
     );
+    void removePropertyFromCards(
+        odb::database *db,
+        odb::transaction &t,
+        uint64_t id
+    );
 public:
 	/// ODB database
 	odb::database *mDb;

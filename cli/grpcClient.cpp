@@ -147,12 +147,12 @@ int32_t RcrClient::cardQuery(
                     ostream << card->card().name();
                 }
                 for (auto p = card->properties().begin(); p != card->properties().end(); p++) {
-                    ostream
+                    ostream << " "
                         << p->property_type()
-                        << ": " << p->value();
+                        << ":" << p->value();
                 }
                 for (auto p = card->packages().begin(); p != card->packages().end(); p++) {
-                    ostream << " " << StockOperation::boxes2string(p->box()) << ": " << p->qty();
+                    ostream << " " << StockOperation::boxes2string(p->box()) << " = " << p->qty();
                 }
                 ostream << std::endl;
             }

@@ -234,7 +234,12 @@ struct ServiceConfig *RcrImpl::getConfig()
         op = request->operationsymbol()[0];
 
         try {
-            odb::result<rcr::PropertyType> qs(mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::key == request->value().key()));
+            odb::result<rcr::PropertyType> qs;
+            if (request->value().id())
+                qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::id == request->value().id());
+            else
+                qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::key == request->value().key());
+
             odb::result<rcr::PropertyType>::iterator it(qs.begin());
             switch (op) {
                 case '=':
@@ -263,6 +268,7 @@ struct ServiceConfig *RcrImpl::getConfig()
                         response->set_code(-3);
                         response->set_description(_("Property does not exists"));
                     } else {
+                        removePropertyFromCards(mDb, t, it->id());
                         mDb->erase(*it);
                         response->set_code(0);
                     }
@@ -624,4 +630,21 @@ grpc::Status RcrImpl::lsUser(
 
     END_GRPC_METHOD("lsUser", request, &u, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+void RcrImpl::removePropertyFromCards(
+    odb::database *db,
+    odb::transaction &t,
+    uint64_t property_type_id
+) {
+    try {
+        odb::result<rcr::Property> qs(mDb->query<rcr::Property>(odb::query<rcr::Property>::property_type_id == property_type_id));
+        for (odb::result<rcr::Property>::iterator it(qs.begin()); it != qs.end(); it++) {
+            db->erase(*it);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("remove property error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("remove property unknown error");
+    }
 }
