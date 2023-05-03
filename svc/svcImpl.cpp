@@ -806,7 +806,7 @@ void RcrImpl::removePropertyFromCards(
 
 grpc::Status RcrImpl::chBox(
     grpc::ServerContext* context,
-    const rcr::chBoxRequest* request,
+    const rcr::ChBoxRequest* request,
     rcr::OperationResponse* response
 )
 {

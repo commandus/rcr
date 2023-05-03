@@ -187,7 +187,7 @@ message ChCardRequest
     repeated Package packages = 5;
 }
 
-message chBoxRequest
+message ChBoxRequest
 {
     User user = 1;
     string operationSymbol = 2;
@@ -322,7 +322,7 @@ service Rcr
 
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc chCard(ChCardRequest) returns (OperationResponse) {}
-    rpc chBox(chBoxRequest) returns (OperationResponse) {}
+    rpc chBox(ChBoxRequest) returns (OperationResponse) {}
 
     rpc cardQuery(CardQueryRequest) returns (CardQueryResponse) {}
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
