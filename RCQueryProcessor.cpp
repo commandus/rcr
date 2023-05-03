@@ -209,6 +209,7 @@ int RCQueryProcessor::saveCard(
             uint64_t packageId;
             uint64_t qPrevious = getQuantity(db, t, packageId, card.id(), cardRequest.box());
             setQuantity(db, t, packageId, card.id(), cardRequest.box(), qPrevious + cardRequest.qty());
+            updateBoxOnInsert(db, t, cardRequest.box(), "");
         }
     }
     return 0;
