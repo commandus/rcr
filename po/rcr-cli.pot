@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-27 15:55+0900\n"
+"POT-Creation-Date: 2023-05-03 13:55+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -135,122 +135,138 @@ msgstr ""
 msgid "Start as daemon, use syslog"
 msgstr ""
 
-#: svc/svcImpl.cpp:43
+#: svc/svcImpl.cpp:41
 msgid "Invalid arguments"
 msgstr ""
 
-#: svc/svcImpl.cpp:83
+#: svc/svcImpl.cpp:81
 msgid "Loading object error, id: "
 msgstr ""
 
-#: svc/svcImpl.cpp:109
+#: svc/svcImpl.cpp:107
 msgid " cause("
 msgstr ""
 
-#: svc/svcImpl.cpp:111
+#: svc/svcImpl.cpp:109
 msgid " what("
 msgstr ""
 
-#: svc/svcImpl.cpp:116
+#: svc/svcImpl.cpp:114
 msgid " message: "
 msgstr ""
 
-#: svc/svcImpl.cpp:172
+#: svc/svcImpl.cpp:170
 msgid "No grants to call"
 msgstr ""
 
-#: svc/svcImpl.cpp:173
+#: svc/svcImpl.cpp:171
 msgid "Not implemented"
 msgstr ""
 
-#: svc/svcImpl.cpp:259
+#: svc/svcImpl.cpp:257
 msgid "Property already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:269
+#: svc/svcImpl.cpp:267
 msgid "Property does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:278 svc/svcImpl.cpp:439
+#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:435 svc/svcImpl.cpp:878
 msgid "Invalid operation"
 msgstr ""
 
-#: svc/svcImpl.cpp:281
+#: svc/svcImpl.cpp:279
 msgid "change property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:283
+#: svc/svcImpl.cpp:281
 msgid "change property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:443
+#: svc/svcImpl.cpp:439
 msgid "chCard error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:445
+#: svc/svcImpl.cpp:441
 msgid "chCard unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:554
+#: svc/svcImpl.cpp:550
 msgid "list operations error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:556
+#: svc/svcImpl.cpp:552
 msgid "list operations unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:566
+#: svc/svcImpl.cpp:562
 msgid "list symbols error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:568
+#: svc/svcImpl.cpp:564
 msgid "list symbols unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:578
+#: svc/svcImpl.cpp:574
 msgid "list property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:580
+#: svc/svcImpl.cpp:576
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:639
+#: svc/svcImpl.cpp:635 svc/svcImpl.cpp:914
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:642
+#: svc/svcImpl.cpp:638 svc/svcImpl.cpp:917
 msgid "list box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:722
+#: svc/svcImpl.cpp:718
 msgid "Check credentials error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:724
+#: svc/svcImpl.cpp:720
 msgid "Check credentials unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:749
+#: svc/svcImpl.cpp:745
 msgid "Check credentials & set token error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:751
+#: svc/svcImpl.cpp:747
 msgid "Check credentials & set token unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:784
+#: svc/svcImpl.cpp:780
 msgid "list user error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:787
+#: svc/svcImpl.cpp:783
 msgid "list user unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:805
+#: svc/svcImpl.cpp:801
 msgid "remove property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:807
+#: svc/svcImpl.cpp:803
 msgid "remove property unknown error"
+msgstr ""
+
+#: svc/svcImpl.cpp:857
+msgid "Box already exists"
+msgstr ""
+
+#: svc/svcImpl.cpp:867
+msgid "Box does not exists"
+msgstr ""
+
+#: svc/svcImpl.cpp:881
+msgid "change box error: "
+msgstr ""
+
+#: svc/svcImpl.cpp:883
+msgid "change box unknown error"
 msgstr ""
