@@ -73,7 +73,6 @@ private:
         odb::database *db,
         rcr::User *retVal
     );
-
     uint64_t generateNewToken();
 
 protected:
@@ -96,6 +95,11 @@ protected:
         odb::transaction &t,
         uint64_t id
     );
+    int removePackagesFromBox(
+        odb::database *db,
+        odb::transaction &t,
+        uint64_t id
+    );
 public:
 	/// ODB database
 	odb::database *mDb;
@@ -109,6 +113,7 @@ public:
 
     grpc::Status login(::grpc::ServerContext* context, const ::rcr::LoginRequest* request, ::rcr::LoginResponse* response) override;
     grpc::Status chPropertyType(::grpc::ServerContext* context, const ::rcr::ChPropertyTypeRequest* request, ::rcr::OperationResponse* response) override;
+    grpc::Status chBox(grpc::ServerContext* context, const rcr::chBoxRequest* request, rcr::OperationResponse* response) override;
     grpc::Status chCard(grpc::ServerContext* context, const rcr::ChCardRequest* request, rcr::OperationResponse* response) override;
     grpc::Status cardQuery(::grpc::ServerContext* context, const ::rcr::CardQueryRequest* request, ::rcr::CardQueryResponse* response) override;
     grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
@@ -116,6 +121,7 @@ public:
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
+
 };
 
 #endif

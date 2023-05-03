@@ -14,10 +14,8 @@
 
 #include "svcImpl.h"
 #include "passphrase.h"
-#include "MeasureUnit.h"
 #include "RCQuery.h"
 #include "RCQueryProcessor.h"
-#include "MeasureUnit.h"
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
@@ -283,8 +281,6 @@ struct ServiceConfig *RcrImpl::getConfig()
             LOG(ERROR) << _("change property unknown error");
         }
 
-    response->set_id(1);
-    response->set_description(request->value().description());
     END_GRPC_METHOD("chPropertyType", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }
@@ -806,4 +802,112 @@ void RcrImpl::removePropertyFromCards(
     } catch (...) {
         LOG(ERROR) << _("remove property unknown error");
     }
+}
+
+grpc::Status RcrImpl::chBox(
+    grpc::ServerContext* context,
+    const rcr::chBoxRequest* request,
+    rcr::OperationResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("chBox", request, t)
+        char op;
+        if (request->operationsymbol().empty())
+            op = 'l';
+        else
+            op = request->operationsymbol()[0];
+
+        try {
+            odb::result<rcr::Box> qs;
+            if (request->value().box_id())
+                qs = mDb->query<rcr::Box>(odb::query<rcr::Box>::box_id == request->value().box_id());
+            else
+                qs = mDb->query<rcr::Box>(odb::query<rcr::Box>::id == request->value().id());
+
+            odb::result<rcr::Box>::iterator it(qs.begin());
+            switch (op) {
+                case '=':
+                    if (it == qs.end()) {
+                        rcr::Box box = request->value();
+                        response->set_id(mDb->persist(box));
+                    } else {
+                        if (request->value().id())
+                            it->set_id(request->value().id());
+                        if (request->value().box_id())
+                            it->set_box_id(request->value().box_id());
+                        it->set_name(request->value().name());
+                        // uppercase to search
+                        it->set_uname(toUpperCase(request->value().name()));
+                        mDb->update(*it);
+                    }
+                    response->set_code(0);
+                    break;
+                case '+':
+                    if (it != qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("Box already exists"));
+                    } else {
+                        rcr::Box box = request->value();
+                        response->set_id(mDb->persist(box));
+                        response->set_code(0);
+                    }
+                    break;
+                case '-':
+                    if (it == qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("Box does not exists"));
+                    } else {
+                        removePackagesFromBox(mDb, t, it->box_id());
+                        mDb->erase(*it);
+                        response->set_code(0);
+                    }
+                    break;
+                default:
+                    response->set_code(-2);
+                    response->set_description(_("Invalid operation"));
+            }
+        } catch (const odb::exception &e) {
+            LOG(ERROR) << _("change box error: ") << e.what();
+        } catch (...) {
+            LOG(ERROR) << _("change box unknown error");
+        }
+    END_GRPC_METHOD("chBox", request, response, t)
+    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+int RcrImpl::removePackagesFromBox(
+    odb::database *db,
+    odb::transaction &t,
+    uint64_t startBox
+) {
+    int depth;
+    int r = 0;
+    uint64_t finishBox = StockOperation::maxBox(startBox, depth);
+#ifdef ENABLE_SQLITE
+    // Sqlite support int64 not uint64
+    if (finishBox == std::numeric_limits<uint64_t>::max())
+        finishBox = std::numeric_limits<int64_t>::max();
+#endif
+
+    try {
+        odb::result<rcr::Package> qs(mDb->query<rcr::Package>(
+                odb::query<rcr::Package>::box >= startBox
+                &&
+                odb::query<rcr::Package>::box <= finishBox
+        ));
+        for (odb::result<rcr::Package>::iterator it(qs.begin()); it != qs.end(); it++) {
+            db->erase(*it);
+        }
+    } catch (const odb::exception &e) {
+        r = -1;
+        LOG(ERROR) << _("list box error: ") << e.what();
+    } catch (...) {
+        r = -2;
+        LOG(ERROR) << _("list box unknown error");
+    }
+    return r;
 }

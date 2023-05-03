@@ -249,6 +249,14 @@ int RCQueryProcessor::updateBoxOnInsert(
     return 0;
 }
 
+/**
+ * On package remove check is box empty.
+ * Empty box to be deleted.
+ * @param db
+ * @param t
+ * @param boxId
+ * @return
+ */
 int RCQueryProcessor::updateBoxOnRemove(
     odb::database *db,
     odb::transaction *t,
