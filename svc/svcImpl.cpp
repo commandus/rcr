@@ -821,12 +821,15 @@ grpc::Status RcrImpl::chBox(
         else
             op = request->operationsymbol()[0];
 
+        uint64_t startBox = request->value().box_id();
+        int depth;
+        uint64_t finishBox = StockOperation::maxBox(startBox, depth);
         try {
             odb::result<rcr::Box> qs;
-            if (request->value().box_id())
-                qs = mDb->query<rcr::Box>(odb::query<rcr::Box>::box_id == request->value().box_id());
-            else
-                qs = mDb->query<rcr::Box>(odb::query<rcr::Box>::id == request->value().id());
+            qs = mDb->query<rcr::Box>(odb::query<rcr::Box>::box_id >= startBox
+                    &&
+                odb::query<rcr::Box>::box_id <= finishBox
+            );
 
             odb::result<rcr::Box>::iterator it(qs.begin());
             switch (op) {
@@ -835,14 +838,16 @@ grpc::Status RcrImpl::chBox(
                         rcr::Box box = request->value();
                         response->set_id(mDb->persist(box));
                     } else {
-                        if (request->value().id())
-                            it->set_id(request->value().id());
-                        if (request->value().box_id())
-                            it->set_box_id(request->value().box_id());
-                        it->set_name(request->value().name());
-                        // uppercase to search
-                        it->set_uname(toUpperCase(request->value().name()));
-                        mDb->update(*it);
+                        for (; it != qs.end(); it++) {
+                            if (request->value().id())
+                                it->set_id(request->value().id());
+                            if (request->value().box_id())
+                                it->set_box_id(request->value().box_id());
+                            it->set_name(request->value().name());
+                            // uppercase to search
+                            it->set_uname(toUpperCase(request->value().name()));
+                            mDb->update(*it);
+                        }
                     }
                     response->set_code(0);
                     break;
@@ -861,8 +866,10 @@ grpc::Status RcrImpl::chBox(
                         response->set_code(-3);
                         response->set_description(_("Box does not exists"));
                     } else {
-                        removePackagesFromBox(mDb, t, it->box_id());
-                        mDb->erase(*it);
+                        removePackagesFromBox(mDb, t, startBox);
+                        for (; it != qs.end(); it++) {
+                            mDb->erase(*it);
+                        }
                         response->set_code(0);
                     }
                     break;
