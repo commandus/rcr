@@ -1,4 +1,6 @@
-	#
+#
+# Dependencies: Gettext Intl ICU Xlnt Protobuf gRPC
+#               unofficial-sqlite3/SQLite3(Windows) or unofficial-postgresql/PostgreSQL(Windows)
 # Options:
 # -DENABLE_SQLITE=on   	enable Sqlite3
 # -DENABLE_PG=on 		enable PostgreSQL
@@ -200,7 +202,7 @@ set(RCR_CLI_SRC
 	${GEN_GRPC_SRC} ${ARGTABLE}
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})
-target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
+target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} rcr gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
 	${SSL_LIBS} ${Intl_LIBRARY}
 )
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})

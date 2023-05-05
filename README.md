@@ -241,7 +241,7 @@
 Проверка
 
 ```
-xlsx-list "~/src/mgp/data" -b 121
+xlsx-list "~/src/rcr/data" -b 121
 ```
 
 Параметр -b хадает номер первой коробки (он может совпадать с номер комнаты, где искать коробку)
@@ -501,9 +501,29 @@ Visual Code UMLet.
 | D   | корпус |
 
 
-### Windows
+## Инструменты
 
-Install vcpkg
+- CMake
+- Visual Studio 2022 17.4.5 (Visual C++) (Windows
+- vcpkg 2021-12-09 (Windows)
+- Gettext
+- компилятор odb (2.4.0)
+- компилятор protoc (libprotoc 3.18.0)
+
+Для Windows скачайте https://www.codesynthesis.com/download/odb/2.4/odb-2.4.0-i686-windows.zip
+
+Распакуйте odb-2.4.0-i686-windows.zip в указываемый переменнгой окружения PATH путь, например, C:\bin
+
+Для Windows скопируйте 
+
+- protoc.exe
+- grpc_cpp_plugin.exe
+- C:\git\vcpkg\installed\x64-windows-static\tools\protobuf\*.dll
+- C:\git\vcpkg\buildtrees\grpc\x64-windows-rel\*.dll 
+
+в указываемый переменнгой окружения PATH путь, например, C:\bin
+
+### Установка vcpkg в Windows:
 
 ```
 cd \git
@@ -513,143 +533,24 @@ cd vcpkg
 ./vcpkg integrate install
 ```
 
-then run
-```
-cd \git\vcpkg
-vcpkg install libodb:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows icu:x64-windows xlnt:x64-windows
-```
+## Зависимости
 
-Produce solution:
-```
-mkdir build
-cd build
-cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
-```
+- ICU / Intl
+- Xlnt
+- Protobuf
+- gRPC
+- unofficial-sqlite3/SQLite3(Windows)
+- or unofficial-postgresql/PostgreSQL(Windows)
+- Xlnt - есть в vcpkg для Windows, но нет в пакетах Ubuntu
 
-Install dependencies and tool first (see section Prerequisites).
-
-Check proto/mgp.proto file.
-
-Determine which classes are persistent in the odb/pragmas.pgsql.hxx.
-
-List classes and members persistent in the relational database in the odb/pragmas.pgsql.hxx file
-e.g.
+Установка в Linux зависимостей из пакетов:
 
 ```
-	ODB_TABLE(Person)
-		ODB_STRING(Person, first_name)
-		ODB_STRING(Person, last_name)
-      ...
+sudo apt install grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev \
+libc-ares-dev odb libodb-sqlite-2.4 libicu-dev
 ```
 
-Then call ./tools/generate-code.ps1
-
-./tools/generate-code.ps1 do:
-
-- generate serialziation & protocol support classes
-- generate object relation mapping (ORM) classes
-
-### Dependencies
-
-[Build and install gRPC and Protocol Buffers instructions](https://grpc.io/docs/languages/cpp/quickstart/)
-
-tools/install-grpc.sh script installs libgrpc++.so.1.24.3
-
-libprotoc 3.12.4
-```
-sudo apt install --reinstall grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev
-```
-
-```
-git clone --recurse-submodules -b v1.24.3 --depth 1 --shallow-submodules https://github.com/grpc/grpc
-cd grpc
-mkdir -p cmake/build
-pushd cmake/build
-cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_SSL_PROVIDER:STRING=package ../..
-make -j 1
-sudo make install
-popd
-```
-
-gRPC depends on c-ares
-```
-sudo apt install libc-ares-dev
-```
-
-### Xlnt
-
-Linux
-
-```
-git clone https://github.com/tfussell/xlnt.git
-cd xmake lnt
-git submodule init
-git submodule update
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-ls /usr/local/lib/libxlnt.so.1.5.0
-ls /usr/local/include/xlnt/xlnt.hpp
-```
-
-### Serialzation & protocol support classes
-
-Generate in the gen/ subdirectory protobuf serialization classes  (.pb.cc, .pb.h),
-gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) usinbg protoc compiler and 
-protoc's grpc c++ plugin.
-
-Object relation mapping (ORM)
-
-Generate in the gen/ subdirectory ODB ORM mapping code(.pb-odb.cxx, .pb-odb.ixx, .pb-odb.hxx),
-gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) usinbg protoc compiler and 
-protoc's grpc c++ plugin.
-
-by the proto/mgp.proto 
-
-## Tools
-
-- .\tools\generate-code.ps1 - Generate
-- .\tools\clean-code.ps1 - Clean
-
-## Prerequisites
-
-### Development tools
-
-- Visual Studio 2022 17.4.5 (Visual C++)
-- vcpkg 2021-12-09 (package manager)
-
-### Preinstalled dependencies
-
-Libraries:
-
-- odb (ORM)
-- grpc (client-server protocol)
-- protobuf (serialization) 
-
-Compilers:
-
-- odb (2.4.0)
-- protoc (libprotoc 3.18.0)
-
-must be in the folder in the %PATH%
-
-Copy protoc.exe, grpc_cpp_plugin.exe and *.dll from C:\git\vcpkg\installed\x64-windows-static\tools\protobuf, C:\git\vcpkg\buildtrees\grpc\x64-windows-rel
-to C:\bin
-
-Download https://www.codesynthesis.com/download/odb/2.4/odb-2.4.0-i686-windows.zip
-
-Unzip odb-2.4.0-i686-windows.zip to c:\p\odb (for example)
-
-Add C:\p\odb\bin to %PATH%
-
-
-#### Install odb
-
-Linux:
-
-[Install unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)
+[Install ODB unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)
 
 ```
 sudo apt install odb libodb-pgsql-2.4
@@ -674,12 +575,43 @@ then install g++-10
 sudo apt install g++-10
 ```
 
-Windows:
+### Xlnt
+
+В Linux Xlnt нужно собрать вручную:
+
+```
+git clone https://github.com/tfussell/xlnt.git
+cd xmake lnt
+git submodule init
+git submodule update
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+ls /usr/local/lib/libxlnt.so.1.5.0
+ls /usr/local/include/xlnt/xlnt.hpp
+```
+
+### Установка зависимостей в Windows
+
+```
+cd \git\vcpkg
+vcpkg install libodb:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows icu:x64-windows xlnt:x64-windows
+```
+
+Static 
+```
+cd \git\vcpkg
+vcpkg install libodb:x64-windows-static libodb-pgsql:x64-windows-static libodb-sqlite:x64-windows-static sqlite3:x64-windows-static grpc:x64-windows-static protobuf:x64-windows-static
+```
+
+###№ Установка odb
 
 ```
 cd \git\vcpkg
 vcpkg install libodb:x64-windows libodb-pgsql:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows
-cd \src\mgp
+cd \src\rcr
 mkdir build
 cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
@@ -712,7 +644,83 @@ vcpkg install libodb-sqlite:x64-windows-static
 or download from https://www.codesynthesis.com/download/odb/2.4/libodb-pgsql-2.4.0.zip
 upgrade solution from 10 to 14 and build release
 
-#### Install grpc & protobuf
+
+### Альтернативные способы установки зависимостей 
+
+[Build and install gRPC and Protocol Buffers instructions](https://grpc.io/docs/languages/cpp/quickstart/)
+
+tools/install-grpc.sh script installs libgrpc++.so.1.24.3
+
+libprotoc 3.12.4
+```
+sudo apt install --reinstall grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev
+```
+
+```
+git clone --recurse-submodules -b v1.24.3 --depth 1 --shallow-submodules https://github.com/grpc/grpc
+cd grpc
+mkdir -p cmake/build
+pushd cmake/build
+cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DgRPC_SSL_PROVIDER:STRING=package ../..
+make -j 1
+sudo make install
+popd
+```
+
+gRPC depends on c-ares
+```
+sudo apt install libc-ares-dev
+```
+
+## Создание решения в Windows
+
+Для создания решения Visual Studio воспользуйтесь CMake:
+
+```
+mkdir build
+cd build
+cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+```
+
+Check proto/rcr.proto file.
+
+Determine which classes are persistent in the odb/pragmas.pgsql.hxx.
+
+List classes and members persistent in the relational database in the odb/pragmas.pgsql.hxx file
+e.g.
+
+```
+	ODB_TABLE(Card)
+		ODB_STRING(Card, name)
+      ...
+```
+
+Then call ./tools/generate-code.ps1
+
+./tools/generate-code.ps1 do:
+
+- generate serialziation & protocol support classes
+- generate object relation mapping (ORM) classes
+
+### Serialzation & protocol support classes
+
+Generate in the gen/ subdirectory protobuf serialization classes  (.pb.cc, .pb.h),
+gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) usinbg protoc compiler and 
+protoc's grpc c++ plugin.
+
+Object relation mapping (ORM)
+
+Generate in the gen/ subdirectory ODB ORM mapping code(.pb-odb.cxx, .pb-odb.ixx, .pb-odb.hxx),
+gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) usinbg protoc compiler and 
+protoc's grpc c++ plugin.
+
+by the proto/rcr.proto 
+
+## Tools
+
+- .\tools\generate-code.ps1 - Generate
+- .\tools\clean-code.ps1 - Clean
+
 
 ##### Linux
 
@@ -728,16 +736,6 @@ cd ~/src-old/third_party/grpc/bins/opt
 sudo cp grpc_cpp_plugin  grpc_node_plugin  grpc_objective_c_plugin  grpc_php_plugin  grpc_python_plugin  grpc_ruby_plugin /usr/local/bin
 ```
 
-##### Windows
-```
-vcpkg install grpc:x64-windows-static protobuf:x64-windows-static
-```
-
-##### Install all
-
-```
-vcpkg install libodb:x64-windows-static libodb-pgsql:x64-windows-static libodb-sqlite:x64-windows-static sqlite3:x64-windows-static grpc:x64-windows-static
-```
 
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 target_link_libraries(main PRIVATE unofficial::sqlite3::sqlite3)
@@ -768,14 +766,14 @@ C:\git\vcpkg\installed\x64-windows-static\lib\ C:\git\vcpkg\installed\x64-window
 
 Generate files:
 
-- mgp.grpc.pb.cc
-- mgp.grpc.pb.h
-- mgp.pb-odb.cxx
-- mgp.pb-odb.hxx
-- mgp.pb-odb.ixx
-- mgp.pb.cc
-- mgp.pb.h
-- mgp.pb.sql
+- rcr.grpc.pb.cc
+- rcr.grpc.pb.h
+- rcr.pb-odb.cxx
+- rcr.pb-odb.hxx
+- rcr.pb-odb.ixx
+- rcr.pb.cc
+- rcr.pb.h
+- rcr.pb.sql
 
 In the PowerShell execute:
 ```
