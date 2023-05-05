@@ -21,7 +21,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 # see https://stackoverflow.com/questions/10521635/using-intltool-with-cmake
 #
 find_package(Gettext REQUIRED)
-
 find_package (Intl REQUIRED)
 include_directories(${Intl_INCLUDE_DIRS})
 link_directories(${Intl_LIBRARY_DIRS})
@@ -144,17 +143,32 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 endif()
 
 #
+# librcr
+#
+set(RCR_LIB_SRC
+	${GEN_GRPC_SRC}
+	third-party/utilfile.cpp third-party/utilstring.cpp
+	string-helper.cpp RcrCredentials.cpp RCQuery.cpp RCQueryProcessor.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
+	AppSettings.cpp SpreadSheetHelper.cpp BoxName.cpp
+)
+add_library(rcr STATIC ${RCR_LIB_SRC})
+target_link_libraries(rcr PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
+	${SSL_LIBS} ${Intl_LIBRARY}
+)
+target_compile_definitions(rcr PRIVATE ${DEFS})
+target_include_directories(rcr PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
+
+#
 # mkdb
 #
 set(MKDB_SRC 
 	cli/mkdb.cpp
 	${GEN_SRC}
 	${ARGTABLE}
-	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
 )
 add_executable(mkdb ${MKDB_SRC})
 target_link_libraries(mkdb PRIVATE ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${Protobuf_LIBRARIES}
-	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} ${GRPC_LIBS}
+	${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES} ${GRPC_LIBS} rcr
 )
 target_compile_definitions(mkdb PRIVATE ${DEFS})
 target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -168,19 +182,12 @@ target_link_libraries(box PRIVATE ${ICU_LIBS})
 #
 # rcr-svc
 #
-set(RCR_SVC_SRC
-	svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
-	${GEN_SRC}
-	${ARGTABLE}
-	third-party/utilfile.cpp third-party/utilstring.cpp RcrCredentials.cpp AppSettings.cpp
-	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
-	RCQuery.cpp RCQueryProcessor.cpp SpreadSheetHelper.cpp
-	BoxName.cpp)
-add_executable(rcr-svc ${RCR_SVC_SRC})
+add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
+	${GEN_SRC} ${ARGTABLE}
+)
 target_link_libraries(rcr-svc PRIVATE
-	${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
-	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}
-	${SSL_LIBS}
+	rcr ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
+	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}	${SSL_LIBS}
 )
 target_compile_definitions(rcr-svc PRIVATE ${DEFS})
 target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -190,19 +197,14 @@ target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_
 #
 set(RCR_CLI_SRC
 	cli/grpcClient.cpp cli/rcr-cli.cpp
-	${GEN_GRPC_SRC}
-	${ARGTABLE}
-	third-party/utilfile.cpp third-party/utilstring.cpp RcrCredentials.cpp AppSettings.cpp
-	string-helper.cpp MeasureUnit.cpp StockOperation.cpp QueryProperties.cpp
-    SpreadSheetHelper.cpp
-	BoxName.cpp
+	${GEN_GRPC_SRC} ${ARGTABLE}
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})
 target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
 	${SSL_LIBS} ${Intl_LIBRARY}
 )
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})
-target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
+target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} rcr )
 
 #if(WIN32)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
