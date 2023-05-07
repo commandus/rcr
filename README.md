@@ -512,7 +512,12 @@ Visual Code UMLet.
 
 Для Windows скачайте https://www.codesynthesis.com/download/odb/2.4/odb-2.4.0-i686-windows.zip
 
-Распакуйте odb-2.4.0-i686-windows.zip в указываемый переменнгой окружения PATH путь, например, C:\bin
+Распакуйте odb-2.4.0-i686-windows.zip в корень, нужны папки
+- C:\bin
+- C:\etc
+- C:\mingw
+
+Папку C:\bin включить в переменную окружения PATH.
 
 Для Windows скопируйте 
 
@@ -522,6 +527,13 @@ Visual Code UMLet.
 - C:\git\vcpkg\buildtrees\grpc\x64-windows-rel\*.dll 
 
 в указываемый переменнгой окружения PATH путь, например, C:\bin
+
+В скрипте tools/generate-code.ps1 в строке 2 исправьте путь к плагину
+```
+$GRPC_PLUGIN = "c:\p\bin\grpc_cpp_plugin.exe"
+```
+Плагин указзывается по полному пути, в переменной PATH плагин grpc компилятра protoc
+не ищет. В linux скрипте используется `which` для полстановки полного пути .
 
 ### Установка vcpkg в Windows:
 
@@ -680,6 +692,8 @@ sudo apt install libc-ares-dev
 mkdir build
 cd build
 cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x64-windows
+или
+cmake -A x64 -D CMAKE_TOOLCHAIN_FILE=c:/git/vcpkg/scripts/buildsystems/vcpkg.cmake -D VCPKG_TARGET_TRIPLET=x64-windows ..
 ```
 
 Check proto/rcr.proto file.
@@ -799,6 +813,15 @@ cmake .. -DCMAKE_TOOLCHAIN_FILE=C:\git\vcpkg\scripts\buildsystems\vcpkg.cmake
 
 #### Bugs
 
+##### Windows script generate-code.ps1 policy issue
+
+Generating C:/git/rcr/gen/rcr.grpc.pb.cc, C:/git/rcr/gen/rcr.pb.cc, C:/git/rcr/gen/rcr.pb-odb.cxx, C:/git/rcr/gen/rcr.grpc.pb.h, C:/git/rcr/gen/rcr.pb.h, C:/git/rcr/gen/rcr.pb-odb.hxx
+C:/git/rcr/tools/generate-code.ps1 : File C:\git\rcr\tools\generate-code.ps1 cannot be loaded. The file C:\git\rcr\tools\generate-code.ps1 is not digitally signed. You cannot run this script on the current system. For more information about running scripts and setting execution policy, see about_Execution_Policies at https:/go.microsoft.com/fwlink/?LinkID=135170.
+
+PowerShell run as administrator:
+```
+Set-ExecutionPolicy -ExecutionPolicy Bypass
+```
 ##### gcc
 
 tools/generate-code.ps1 on odb calls gcc
@@ -826,6 +849,14 @@ Remove (comment) line 124 in the C:\git\vcpkg\packages\protobuf_x64-windows-stat
   WrappedMutex() {}
 #endif
 ```
+#### Visual Studio C++17 deprecated issue
+
+On error 'ptr_fun': is not a member of visual studio
+see https://stackoverflow.com/questions/48882439/how-to-restore-auto-ptr-in-visual-studio-c17
+
+1. Project > Properties > C/C++ > Preprocessor > Preprocessor Definitions and add _HAS_AUTO_PTR_ETC=1. Do so for all configurations and platforms.
+2. If you use a precompiled header then you probably favor defining the macro there. Before any #includes, insert #define _HAS_AUTO_PTR_ETC 1.
+
 
 #### odb
 
