@@ -51,11 +51,17 @@ ELSE()
 			SET(_moFile ${_moPath}/${PRG}.mo)
 			MESSAGE("** ** ${_moFile} install to ${LOCALE_INSTALL_DIR}/${_langCode}/LC_MESSAGES/${PRG}.mo")
 #	mkdir -p ${_moPath} ; ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_moFile} ${_poFile}
-			MESSAGE("** ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.sh ${_moPath} ${_moFile} ${_poFile}")
-
-			ADD_CUSTOM_COMMAND(OUTPUT ${_moFile}
-				COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.sh ${_moPath} ${_moFile} ${_poFile}
-				DEPENDS ${_poFile})
+if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	MESSAGE("** powershell ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.ps1 ${GETTEXT_MSGFMT_EXECUTABLE} ${_moPath} ${_moFile} ${_poFile}")
+	ADD_CUSTOM_COMMAND(OUTPUT ${_moFile}
+		COMMAND powershell ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.ps1 ${GETTEXT_MSGFMT_EXECUTABLE} ${_moPath} ${_moFile} ${_poFile}
+		DEPENDS ${_poFile})
+else()
+	MESSAGE("** ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.sh ${_moPath} ${_moFile} ${_poFile}")
+	ADD_CUSTOM_COMMAND(OUTPUT ${_moFile}
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/tools/mk_mo.sh ${_moPath} ${_moFile} ${_poFile}
+		DEPENDS ${_poFile})
+endif()
 #			INSTALL(FILES ${_moFile} DESTINATION ${LOCALE_INSTALL_DIR}/${_langCode}/LC_MESSAGES/ RENAME ${PRG}.mo)
 			LIST(APPEND MO_FILES ${_moFile})
 		ENDIF()
@@ -79,7 +85,7 @@ set(XLSX_LIBS xlnt::xlnt)
 # ODB requires 11, 14?, not compile 17 (on Windows)
 # gRPC 1.24 requires 11, gRPC 1.53 requires 17
 # 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 
 option(ENABLE_SQLITE "Build with Sqlite3" ON)
 option(ENABLE_PG "Build with PostgreSQL}" OFF)
@@ -179,7 +185,7 @@ target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIR
 # box
 #
 add_executable(box cli/box.cpp	${ARGTABLE}	StockOperation.cpp)
-target_link_libraries(box PRIVATE ${ICU_LIBS})
+target_link_libraries(box PRIVATE ${ICU_LIBS} ${Intl_LIBRARY})
 
 #
 # rcr-svc

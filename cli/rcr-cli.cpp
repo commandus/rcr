@@ -6,6 +6,7 @@
  */
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 #include "argtable3/argtable3.h"
