@@ -597,7 +597,7 @@ ls /usr/local/include/xlnt/xlnt.hpp
 
 ```
 cd \git\vcpkg
-vcpkg install libodb:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows icu:x64-windows xlnt:x64-windows
+vcpkg install gettext[tools]:x64-windows libodb:x64-windows libodb-sqlite:x64-windows protobuf:x64-windows grpc:x64-windows icu:x64-windows xlnt:x64-windows
 ```
 
 Static 
