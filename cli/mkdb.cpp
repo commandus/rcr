@@ -137,6 +137,22 @@ static bool sqliteFillOutDatabase(
         propertyType.set_description(_("housing"));
         db.persist(propertyType);
 
+        propertyType.set_key("V");
+        propertyType.set_description(_("voltage"));
+        db.persist(propertyType);
+
+        propertyType.set_key("A");
+        propertyType.set_description(_("current"));
+        db.persist(propertyType);
+
+        propertyType.set_key("P");
+        propertyType.set_description(_("power"));
+        db.persist(propertyType);
+
+        propertyType.set_key("%");
+        propertyType.set_description(_("precision"));
+        db.persist(propertyType);
+
         // user
         rcr::User user;
         user.set_name("SYSDBA");

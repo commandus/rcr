@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-04-25 14:01+0900\n"
+"POT-Creation-Date: 2023-05-10 10:42+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -50,23 +50,39 @@ msgstr "утилита создания базы данных"
 msgid "housing"
 msgstr "корпус"
 
-#: cli/mkdb.cpp:160
+#: cli/mkdb.cpp:141
+msgid "voltage"
+msgstr "напряжение"
+
+#: cli/mkdb.cpp:145
+msgid "current"
+msgstr "ток"
+
+#: cli/mkdb.cpp:149
+msgid "power"
+msgstr "мощность"
+
+#: cli/mkdb.cpp:153
+msgid "precision"
+msgstr "точность"
+
+#: cli/mkdb.cpp:176
 msgid "Error filling schema :"
 msgstr "Ошибка заполнения схемы: "
 
-#: cli/mkdb.cpp:163
+#: cli/mkdb.cpp:179
 msgid "Unknown error filling schema"
 msgstr "Неизвестная ошибка заполнения схемы"
 
-#: cli/mkdb.cpp:185
+#: cli/mkdb.cpp:201
 msgid "Error create schema: "
 msgstr "Ошибка создания схемы: "
 
-#: cli/mkdb.cpp:187
+#: cli/mkdb.cpp:203
 msgid "Unknown error create schema"
 msgstr "Неизвестная  ошибка создания схемы"
 
-#: cli/mkdb.cpp:216
+#: cli/mkdb.cpp:232
 msgid "Admin user SYSDBA created with password \"masterkey\""
 msgstr ""
 "Пользователь SYSDBA с правами администратора создан с паролем \"masterkey\""
