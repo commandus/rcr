@@ -100,6 +100,34 @@ protected:
         odb::transaction &t,
         uint64_t id
     );
+    void updateCardPackages(
+        odb::database *db,
+        odb::transaction &t,
+        const rcr::ChCardRequest *request
+    );
+    void updateCardPackage(
+        odb::database *db,
+        odb::transaction &t,
+        const rcr::ChCardRequest *request,
+        uint64_t packageId
+    );
+    bool removeCard(
+        odb::database *db,
+        odb::transaction &t,
+        const rcr::ChCardRequest *request
+    );
+    /**
+     * Return true if card is empty, false-
+     * @param db
+     * @param t
+     * @param request
+     * @return
+     */
+    bool removePackage(
+        odb::database *db,
+        odb::transaction &t,
+        const rcr::ChCardRequest *request
+    );
 public:
 	/// ODB database
 	odb::database *mDb;
@@ -121,7 +149,6 @@ public:
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
-
 };
 
 #endif

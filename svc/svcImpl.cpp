@@ -321,22 +321,14 @@ grpc::Status RcrImpl::chCard(
                 response->set_id(card_id);
                 response->set_code(0);
                 }
-                response->set_code(0);
                 break;
             case '-':
-                // remove if exists
-                if (request->value().id()) {
-                    // cascade delete mey not work
-                    odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
-                    for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
-                        mDb->erase(*it);
-                    }
-                    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
-                    for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
-                        mDb->erase(*itp);
-                    }
-                    mDb->erase(request->value());
-                }
+                if (request->package_id())
+                    // remove only package not a card
+                    if (removePackage(mDb, t, request))
+                        removeCard(mDb, t, request);
+                else
+                    removeCard(mDb, t, request);
                 response->set_code(0);
                 break;
             case '=': {
@@ -382,50 +374,11 @@ grpc::Status RcrImpl::chCard(
                     }
                 }
 
-                // update packages if changed
-                odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
-                std::vector <uint64_t> updatedPackageIds(8);
-                for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
-                    auto qit = std::find_if(request->packages().begin(), request->packages().end(),
-                        [it] (auto v) {
-                            return it->id() == v.id();
-                        });
-                    if (qit == request->packages().end()) {
-                        // delete from database, it removed
-                        mDb->erase(*it);
-                    } else {
-                        updatedPackageIds.push_back(qit->card_id());
-                        // update if it changed
-                        if (!(it->card_id() == qit->card_id()
-                              && it->box() == qit->box()
-                              && it->qty() == qit->qty()
-                              && it->box_name() == qit->box_name())) {
-                            // update
-                            mDb->update(*qit);
-                        }
-                    }
-                }
-                // insert a new ones
-                for (auto it = request->packages().begin(); it != request->packages().end(); it++) {
-                    auto alreadyIt = std::find_if(updatedPackageIds.begin(), updatedPackageIds.end(),
-                      [it] (auto v) {
-                          return it->id() == v;
-                      });
-                    if (alreadyIt == updatedPackageIds.end()) {
-                        // not updatedPackageIds yet, insert a new one
-                        rcr::Package p = *it;
-                        uint64_t pid = mDb->persist(p);
-                    }
-                }
-
-                for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
-                    rcr::Package p = *pack;
-                    p.set_card_id(id);
-                    if (p.id())
-                        mDb->update(p);
-                    else
-                        mDb->persist(p);
-                }
+                // update packages if changed or delete if no more exists
+                if (request->package_id())
+                    updateCardPackage(mDb, t, request, request->package_id());  // only selected
+                else
+                    updateCardPackages(mDb, t, request);    // all
                 response->set_id(id);
                 response->set_code(0);
             }
@@ -917,4 +870,134 @@ int RcrImpl::removePackagesFromBox(
         LOG(ERROR) << _("list box unknown error");
     }
     return r;
+}
+
+void RcrImpl::updateCardPackages(
+    odb::database *db,
+    odb::transaction &t,
+    const rcr::ChCardRequest *request
+) {
+    odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
+    std::vector <uint64_t> updatedPackageIds(8);
+    for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
+        auto qit = std::find_if(request->packages().begin(), request->packages().end(),
+                                [it] (auto v) {
+                                    return it->id() == v.id();
+                                });
+        if (qit == request->packages().end()) {
+            // delete from database, because it removed
+            mDb->erase(*it);
+        } else {
+            updatedPackageIds.push_back(qit->card_id());
+            // update if it changed
+            if (!(it->card_id() == qit->card_id()
+                  && it->box() == qit->box()
+                  && it->qty() == qit->qty()
+                  && it->box_name() == qit->box_name())) {
+                // update
+                mDb->update(*qit);
+            }
+        }
+    }
+    // insert a new ones
+    for (auto it = request->packages().begin(); it != request->packages().end(); it++) {
+        auto alreadyIt = std::find_if(updatedPackageIds.begin(), updatedPackageIds.end(),
+                                      [it] (auto v) {
+                                          return it->id() == v;
+                                      });
+        if (alreadyIt == updatedPackageIds.end()) {
+            // not updatedPackageIds yet, insert a new one
+            rcr::Package p = *it;
+            uint64_t pid = mDb->persist(p);
+        }
+    }
+
+    for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
+        rcr::Package p = *pack;
+        p.set_card_id(request->value().id());
+        if (p.id())
+            mDb->update(p);
+        else
+            mDb->persist(p);
+    }
+}
+
+void RcrImpl::updateCardPackage(
+    odb::database *db,
+    odb::transaction &t,
+    const rcr::ChCardRequest *request,
+    uint64_t packageId
+) {
+    if (request->packages_size() == 0)
+        return; // nothing to update.
+    // find out old one
+    odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(
+            odb::query<rcr::Package>::card_id == request->value().id()
+            &&
+            odb::query<rcr::Package>::id == packageId
+            ));
+    // trying to update
+    odb::result<rcr::Package>::iterator it(qPackage.begin());
+    if (it != qPackage.end()) {
+        *it = *request->packages().begin(); // just one package
+        it->set_card_id(request->value().id());
+        mDb->update(*it);
+        return;
+    }
+
+    // insert if it does not exists yet
+    auto p1(request->packages().begin());
+    rcr::Package p = *p1;
+    p.set_card_id(request->value().id());
+    uint64_t pid = mDb->persist(p);
+}
+
+bool RcrImpl::removeCard(
+    odb::database *db,
+    odb::transaction &t,
+    const rcr::ChCardRequest *request
+) {
+    // remove if exists
+    if (request->value().id() == 0)
+        return false;  // nothing to delete
+    // cascade delete may not work
+    odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
+    for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
+        mDb->erase(*it);
+    }
+    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
+    for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
+        mDb->erase(*itp);
+    }
+    mDb->erase(request->value());
+    return true;
+}
+
+/**
+ * Remove package not a card.
+ * Return true if all packages has been deleted and card may to delete
+ * @param db
+ * @param t
+ * @param request
+ * @return
+ */
+bool RcrImpl::removePackage(
+    odb::database *db,
+    odb::transaction &t,
+    const rcr::ChCardRequest *request
+) {
+    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(
+        odb::query<rcr::Package>::card_id == request->value().id()
+        &&
+        odb::query<rcr::Package>::id == request->package_id()
+    ));
+    for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
+        mDb->erase(*itp);
+    }
+    // check does card has any packages
+    odb::result<rcr::Package> qExists(mDb->query<rcr::Package>(
+            odb::query<rcr::Package>::card_id == request->value().id()
+    ));
+    odb::result<rcr::Package>::iterator itExists(qExists.begin());
+    return (itExists == qExists.end());
 }
