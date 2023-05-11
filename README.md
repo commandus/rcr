@@ -513,6 +513,14 @@ Visual Code UMLet.
 - компилятор odb (2.4.0)
 - компилятор protoc (libprotoc 3.18.0)
 
+Для Linux для glade установите утилиту xmllint
+
+```
+sudo apt install libxml2-utils
+```
+
+для удаления пробелов в XML файлое ресурса.
+
 Для Windows скачайте https://www.codesynthesis.com/download/odb/2.4/odb-2.4.0-i686-windows.zip
 
 Распакуйте odb-2.4.0-i686-windows.zip в корень, нужны папки
@@ -529,7 +537,7 @@ Visual Code UMLet.
 - C:\git\vcpkg\installed\x64-windows-static\tools\protobuf\*.dll
 - C:\git\vcpkg\buildtrees\grpc\x64-windows-rel\*.dll 
 
-в указываемый переменнгой окружения PATH путь, например, C:\bin
+в указываемый переменной окружения PATH путь, например, C:\bin
 
 В скрипте tools/generate-code.ps1 в строке 2 исправьте путь к плагину
 ```
