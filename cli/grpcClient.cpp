@@ -338,7 +338,7 @@ void RcrClient::printBoxes(
 }
 
 void RcrClient::changeProperty(
-    std::string &clause,
+    const std::string &clause,
     std::string &user,
     std::string &password
 ) {
@@ -360,6 +360,54 @@ void RcrClient::changeProperty(
     request.mutable_user()->set_name(password);
 
     grpc::Status status = stub->chPropertyType(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
+        return;
+    }
+    if (response.code()) {
+        std::cerr << _("Error: ") << response.code() << " " << response.description() << std::endl;
+        return;
+    }
+}
+
+void RcrClient::chBox(
+    const char operation,
+    const std::string &sourceBoxIdStr,
+    const std::string &p2,
+    const std::string &p3,
+    const std::string &user,
+    const std::string &password
+) {
+    grpc::ClientContext context;
+    rcr::OperationResponse response;
+    rcr::ChBoxRequest request;
+    // first parameter
+    uint64_t b;
+    uint64_t bNew;
+    StockOperation::parseBoxes(b, sourceBoxIdStr, 0, sourceBoxIdStr.size());
+    request.mutable_value()->set_box_id(b);
+    switch(operation) {
+        case '+':
+            request.set_operationsymbol("+");
+            request.mutable_value()->set_name(p2);
+            break;
+        case '-':
+            request.set_operationsymbol("-");
+            break;
+        case '=':
+            StockOperation::parseBoxes(bNew, p2, 0, p2.size());
+            request.mutable_value()->set_id(bNew);
+            request.set_operationsymbol("=");
+            request.mutable_value()->set_name(p3);
+            break;
+        default:
+            break;
+    }
+
+    request.mutable_user()->set_name(user);
+    request.mutable_user()->set_name(password);
+
+    grpc::Status status = stub->chBox(&context, request, &response);
     if (!status.ok()) {
         std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
         return;

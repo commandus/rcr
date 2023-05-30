@@ -34,15 +34,18 @@ const char* DEF_COMMAND = "stream-query";
 
 #define HELP_STRING _("help               Help screen\n\
 quit               Exit\n\
-symbol list        Component type and symbol list\n\
-symbol             Set all component types\n\
+symbol             Component type and symbol list\n\
+symbol *           Set all component types\n\
 symbol D           Set component symbol D (integrated circuits)\n\
-box list           Boxes\n\
-property list      Properties list\n\
+box                Box list\n\
+box + 21-1 spare   Add box 21-1 named \"spare\"\n\
+box - 21-1         Remove box\n\
+box = 21-1 22 new  Rename box 21-1 to 22\n\
+property           Properties list\n\
 property = A accu  Set property accu with shortkey A\n\
 property + B bat   Add property\n\
 property - A       Remove property\n\
-user list          Registered users\n\
+user               Registered users\n\
 import <path>      Preview spreadsheets in the path\n\
 import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n\
 .. no-num       Do not read box number from Excel file name\n\
@@ -262,6 +265,31 @@ int parseCmd
 	return 0;
 }
 
+static std::string nextWord(
+    const std::string &line,
+    size_t &start
+) {
+    size_t eolp = line.size();
+    size_t finish = eolp;
+    // skip spaces
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(line[p])) {
+            start = p;
+            break;
+        }
+    }
+    // try read symbol
+    for (auto p = start; p < eolp; p++) {
+        if (std::isspace(line[p])) {
+            finish = p;
+            break;
+        }
+    }
+    std::string r = line.substr(start, finish - start);
+    start = finish;
+    return r;
+}
+
 int main(int argc, char** argv)
 {
     // I18N
@@ -372,125 +400,86 @@ int main(int argc, char** argv)
             cs = config.command.substr(7);
         if (cs == "query") {
             std::string line;
-            std::string symbol = "";
+            std::string symbol;
             std::cerr << _("Enter help to see command list") << std::endl;
+
             while (std::getline(std::cin, line)) {
-                if (line.find("help") == 0) {
+                size_t start = 0;
+                std::string cliCmd = toUpperCase(nextWord(line, start));
+                if (cliCmd == "HELP") {
                     std::cerr << HELP_STRING << std::endl;
                     continue;
                 }
-                if (line.find("quit") == 0) {
+                if (cliCmd == "QUIT") {
                     break;
                 }
-                if (line.find("symbol") == 0) {
-                    auto verb = line.find("list");
-                    if (verb != std::string::npos && verb >= 6) {   // symbollist, symbol-list, symbol list
+                if (cliCmd == "SYMBOL") {
+                    std::string symbolParam = toUpperCase(nextWord(line, start));
+                    if (symbolParam.empty()) {
                         rpc.printSymbols(std::cout, config.locale);
                         std::cout << std::endl;
                         continue;
+                    } else {
+                        if (symbolParam == "*")
+                            symbol = "";
+                        else
+                            symbol = trim(symbolParam);
                     }
-                    symbol = toUpperCase(trim(line.substr(6)));
                 }
-                if (line.find("user") == 0) {
-                    auto verb = line.find("list");
-                    if (verb != std::string::npos && verb >= 4) {   // userlist, user-list, user list
+                if (cliCmd == "USER") {
+                    std::string userParam = toUpperCase(nextWord(line, start));
+                    if (userParam.empty()) {
                         rpc.printUser(std::cout, &u);
                         std::cout << std::endl;
                         continue;
                     }
                 }
-                if (line.find("property") == 0) {
-                    auto verb = line.find("list");
-                    if (verb != std::string::npos && verb >= 8) {   // propertylist, property-list, property list
-                        rpc.printProperty(std::cout);
-                        std::cout << std::endl;
-                        continue;
-                    } else {
-                        std::string clause = line.substr(8);
-                        rpc.changeProperty(clause, config.username, config.password);
-                        continue;
+                if (cliCmd == "PROPERTY") {
+                    std::string propertyManipStr = nextWord(line, start);
+                    char propertyManip = 'l';
+                    if (!propertyManipStr.empty())
+                        propertyManip = propertyManipStr[0];
+                    switch (propertyManip) {
+                        case '+':
+                        case '-':
+                        case '=':
+                            rpc.changeProperty(line.substr(8), config.username, config.password);
+                            break;
+                        default:
+                            rpc.printProperty(std::cout);
+                            std::cout << std::endl;
+                            break;
                     }
+                    continue;
                 }
 
-                if (line.find("box") == 0) {
-                    auto verb = line.find("list");
-                    if (verb != std::string::npos && verb >= 3) {   // boxlist, box-list, box list
-                        rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
-                        std::cout << std::endl;
-                        continue;
+                if (cliCmd == "BOX") {
+                    std::string boxCmdStr = nextWord(line, start);
+                    char boxCmd = 'l';
+                    if (!boxCmdStr.empty())
+                        boxCmd = boxCmdStr[0];
+                    std::string boxParam1 = nextWord(line, start);
+                    std::string boxParam2 = nextWord(line, start);
+                    std::string boxParam3 = nextWord(line, start);
+                    switch(boxCmd) {
+                        case '+':
+                        case '-':
+                        case '=':
+                            rpc.chBox(boxCmd, boxParam1, boxParam2, boxParam3, config.username, config.password);
+                            break;
+                        default:    // box listing
+                            rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
+                            std::cout << std::endl;
                     }
+                    continue;
                 }
 
-                if (line.find("import") == 0) {
-                    std::string symbol;
-                    std::string path;
-                    size_t start = 6;
-                    size_t eolp = line.size();
-                    size_t finish = eolp;
-                    // skip spaces
-                    for (auto p = start; p < eolp; p++) {
-                        if (!std::isspace(line[p])) {
-                            start = p;
-                            break;
-                        }
-                    }
-                    // try read path
-                    for (auto p = start; p < eolp; p++) {
-                        if (std::isspace(line[p])) {
-                            finish = p;
-                            break;
-                        }
-                    }
-                    path = line.substr(start, finish - start);
-                    start = finish;
-                    // skip spaces
-                    for (auto p = start; p < eolp; p++) {
-                        if (!std::isspace(line[p])) {
-                            start = p;
-                            break;
-                        }
-                    }
-                    // try read symbol
-                    for (auto p = start; p < eolp; p++) {
-                        if (std::isspace(line[p])) {
-                            finish = p;
-                            break;
-                        }
-                    }
-                    symbol = line.substr(start, finish - start);
-                    start = finish;
-                    // skip spaces
-                    for (auto p = start; p < eolp; p++) {
-                        if (!std::isspace(line[p])) {
-                            start = p;
-                            break;
-                        }
-                    }
-                    // try read box
-                    for (auto p = start; p < eolp; p++) {
-                        if (std::isspace(line[p])) {
-                            finish = p;
-                            break;
-                        }
-                    }
-                    std::string boxName = line.substr(start, finish - start);
-
-                    bool numberInFilename = true;
-                    // skip spaces
-                    for (auto p = start; p < eolp; p++) {
-                        if (!std::isspace(line[p])) {
-                            start = p;
-                            break;
-                        }
-                    }
-                    // try boolean numberInFilename
-                    for (auto p = start; p < eolp; p++) {
-                        if (std::isspace(line[p])) {
-                            finish = p;
-                            break;
-                        }
-                    }
-                    std::string sNumberInFilename = line.substr(start, finish - start);
+                if (cliCmd == "IMPORT") {
+                    std::string path = nextWord(line, start);
+                    std::string importSymbol = nextWord(line, start);
+                    std::string boxName = nextWord(line, start);
+                    std::string sNumberInFilename = nextWord(line, start);
+                    bool numberInFilename;
                     if (!sNumberInFilename.empty()) {
                         switch(sNumberInFilename[0]) {
                             case 'F':
@@ -502,10 +491,10 @@ int main(int argc, char** argv)
                         }
                     }
 
-                    if (symbol.empty() || boxName.empty())
+                    if (importSymbol.empty() || boxName.empty())
                         printSpreadSheets(path, boxName, 1, numberInFilename);
                     else
-                        importSpreadSheets(rpc, path, symbol, boxName, numberInFilename);
+                        importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename);
                     continue;
                 }
 

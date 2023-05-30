@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-10 10:43+0900\n"
+"POT-Creation-Date: 2023-05-30 13:13+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -171,7 +171,7 @@ msgstr ""
 msgid "Property does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:435 svc/svcImpl.cpp:878
+#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:831
 msgid "Invalid operation"
 msgstr ""
 
@@ -183,90 +183,90 @@ msgstr ""
 msgid "change property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:439
+#: svc/svcImpl.cpp:392
 msgid "chCard error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:441
+#: svc/svcImpl.cpp:394
 msgid "chCard unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:550
+#: svc/svcImpl.cpp:503
 msgid "list operations error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:552
+#: svc/svcImpl.cpp:505
 msgid "list operations unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:562
+#: svc/svcImpl.cpp:515
 msgid "list symbols error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:564
+#: svc/svcImpl.cpp:517
 msgid "list symbols unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:574
+#: svc/svcImpl.cpp:527
 msgid "list property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:576
+#: svc/svcImpl.cpp:529
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:635 svc/svcImpl.cpp:914
+#: svc/svcImpl.cpp:588 svc/svcImpl.cpp:867
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:638 svc/svcImpl.cpp:917
+#: svc/svcImpl.cpp:591 svc/svcImpl.cpp:870
 msgid "list box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:718
+#: svc/svcImpl.cpp:671
 msgid "Check credentials error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:720
+#: svc/svcImpl.cpp:673
 msgid "Check credentials unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:745
+#: svc/svcImpl.cpp:698
 msgid "Check credentials & set token error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:747
+#: svc/svcImpl.cpp:700
 msgid "Check credentials & set token unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:780
+#: svc/svcImpl.cpp:733
 msgid "list user error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:783
+#: svc/svcImpl.cpp:736
 msgid "list user unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:801
+#: svc/svcImpl.cpp:754
 msgid "remove property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:803
+#: svc/svcImpl.cpp:756
 msgid "remove property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:857
+#: svc/svcImpl.cpp:810
 msgid "Box already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:867
+#: svc/svcImpl.cpp:820
 msgid "Box does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:881
+#: svc/svcImpl.cpp:834
 msgid "change box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:883
+#: svc/svcImpl.cpp:836
 msgid "change box unknown error"
 msgstr ""

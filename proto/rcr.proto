@@ -59,10 +59,10 @@ message Package
 
 message Box
 {
-    uint64 id = 1;
+    uint64 id = 1;                          ///< in chBox() reserved for '=' operation when a new box assigned
     uint64 box_id = 2;
     string name = 3;
-    string uname = 4;   ///< uppercase name for search
+    string uname = 4;                       ///< uppercase name for search
 }
 
 message User

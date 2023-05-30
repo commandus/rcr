@@ -72,7 +72,20 @@ public:
         const std::string &password
     );
 
-    void changeProperty(std::string &clause, std::string &user, std::string &password);
+    void changeProperty(
+        const std::string &clause,
+        std::string &user,
+        std::string &password
+    );
+
+    void chBox(
+        const char operation,
+        const std::string &sourceBoxIdStr,
+        const std::string &p2,
+        const std::string &p3,
+        const std::string &user,
+        const std::string &passwd
+    );
 };
 
 #endif /* GRPCCLIENT_H_ */
