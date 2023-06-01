@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-30 13:13+0900\n"
+"POT-Creation-Date: 2023-06-01 14:50+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -171,7 +171,7 @@ msgstr ""
 msgid "Property does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:831
+#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:864
 msgid "Invalid operation"
 msgstr ""
 
@@ -215,11 +215,11 @@ msgstr ""
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:588 svc/svcImpl.cpp:867
+#: svc/svcImpl.cpp:588 svc/svcImpl.cpp:900
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:591 svc/svcImpl.cpp:870
+#: svc/svcImpl.cpp:591 svc/svcImpl.cpp:903
 msgid "list box unknown error"
 msgstr ""
 
@@ -255,18 +255,26 @@ msgstr ""
 msgid "remove property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:810
+#: svc/svcImpl.cpp:840
 msgid "Box already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:820
+#: svc/svcImpl.cpp:853
 msgid "Box does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:834
+#: svc/svcImpl.cpp:867
 msgid "change box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:836
+#: svc/svcImpl.cpp:869
 msgid "change box unknown error"
+msgstr ""
+
+#: svc/svcImpl.cpp:926
+msgid "change package box error: "
+msgstr ""
+
+#: svc/svcImpl.cpp:929
+msgid "change package box unknown error"
 msgstr ""

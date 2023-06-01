@@ -104,7 +104,19 @@ public:
         size_t start,
         size_t finish
     );
-    static uint64_t boxAppendBox(uint64_t boxes, int box);
+    static uint64_t parseBoxes(
+        const std::string &value
+    );
+
+    static uint64_t boxAppendBox(
+        uint64_t boxes,
+        int box
+    );
+    static uint64_t renameBox(
+            uint64_t src,
+            uint64_t srcRoot,
+            uint64_t destRoot
+    );
     static std::string boxes2string(uint64_t boxes);
     /**
      * @param minBox

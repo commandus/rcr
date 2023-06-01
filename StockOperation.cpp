@@ -245,6 +245,15 @@ int StockOperation::parseBoxes(
     return blocks;
 }
 
+uint64_t StockOperation::parseBoxes(
+    const std::string &value
+)
+{
+    uint64_t r;
+    parseBoxes(r, value, 0, value.size());
+    return r;
+}
+
 /**
  * Parse command +1, -1, =1, sum, count, rm
  * @param value
@@ -368,7 +377,7 @@ uint64_t StockOperation::maxBox(
     int &depth
 )
 {
-    depth = getBoxDepth(minBox);
+    depth = getBoxDepth(minBox);    // 0..4
     switch (depth) {
         case 1:
             return minBox | 0xffffffffffff;
@@ -381,6 +390,20 @@ uint64_t StockOperation::maxBox(
         default:    // 0
             return std::numeric_limits<uint64_t>::max();
     }
+}
+
+uint64_t StockOperation::renameBox(
+    uint64_t src,
+    uint64_t srcRoot,
+    uint64_t destRoot
+)
+{
+    int srcBoxDepth = getBoxDepth(srcRoot);
+    int destBoxDepth = getBoxDepth(destRoot);
+    // remove previous root by shift
+    uint64_t r = src << (srcBoxDepth * 16);
+    // add a new root
+    return destRoot | (r >> (destBoxDepth * 16));
 }
 
 /**

@@ -80,9 +80,9 @@ public:
 
     void chBox(
         const char operation,
-        const std::string &sourceBoxIdStr,
-        const std::string &p2,
-        const std::string &p3,
+        uint64_t sourceBox,
+        uint64_t destBox,
+        const std::string &name,
         const std::string &user,
         const std::string &passwd
     );

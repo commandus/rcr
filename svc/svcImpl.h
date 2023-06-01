@@ -111,6 +111,21 @@ protected:
         const rcr::ChCardRequest *request,
         uint64_t packageId
     );
+    /**
+     * Move packages from one box to another
+     * @param db database
+     * @param t transaction
+     * @param oldBox source
+     * @param newBox destination
+     * @return 0- success
+     */
+    int changePackageBox(
+        odb::database *db,
+        odb::transaction &t,
+        uint64_t oldBox,
+        uint64_t newBox
+    );
+
     bool removeCard(
         odb::database *db,
         odb::transaction &t,

@@ -331,9 +331,11 @@ void RcrClient::printBoxes(
         return;
     }
     for (auto box(response.box().begin()); box != response.box().end(); box++) {
-        strm
-//        << StockOperation::boxes2string(box->box_id()) << "\t"
-        << box->name() << std::endl;
+        std::string sbid = StockOperation::boxes2string(box->box_id());
+        strm << sbid;
+        if (!box->name().empty() && (sbid != box->name()))
+            strm << "\t" << box->name();
+        strm << std::endl;
     }
 }
 
@@ -372,33 +374,32 @@ void RcrClient::changeProperty(
 
 void RcrClient::chBox(
     const char operation,
-    const std::string &sourceBoxIdStr,
-    const std::string &p2,
-    const std::string &p3,
+    uint64_t sourceBox,
+    uint64_t destBox,
+    const std::string &name,
     const std::string &user,
     const std::string &password
 ) {
     grpc::ClientContext context;
     rcr::OperationResponse response;
     rcr::ChBoxRequest request;
-    // first parameter
-    uint64_t b;
-    uint64_t bNew;
-    StockOperation::parseBoxes(b, sourceBoxIdStr, 0, sourceBoxIdStr.size());
-    request.mutable_value()->set_box_id(b);
+    request.mutable_value()->set_box_id(sourceBox);
     switch(operation) {
         case '+':
             request.set_operationsymbol("+");
-            request.mutable_value()->set_name(p2);
+            request.mutable_value()->set_name(name);
             break;
         case '-':
             request.set_operationsymbol("-");
             break;
+        case '>':
+            request.mutable_value()->set_id(destBox);
+            request.set_operationsymbol(">");
+            request.mutable_value()->set_name(name);
+            break;
         case '=':
-            StockOperation::parseBoxes(bNew, p2, 0, p2.size());
-            request.mutable_value()->set_id(bNew);
             request.set_operationsymbol("=");
-            request.mutable_value()->set_name(p3);
+            request.mutable_value()->set_name(name);
             break;
         default:
             break;

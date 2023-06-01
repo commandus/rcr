@@ -786,11 +786,40 @@ grpc::Status RcrImpl::chBox(
 
             odb::result<rcr::Box>::iterator it(qs.begin());
             switch (op) {
+                case '>':   // rename (move) boxes
+                {
+                    uint64_t destRoot = request->value().id();  // sorry!
+                    for (; it != qs.end(); it++) {
+                        uint64_t srcBox = request->value().box_id();
+                        uint64_t dstBox = StockOperation::renameBox(request->value().box_id(), startBox, destRoot);
+                        // move to a new box
+                        changePackageBox(mDb, t, srcBox, dstBox);
+                        // remove old
+                        mDb->erase(*it);
+                        // check is destination exists
+                        odb::result<rcr::Box> qTarget = mDb->query<rcr::Box>(
+                                odb::query<rcr::Box>::box_id == dstBox
+                        );
+                        // if not, create a new one
+                        odb::result<rcr::Box>::iterator itTarget(qTarget.begin());
+                        if (itTarget == qTarget.end()) {
+                            rcr::Box b;
+                            b.set_box_id(dstBox);
+                            b.set_name(request->value().name());
+                            mDb->persist(b);
+                        }
+                    }
+                    response->set_code(0);
+                }
+                    break;
                 case '=':
                     if (it == qs.end()) {
+                        // no box exist. create a new one
                         rcr::Box box = request->value();
+                        box.set_uname(toUpperCase(request->value().name()));
                         response->set_id(mDb->persist(box));
                     } else {
+                        // box exists
                         for (; it != qs.end(); it++) {
                             if (request->value().id())
                                 it->set_id(request->value().id());
@@ -806,16 +835,20 @@ grpc::Status RcrImpl::chBox(
                     break;
                 case '+':
                     if (it != qs.end()) {
+                        // box exist already, nothing to do
                         response->set_code(-3);
                         response->set_description(_("Box already exists"));
                     } else {
+                        // no box exist, add
                         rcr::Box box = request->value();
+                        box.set_uname(toUpperCase(request->value().name()));
                         response->set_id(mDb->persist(box));
                         response->set_code(0);
                     }
                     break;
                 case '-':
                     if (it == qs.end()) {
+                        // no box exist, report error
                         response->set_code(-3);
                         response->set_description(_("Box does not exists"));
                     } else {
@@ -868,6 +901,32 @@ int RcrImpl::removePackagesFromBox(
     } catch (...) {
         r = -2;
         LOG(ERROR) << _("list box unknown error");
+    }
+    return r;
+}
+
+int RcrImpl::changePackageBox(
+    odb::database *db,
+    odb::transaction &t,
+    uint64_t oldBox,
+    uint64_t newBox
+) {
+    int depth;
+    int r = 0;
+    try {
+        odb::result<rcr::Package> qs(mDb->query<rcr::Package>(
+            odb::query<rcr::Package>::box == oldBox
+        ));
+        for (odb::result<rcr::Package>::iterator it(qs.begin()); it != qs.end(); it++) {
+            it->set_box(newBox);
+            db->update(*it);
+        }
+    } catch (const odb::exception &e) {
+        r = -1;
+        LOG(ERROR) << _("change package box error: ") << e.what();
+    } catch (...) {
+        r = -2;
+        LOG(ERROR) << _("change package box unknown error");
     }
     return r;
 }

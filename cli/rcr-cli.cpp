@@ -40,7 +40,9 @@ symbol D           Set component symbol D (integrated circuits)\n\
 box                Box list\n\
 box + 21-1 spare   Add box 21-1 named \"spare\"\n\
 box - 21-1         Remove box\n\
-box = 21-1 22 new  Rename box 21-1 to 22\n\
+box = 21-1 newname Change box 21-1\n\
+box > 21-1 22      Rename box 21-1 to 22\n\
+box > 1-1 2 new    Rename box 1-1 to 2 and assign a name\n\
 property           Properties list\n\
 property = A accu  Set property accu with shortkey A\n\
 property + B bat   Add property\n\
@@ -278,7 +280,7 @@ static std::string nextWord(
             break;
         }
     }
-    // try read symbol
+    // try read word
     for (auto p = start; p < eolp; p++) {
         if (std::isspace(line[p])) {
             finish = p;
@@ -286,6 +288,25 @@ static std::string nextWord(
         }
     }
     std::string r = line.substr(start, finish - start);
+    start = finish;
+    return r;
+}
+
+static std::string remainText(
+    const std::string &line,
+    size_t &start
+) {
+    size_t eolp = line.size();
+    size_t finish = eolp;
+    // skip spaces
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(line[p])) {
+            start = p;
+            break;
+        }
+    }
+    // try read to the end
+    std::string r = line.substr(start, eolp - start);
     start = finish;
     return r;
 }
@@ -406,13 +427,12 @@ int main(int argc, char** argv)
             while (std::getline(std::cin, line)) {
                 size_t start = 0;
                 std::string cliCmd = toUpperCase(nextWord(line, start));
-                if (cliCmd == "HELP") {
+                if (cliCmd.find('H') == 0) { // "help"
                     std::cerr << HELP_STRING << std::endl;
                     continue;
                 }
-                if (cliCmd == "QUIT") {
+                if (cliCmd.find('Q') == 0)  // "quit"
                     break;
-                }
                 if (cliCmd == "SYMBOL") {
                     std::string symbolParam = toUpperCase(nextWord(line, start));
                     if (symbolParam.empty()) {
@@ -458,19 +478,38 @@ int main(int argc, char** argv)
                     char boxCmd = 'l';
                     if (!boxCmdStr.empty())
                         boxCmd = boxCmdStr[0];
-                    std::string boxParam1 = nextWord(line, start);
-                    std::string boxParam2 = nextWord(line, start);
-                    std::string boxParam3 = nextWord(line, start);
+                    uint64_t srcBox;
+                    uint64_t destBox;
+                    std::string p;
+                    std::string name;
                     switch(boxCmd) {
                         case '+':
+                            p = nextWord(line, start);
+                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                            name = remainText(line, start);
+                            break;
                         case '-':
+                            p = nextWord(line, start);
+                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                            break;
                         case '=':
-                            rpc.chBox(boxCmd, boxParam1, boxParam2, boxParam3, config.username, config.password);
+                            p = nextWord(line, start);
+                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                            name = remainText(line, start);
+                            break;
+                        case '>':
+                            p = nextWord(line, start);
+                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                            p = nextWord(line, start);
+                            StockOperation::parseBoxes(destBox, p, 0, p.size());
+                            name = remainText(line, start);
                             break;
                         default:    // box listing
                             rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
                             std::cout << std::endl;
+                            continue;
                     }
+                    rpc.chBox(boxCmd, srcBox, destBox, name, config.username, config.password);
                     continue;
                 }
 

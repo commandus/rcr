@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-30 12:00+0900\n"
+"POT-Creation-Date: 2023-06-01 14:50+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -28,7 +28,9 @@ msgid ""
 "box                Box list\n"
 "box + 21-1 spare   Add box 21-1 named \"spare\"\n"
 "box - 21-1         Remove box\n"
-"box = 21-1 22 new  Rename box 21-1 to 22\n"
+"box = 21-1 newname Change box 21-1\n"
+"box > 21-1 22      Rename box 21-1 to 22\n"
+"box > 1-1 2 new    Rename box 1-1 to 2 and assign a name\n"
 "property           Properties list\n"
 "property = A accu  Set property accu with shortkey A\n"
 "property + B bat   Add property\n"
@@ -53,7 +55,9 @@ msgstr ""
 "box                Список коробок\n"
 "box + 21-1 spare   Добавить коробку 21-1 с названием \"spare\"\n"
 "box - 21-1         Удалить коробку\n"
-"box = 21-1 22 new  Переименовать коробку 21-1 в 22\n"
+"box = 21-1 newname Изменить название коробки\n"
+"box > 21-1 22      Переименовать коробку 21-1 в 22\n"
+"box > 1-1 2 new    Переименовать коробку 1-1 в 2 и назначить имя\n"
 "property           Список свойств\n"
 "property = A accu  Задать название 'accu' свойству с коротким именем 'A'\n"
 "property + B bat   Добавить свойство\n"
@@ -69,127 +73,128 @@ msgstr ""
 "* 119              Найти все компоненты в коробке 119-..\n"
 "* 119-1 K:DIP      Найти все в коробке со свойством корпус DIP\n"
 
-#: cli/rcr-cli.cpp:86
+#: cli/rcr-cli.cpp:88
 msgid " *.xlsx files found in '"
 msgstr " *.xlsx найдены в '"
 
-#: cli/rcr-cli.cpp:95
+#: cli/rcr-cli.cpp:97
 msgid " names, "
 msgstr " наименований, "
 
-#: cli/rcr-cli.cpp:95
+#: cli/rcr-cli.cpp:97
 msgid " items"
 msgstr " шт."
 
-#: cli/rcr-cli.cpp:135 cli/grpcClient.cpp:83 cli/grpcClient.cpp:89
+#: cli/rcr-cli.cpp:137 cli/grpcClient.cpp:83 cli/grpcClient.cpp:89
 #: cli/grpcClient.cpp:116 cli/grpcClient.cpp:123 cli/grpcClient.cpp:189
 #: cli/grpcClient.cpp:212 cli/grpcClient.cpp:237 cli/grpcClient.cpp:251
 #: cli/grpcClient.cpp:287 cli/grpcClient.cpp:305 cli/grpcClient.cpp:330
-#: cli/grpcClient.cpp:351 cli/grpcClient.cpp:364 cli/grpcClient.cpp:368
+#: cli/grpcClient.cpp:353 cli/grpcClient.cpp:366 cli/grpcClient.cpp:370
+#: cli/grpcClient.cpp:413 cli/grpcClient.cpp:417
 msgid "Error: "
 msgstr "Ошибка: "
 
-#: cli/rcr-cli.cpp:153
+#: cli/rcr-cli.cpp:155
 msgid "<service host name>"
 msgstr "<адрес>"
 
-#: cli/rcr-cli.cpp:153
+#: cli/rcr-cli.cpp:155
 msgid "service host name or IP address."
 msgstr "имя или IP адрес хоста сервиса."
 
-#: cli/rcr-cli.cpp:154
+#: cli/rcr-cli.cpp:156
 msgid "service port. Default 50051"
 msgstr "номер порта сервиса. По умолчанию 50051"
 
-#: cli/rcr-cli.cpp:156
+#: cli/rcr-cli.cpp:158
 msgid "SSL on"
 msgstr "вкл SSL"
 
-#: cli/rcr-cli.cpp:159
+#: cli/rcr-cli.cpp:161
 msgid "<command>"
 msgstr "<команда>"
 
-#: cli/rcr-cli.cpp:161
+#: cli/rcr-cli.cpp:163
 msgid "<request>"
 msgstr "<запрос>"
 
-#: cli/rcr-cli.cpp:161
+#: cli/rcr-cli.cpp:163
 msgid "command parameter(request)"
 msgstr "параметр(запрос)"
 
-#: cli/rcr-cli.cpp:162
+#: cli/rcr-cli.cpp:164
 msgid "<user-name>"
 msgstr "<пользователь>"
 
-#: cli/rcr-cli.cpp:162
+#: cli/rcr-cli.cpp:164
 msgid "User login"
 msgstr "Логин"
 
-#: cli/rcr-cli.cpp:163
+#: cli/rcr-cli.cpp:165
 msgid "<password>"
 msgstr "<пароль>"
 
-#: cli/rcr-cli.cpp:163
+#: cli/rcr-cli.cpp:165
 msgid "User password"
 msgstr "Пароль пользователя"
 
-#: cli/rcr-cli.cpp:164
+#: cli/rcr-cli.cpp:166
 msgid "<box>"
 msgstr "<коробка>"
 
-#: cli/rcr-cli.cpp:164
+#: cli/rcr-cli.cpp:166
 msgid "box prefix e.g. 221-2"
 msgstr "префикс коробки, например, 119-2"
 
-#: cli/rcr-cli.cpp:165 cli/rcr-cli.cpp:166
+#: cli/rcr-cli.cpp:167 cli/rcr-cli.cpp:168
 msgid "<number>"
 msgstr "<число>"
 
-#: cli/rcr-cli.cpp:165
+#: cli/rcr-cli.cpp:167
 msgid "List offset 0.. Default 0"
 msgstr "смещение в списке (0..) По умолчанию 0"
 
-#: cli/rcr-cli.cpp:166
+#: cli/rcr-cli.cpp:168
 msgid "List size. Default 10000"
 msgstr "Размер списка. По умолчанию 10000"
 
-#: cli/rcr-cli.cpp:168
+#: cli/rcr-cli.cpp:170
 msgid "do not read box from Excel file name"
 msgstr "не искать номер коробки из имени файла Excel"
 
-#: cli/rcr-cli.cpp:169
+#: cli/rcr-cli.cpp:171
 msgid "<locale>"
 msgstr "<локаль>"
 
-#: cli/rcr-cli.cpp:169
+#: cli/rcr-cli.cpp:171
 msgid "Locale: intl, ru"
 msgstr "Локаль: intl, ru"
 
-#: cli/rcr-cli.cpp:171
+#: cli/rcr-cli.cpp:173
 msgid "Verbose level"
 msgstr "Уровень подробностей журнала"
 
-#: cli/rcr-cli.cpp:173
+#: cli/rcr-cli.cpp:175
 msgid "Show this help"
 msgstr "Показать этот экран справки"
 
-#: cli/rcr-cli.cpp:197
+#: cli/rcr-cli.cpp:199
 msgid "Usage: "
 msgstr "Использование: "
 
-#: cli/rcr-cli.cpp:199
+#: cli/rcr-cli.cpp:201
 msgid "rcr CLI client"
 msgstr "rcr клиент"
 
-#: cli/rcr-cli.cpp:367
+#: cli/rcr-cli.cpp:388
 msgid "success"
 msgstr "успешно"
 
-#: cli/rcr-cli.cpp:367
+#: cli/rcr-cli.cpp:388
 msgid "fail"
 msgstr "сбой"
 
-#: cli/rcr-cli.cpp:404
+#: cli/rcr-cli.cpp:425
 msgid "Enter help to see command list"
 msgstr "Введите help, чтобы посмотреть список доступных команд"
 
@@ -197,6 +202,6 @@ msgstr "Введите help, чтобы посмотреть список дос
 msgid "Admin"
 msgstr "Администратор"
 
-#: cli/grpcClient.cpp:351
+#: cli/grpcClient.cpp:353
 msgid "Invalid arguments"
 msgstr "Неверные аргументы"

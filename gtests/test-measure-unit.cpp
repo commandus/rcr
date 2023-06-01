@@ -10,6 +10,45 @@
 #include "BoxName.h"
 #include "string-helper.h"
 
+TEST(BoxId, Rename) {
+    // 1-2 to 3
+    uint64_t srcBoxRoot = StockOperation::parseBoxes("1-2");
+    uint64_t srcBox1 = StockOperation::parseBoxes("1-2");
+    uint64_t srcBox2 = StockOperation::parseBoxes("1-2-3");
+    uint64_t srcBox3 = StockOperation::parseBoxes("1-2-3-4");
+    uint64_t destBox = StockOperation::parseBoxes("3");
+    uint64_t destBox1 = StockOperation::renameBox(srcBox1, srcBoxRoot, destBox);
+    uint64_t destBox2 = StockOperation::renameBox(srcBox2, srcBoxRoot, destBox);
+    uint64_t destBox3 = StockOperation::renameBox(srcBox3, srcBoxRoot, destBox);
+    ASSERT_EQ(StockOperation::boxes2string(destBox1), "3");
+    ASSERT_EQ(StockOperation::boxes2string(destBox2), "3-3");
+    ASSERT_EQ(StockOperation::boxes2string(destBox3), "3-3-4");
+    // to root
+    srcBoxRoot = StockOperation::parseBoxes("1-2");
+    srcBox1 = StockOperation::parseBoxes("1-2");
+    srcBox2 = StockOperation::parseBoxes("1-2-3");
+    srcBox3 = StockOperation::parseBoxes("1-2-3-4");
+    destBox = StockOperation::parseBoxes("");
+    destBox1 = StockOperation::renameBox(srcBox1, srcBoxRoot, destBox);
+    destBox2 = StockOperation::renameBox(srcBox2, srcBoxRoot, destBox);
+    destBox3 = StockOperation::renameBox(srcBox3, srcBoxRoot, destBox);
+    ASSERT_EQ(StockOperation::boxes2string(destBox1), "0");
+    ASSERT_EQ(StockOperation::boxes2string(destBox2), "3");
+    ASSERT_EQ(StockOperation::boxes2string(destBox3), "3-4");
+    // overflow destination
+    srcBoxRoot = StockOperation::parseBoxes("1-2");
+    srcBox1 = StockOperation::parseBoxes("1-2");
+    srcBox2 = StockOperation::parseBoxes("1-2-7");
+    srcBox3 = StockOperation::parseBoxes("1-2-7-8");
+    destBox = StockOperation::parseBoxes("3-4-5");
+    destBox1 = StockOperation::renameBox(srcBox1, srcBoxRoot, destBox);
+    destBox2 = StockOperation::renameBox(srcBox2, srcBoxRoot, destBox);
+    destBox3 = StockOperation::renameBox(srcBox3, srcBoxRoot, destBox);
+    ASSERT_EQ(StockOperation::boxes2string(destBox1), "3-4-5");
+    ASSERT_EQ(StockOperation::boxes2string(destBox2), "3-4-5-7");
+    ASSERT_EQ(StockOperation::boxes2string(destBox3), "3-4-5-7");
+}
+
 TEST(String, split) {
     std::vector<std::string> r = split(" 1  2    3", ' ');
     ASSERT_EQ(r.size(), 3);
