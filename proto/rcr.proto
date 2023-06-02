@@ -285,6 +285,7 @@ message ServiceSettings
     bool number_in_filename = 8;
     string last_excel_file = 9;
     string last_excel_dir = 10;
+    uint64 last_import_box = 11;
 }
 
 message Settings
