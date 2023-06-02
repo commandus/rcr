@@ -283,6 +283,8 @@ message ServiceSettings
     uint64 last_box = 6;
     string last_query = 7;
     bool number_in_filename = 8;
+    string last_excel_file = 9;
+    string last_excel_dir = 10;
 }
 
 message Settings
