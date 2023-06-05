@@ -782,28 +782,31 @@ grpc::Status RcrImpl::chBox(
 
             odb::result<rcr::Box>::iterator it(qs.begin());
             switch (op) {
-                case '>':   // rename (move) boxes
+                case '/':   // rename (move) boxes
                 {
                     uint64_t destRoot = request->value().id();  // sorry!
                     for (; it != qs.end(); it++) {
-                        uint64_t srcBox = request->value().box_id();
-                        uint64_t dstBox = StockOperation::renameBox(request->value().box_id(), startBox, destRoot);
-                        // move to a new box
-                        changePackageBox(mDb, t, srcBox, dstBox);
-                        // remove old
-                        mDb->erase(*it);
-                        // check is destination exists
+                        uint64_t srcBox = it->box_id();
+                        uint64_t dstBox = StockOperation::renameBox(srcBox, startBox, destRoot);
+
+                        // check does destination exists
                         odb::result<rcr::Box> qTarget = mDb->query<rcr::Box>(
                                 odb::query<rcr::Box>::box_id == dstBox
                         );
-                        // if not, create a new one
                         odb::result<rcr::Box>::iterator itTarget(qTarget.begin());
+                        // if not, create a new one
                         if (itTarget == qTarget.end()) {
                             rcr::Box b;
                             b.set_box_id(dstBox);
                             b.set_name(request->value().name());
                             mDb->persist(b);
                         }
+
+                        // move to a new box
+                        changePackageBox(mDb, t, srcBox, dstBox);
+
+                        // remove old
+                        mDb->erase(*it);
                     }
                     response->set_code(0);
                 }
@@ -913,7 +916,11 @@ int RcrImpl::changePackageBox(
         odb::result<rcr::Package> qs(mDb->query<rcr::Package>(
             odb::query<rcr::Package>::box == oldBox
         ));
+        LOG(INFO) << "Move package "
+                  << StockOperation::boxes2string(oldBox) << " to "
+                  << StockOperation::boxes2string(newBox) << std::endl;
         for (odb::result<rcr::Package>::iterator it(qs.begin()); it != qs.end(); it++) {
+            LOG(INFO) << "=== " << it->id() << " card " << it->card_id() << std::endl;
             it->set_box(newBox);
             db->update(*it);
         }

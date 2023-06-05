@@ -41,8 +41,8 @@ box                Box list\n\
 box + 21-1 spare   Add box 21-1 named \"spare\"\n\
 box - 21-1         Remove box\n\
 box = 21-1 newname Change box 21-1\n\
-box > 21-1 22      Rename box 21-1 to 22\n\
-box > 1-1 2 new    Rename box 1-1 to 2 and assign a name\n\
+box / 21-1 22      Rename box 21-1 to 22\n\
+box / 1-1 2 new    Rename box 1-1 to 2 and assign a name\n\
 property           Properties list\n\
 property = A accu  Set property accu with shortkey A\n\
 property + B bat   Add property\n\
@@ -497,7 +497,7 @@ int main(int argc, char** argv)
                             StockOperation::parseBoxes(srcBox, p, 0, p.size());
                             name = remainText(line, start);
                             break;
-                        case '>':
+                        case '/':
                             p = nextWord(line, start);
                             StockOperation::parseBoxes(srcBox, p, 0, p.size());
                             p = nextWord(line, start);

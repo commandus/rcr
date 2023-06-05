@@ -392,9 +392,9 @@ void RcrClient::chBox(
         case '-':
             request.set_operationsymbol("-");
             break;
-        case '>':
+        case '/':
             request.mutable_value()->set_id(destBox);
-            request.set_operationsymbol(">");
+            request.set_operationsymbol("/");
             request.mutable_value()->set_name(name);
             break;
         case '=':

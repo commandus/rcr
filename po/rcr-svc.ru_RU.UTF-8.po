@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-01 14:49+0900\n"
+"POT-Creation-Date: 2023-06-05 13:06+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -174,7 +174,7 @@ msgstr "Свойство уже существует"
 msgid "Property does not exists"
 msgstr "Свойство не существует"
 
-#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:864
+#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:860
 msgid "Invalid operation"
 msgstr "Неверная операция"
 
@@ -218,68 +218,68 @@ msgstr "ошибка списка свойств: "
 msgid "list property unknown error"
 msgstr "неизвестная ошибка списка свойств"
 
-#: svc/svcImpl.cpp:588 svc/svcImpl.cpp:900
+#: svc/svcImpl.cpp:584 svc/svcImpl.cpp:896
 msgid "list box error: "
 msgstr "ошибка списка коробок: "
 
-#: svc/svcImpl.cpp:591 svc/svcImpl.cpp:903
+#: svc/svcImpl.cpp:587 svc/svcImpl.cpp:899
 msgid "list box unknown error"
 msgstr "неизвестная ошибка списка коробок"
 
-#: svc/svcImpl.cpp:671
+#: svc/svcImpl.cpp:667
 msgid "Check credentials error: "
 msgstr "ошибка проверки прав"
 
-#: svc/svcImpl.cpp:673
+#: svc/svcImpl.cpp:669
 msgid "Check credentials unknown error"
 msgstr "неизвестная ошибка проверки прав"
 
-#: svc/svcImpl.cpp:698
+#: svc/svcImpl.cpp:694
 msgid "Check credentials & set token error: "
 msgstr "ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:700
+#: svc/svcImpl.cpp:696
 msgid "Check credentials & set token unknown error"
 msgstr "неизвестная ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:733
+#: svc/svcImpl.cpp:729
 msgid "list user error: "
 msgstr "ошибка списка пользователей: "
 
-#: svc/svcImpl.cpp:736
+#: svc/svcImpl.cpp:732
 msgid "list user unknown error"
 msgstr "неизвестная ошибка списка пользователей"
 
-#: svc/svcImpl.cpp:754
+#: svc/svcImpl.cpp:750
 msgid "remove property error: "
 msgstr "ошибка удаления свойства: "
 
-#: svc/svcImpl.cpp:756
+#: svc/svcImpl.cpp:752
 msgid "remove property unknown error"
 msgstr "неизвестная ошибка удаления свойства"
 
-#: svc/svcImpl.cpp:840
+#: svc/svcImpl.cpp:836
 msgid "Box already exists"
 msgstr "Коробка уже существует"
 
-#: svc/svcImpl.cpp:853
+#: svc/svcImpl.cpp:849
 msgid "Box does not exists"
 msgstr "Коробка не существует"
 
-#: svc/svcImpl.cpp:867
+#: svc/svcImpl.cpp:863
 msgid "change box error: "
 msgstr "ошибка изменения коробки: "
 
-#: svc/svcImpl.cpp:869
+#: svc/svcImpl.cpp:865
 msgid "change box unknown error"
 msgstr "неизвестная ошибка изменения коробки"
 
-#: svc/svcImpl.cpp:926
+#: svc/svcImpl.cpp:922
 #, fuzzy
 msgid "change package box error: "
 msgstr "ошибка изменения номера коробки: "
 
-#: svc/svcImpl.cpp:929
+#: svc/svcImpl.cpp:925
 #, fuzzy
 msgid "change package box unknown error"
 msgstr "неизвестная ошибка изменения номера коробки"
