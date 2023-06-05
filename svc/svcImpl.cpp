@@ -578,10 +578,6 @@ grpc::Status RcrImpl::getBox(
                 break;
             rcr::Box *op = response->add_box();
             op->CopyFrom(*i);
-#if CMAKE_BUILD_TYPE == Debug
-            if (op->name().empty())
-                op->set_name(StockOperation::boxes2string(op->box_id()));
-#endif
         }
     } catch (const odb::exception &e) {
         r = -1;
