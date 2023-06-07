@@ -425,13 +425,16 @@ int main(int argc, char** argv)
             std::cerr << _("Enter help to see command list") << std::endl;
 
             while (std::getline(std::cin, line)) {
+                // nothing to do
+                if (line.empty())
+                    continue;
                 size_t start = 0;
                 std::string cliCmd = toUpperCase(nextWord(line, start));
-                if (cliCmd.find('H') == 0) { // "help"
+                if (cliCmd == "HELP") { // "help"
                     std::cerr << HELP_STRING << std::endl;
                     continue;
                 }
-                if (cliCmd.find('Q') == 0)  // "quit"
+                if (cliCmd == "QUIT")  // "quit"
                     break;
                 if (cliCmd == "SYMBOL") {
                     std::string symbolParam = toUpperCase(nextWord(line, start));

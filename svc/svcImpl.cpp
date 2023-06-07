@@ -820,10 +820,6 @@ grpc::Status RcrImpl::chBox(
                     } else {
                         // box exists
                         for (; it != qs.end(); it++) {
-                            if (request->value().id())
-                                it->set_id(request->value().id());
-                            if (request->value().box_id())
-                                it->set_box_id(request->value().box_id());
                             it->set_name(request->value().name());
                             // uppercase to search
                             it->set_uname(toUpperCase(request->value().name()));
