@@ -341,7 +341,7 @@ grpc::Status RcrImpl::chCard(
 
                 // update property if changed
                 odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
-                std::vector <uint64_t> updatedProperyIds(8);
+                std::vector <uint64_t> updatedPropertyIds;
                 for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
                     auto qit = std::find_if(request->properties().begin(), request->properties().end(),
                                   [it] (auto v) {
@@ -351,7 +351,7 @@ grpc::Status RcrImpl::chCard(
                         // delete from database, it removed
                         mDb->erase(*it);
                     } else {
-                        updatedProperyIds.push_back(qit->card_id());
+                        updatedPropertyIds.push_back(qit->card_id());
                         // update if it changed
                         if (!(it->card_id() == qit->card_id()
                             && it->property_type_id() == qit->property_type_id()
@@ -363,12 +363,12 @@ grpc::Status RcrImpl::chCard(
                 }
                 // insert a new ones
                 for (auto it = request->properties().begin(); it != request->properties().end(); it++) {
-                    auto alreadyIt = std::find_if(updatedProperyIds.begin(), updatedProperyIds.end(),
+                    auto alreadyIt = std::find_if(updatedPropertyIds.begin(), updatedPropertyIds.end(),
                                                   [it] (auto v) {
                             return it->id() == v;
                         });
-                    if (alreadyIt == updatedProperyIds.end()) {
-                        // not updatedProperyIds yet, insert a new one
+                    if (alreadyIt == updatedPropertyIds.end()) {
+                        // not updatedPropertyIds yet, insert a new one
                         rcr::Property p = *it;
                         uint64_t pid = mDb->persist(p);
                     }
