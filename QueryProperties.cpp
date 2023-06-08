@@ -2,6 +2,7 @@
 // Created by andrei on 15.03.23.
 //
 
+#include <sstream>
 #include "QueryProperties.h"
 
 int QueryProperties::parse(
@@ -71,4 +72,19 @@ int QueryProperties::parse(
         position = finish;
     }
     return 0;
+}
+
+std::string QueryProperties::toString(
+    const std::map<std::string, std::string> &value
+) {
+    std::stringstream ss;
+    bool first = true;
+    for (auto mit = value.begin(); mit != value.end(); mit++) {
+        if (first)
+            first = false;
+        else
+            ss << " ";
+        ss << mit->first << ":" << mit->second;
+    }
+    return ss.str();
 }

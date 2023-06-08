@@ -15,6 +15,10 @@ public:
         size_t &position,
         std::map<std::string, std::string> &retKeyValues
     );
+
+    static std::string toString(
+        const std::map<std::string, std::string> &value
+    );
 };
 
 #endif //RCR_QUERYPROPERTIES_H
