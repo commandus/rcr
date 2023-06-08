@@ -17,5 +17,4 @@ public:
     );
 };
 
-
 #endif //RCR_QUERYPROPERTIES_H
