@@ -115,11 +115,11 @@ msgid "<command>"
 msgstr "<команда>"
 
 #: cli/rcr-cli.cpp:163
-msgid "<request>"
+msgid "<params>"
 msgstr "<запрос>"
 
 #: cli/rcr-cli.cpp:163
-msgid "command parameter(request)"
+msgid "command parameter(params)"
 msgstr "параметр(запрос)"
 
 #: cli/rcr-cli.cpp:164

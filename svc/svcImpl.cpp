@@ -709,7 +709,7 @@ grpc::Status RcrImpl::lsUser(
 {
     int r = 0;
     BEGIN_GRPC_METHOD("lsUser", request, t)
-    // std::cerr << pb2JsonString(request->user()) << std::endl;
+    // std::cerr << pb2JsonString(params->user()) << std::endl;
     rcr::User u;
     int rights = checkUserRights(t, mDb, request->user());
     try {

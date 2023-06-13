@@ -4,6 +4,7 @@
 # Options:
 # -DENABLE_SQLITE=on   	enable Sqlite3
 # -DENABLE_PG=on 		enable PostgreSQL
+# -DENABLE_HTTP=on 		enable embedded HTTP server
 #
 
 set(VCPKG_INC "/git/vcpkg/installed/x64-windows/include")
@@ -89,6 +90,7 @@ set(CMAKE_CXX_STANDARD 14)
 
 option(ENABLE_SQLITE "Build with Sqlite3" ON)
 option(ENABLE_PG "Build with PostgreSQL}" OFF)
+option(ENABLE_HTTP "Build with HTTP JSON server" ON)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -104,6 +106,13 @@ endif()
 
 if(ENABLE_PG)
 	find_package(ODB REQUIRED OPTIONAL_COMPONENTS pg)
+endif()
+
+if(ENABLE_HTTP)
+	find_library(LIBMICROHTTPD NAMES microhttpd HINTS /usr/lib/x86_64-linux-gnu/)
+	set(SVC_EXTRA_SRC rcr-ws.cpp)
+	set(SVC_EXTRA_LIB ${LIBMICROHTTPD})
+	set(SVC_EXTRA_DEFS ENABLE_HTTP)
 endif()
 
 set (ARGTABLE "third-party/argtable3/argtable3.c")
@@ -191,13 +200,13 @@ target_link_libraries(box PRIVATE ${ICU_LIBS} ${Intl_LIBRARY})
 # rcr-svc
 #
 add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
-	${GEN_SRC} ${ARGTABLE}
+	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC}
 )
 target_link_libraries(rcr-svc PRIVATE
 	rcr ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
-	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}	${SSL_LIBS}
+	gRPC::grpc++ ${Protobuf_LIBRARIES} ${XLSX_LIBS}	${SSL_LIBS} ${SVC_EXTRA_LIB}
 )
-target_compile_definitions(rcr-svc PRIVATE ${DEFS})
+target_compile_definitions(rcr-svc PRIVATE ${DEFS} ${SVC_EXTRA_DEFS})
 target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
 
 #
@@ -276,3 +285,15 @@ include(CPack)
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
 	add_subdirectory(gtests)
 endif()
+
+if(ENABLE_SQLITE)
+	message("Sqlite enabled")
+endif ()
+
+if(ENABLE_PG)
+	message("PostgreSQL enabled")
+endif ()
+
+if(ENABLE_HTTP)
+	message("Embedded HTTP JSON server enabled")
+endif ()

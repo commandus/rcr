@@ -559,12 +559,13 @@ cd vcpkg
 - unofficial-sqlite3/SQLite3(Windows)
 - or unofficial-postgresql/PostgreSQL(Windows)
 - Xlnt - есть в vcpkg для Windows, но нет в пакетах Ubuntu
+- libmicrohttpd (если включена опция ENABLE_HTTP)
 
 Установка в Linux зависимостей из пакетов:
 
 ```
 sudo apt install grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev \
-libc-ares-dev odb libodb-sqlite-2.4 libicu-dev
+libc-ares-dev odb libodb-sqlite-2.4 libicu-dev libmicrohttpd-dev
 ```
 
 [Install ODB unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)

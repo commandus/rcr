@@ -160,7 +160,7 @@ int parseCmd
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, _("<command>"),
             "card|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
-    struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<request>"), _("command parameter(request)"));
+    struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<params>"), _("command parameter(params)"));
     struct arg_str *a_user_name = arg_str0("u", "user", _("<user-name>"), _("User login"));
     struct arg_str *a_user_password = arg_str0("p", "password", _("<password>"), _("User password"));
     struct arg_str *a_box = arg_str0("b", "box", _("<box>"), _("box prefix e.g. 221-2"));

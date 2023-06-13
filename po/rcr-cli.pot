@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-05 13:07+0900\n"
+"POT-Creation-Date: 2023-06-13 11:30+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,121 +17,145 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: svc/svc.cpp:75
+#: svc/svc.cpp:100
 msgid "SSL on"
 msgstr ""
 
-#: svc/svc.cpp:93 svc/svc.cpp:116
+#: svc/svc.cpp:118 svc/svc.cpp:138
 msgid "Server listening on "
 msgstr ""
 
-#: svc/svc.cpp:97 svc/svc.cpp:119
+#: svc/svc.cpp:122 svc/svc.cpp:146
 msgid "Can not start server"
 msgstr ""
 
-#: svc/svc.cpp:127
+#: svc/svc.cpp:141
+msgid "HTTP JSON port "
+msgstr ""
+
+#: svc/svc.cpp:173
 msgid "Interrupted.."
 msgstr ""
 
-#: svc/svc.cpp:130
+#: svc/svc.cpp:176
 msgid "exit"
 msgstr ""
 
-#: svc/svc.cpp:133
+#: svc/svc.cpp:179
 msgid "Signal "
 msgstr ""
 
-#: svc/svc.cpp:149
+#: svc/svc.cpp:195
 msgid "<address>"
 msgstr ""
 
-#: svc/svc.cpp:149
+#: svc/svc.cpp:195
 msgid "service IPv4 network interface address. Default 0.0.0.0 (all)"
 msgstr ""
 
-#: svc/svc.cpp:150
+#: svc/svc.cpp:196
 msgid "<port>"
 msgstr ""
 
-#: svc/svc.cpp:150
+#: svc/svc.cpp:196
 msgid "service port. Default 50051"
 msgstr ""
 
-#: svc/svc.cpp:152
+#: svc/svc.cpp:198
 msgid "<SQLite# database>"
 msgstr ""
 
-#: svc/svc.cpp:152
+#: svc/svc.cpp:198
 msgid "database, default \"rcr.db\""
 msgstr ""
 
-#: svc/svc.cpp:156
+#: svc/svc.cpp:199
+msgid "<path>"
+msgstr ""
+
+#: svc/svc.cpp:199
+msgid "web root path. Default './html'"
+msgstr ""
+
+#: svc/svc.cpp:203
 msgid "database connection"
 msgstr ""
 
-#: svc/svc.cpp:157
+#: svc/svc.cpp:204
 msgid "database login"
 msgstr ""
 
-#: svc/svc.cpp:158
+#: svc/svc.cpp:205
 msgid "database scheme"
 msgstr ""
 
-#: svc/svc.cpp:159
+#: svc/svc.cpp:206
 msgid "database user password"
 msgstr ""
 
-#: svc/svc.cpp:160
+#: svc/svc.cpp:207
 msgid "database host. Default localhost"
 msgstr ""
 
-#: svc/svc.cpp:161
+#: svc/svc.cpp:208
 msgid "database port. Default 5432"
 msgstr ""
 
-#: svc/svc.cpp:162
+#: svc/svc.cpp:209
 msgid "database options file"
 msgstr ""
 
-#: svc/svc.cpp:163
+#: svc/svc.cpp:210
 msgid "database socket. Default none."
 msgstr ""
 
-#: svc/svc.cpp:164
+#: svc/svc.cpp:211
 msgid "database client charset. Default utf8."
 msgstr ""
 
-#: svc/svc.cpp:165
+#: svc/svc.cpp:212
 msgid "database client flags. Default 0."
 msgstr ""
 
-#: svc/svc.cpp:167
+#: svc/svc.cpp:214
 msgid "enable SSL"
 msgstr ""
 
-#: svc/svc.cpp:168
+#: svc/svc.cpp:215
 msgid "start as daemon/service"
 msgstr ""
 
-#: svc/svc.cpp:170
+#: svc/svc.cpp:217
+msgid "run JSON HTTP service"
+msgstr ""
+
+#: svc/svc.cpp:218
+msgid "HTTP service port number. Default 8050"
+msgstr ""
+
+#: svc/svc.cpp:226
+msgid "-v- verbose"
+msgstr ""
+
+#: svc/svc.cpp:227
 msgid "Show this help"
 msgstr ""
 
-#: svc/svc.cpp:198
+#: svc/svc.cpp:261
 msgid "Usage: "
 msgstr ""
 
-#: svc/svc.cpp:200
+#: svc/svc.cpp:263
 msgid "rcr GRPC service"
 msgstr ""
 
-#: svc/svc.cpp:260
+#: svc/svc.cpp:323
 msgid ""
 "database connection error.\n"
 "Usage: "
 msgstr ""
 
-#: svc/svc.cpp:309
+#: svc/svc.cpp:376
 msgid "Start as daemon, use syslog"
 msgstr ""
 
@@ -171,7 +195,7 @@ msgstr ""
 msgid "Property does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:860
+#: svc/svcImpl.cpp:276 svc/svcImpl.cpp:388 svc/svcImpl.cpp:859
 msgid "Invalid operation"
 msgstr ""
 
@@ -215,11 +239,11 @@ msgstr ""
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:584 svc/svcImpl.cpp:896
+#: svc/svcImpl.cpp:584 svc/svcImpl.cpp:895
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:587 svc/svcImpl.cpp:899
+#: svc/svcImpl.cpp:587 svc/svcImpl.cpp:898
 msgid "list box unknown error"
 msgstr ""
 
@@ -255,26 +279,26 @@ msgstr ""
 msgid "remove property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:836
+#: svc/svcImpl.cpp:835
 msgid "Box already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:849
+#: svc/svcImpl.cpp:848
 msgid "Box does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:863
+#: svc/svcImpl.cpp:862
 msgid "change box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:865
+#: svc/svcImpl.cpp:864
 msgid "change box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:922
+#: svc/svcImpl.cpp:925
 msgid "change package box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:925
+#: svc/svcImpl.cpp:928
 msgid "change package box unknown error"
 msgstr ""

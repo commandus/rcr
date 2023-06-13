@@ -87,8 +87,8 @@ GTEST_API_ bool InDeathTestChild();
 //   ASSERT_DEATH(server.SendMessage(56, "Hello"), "Invalid port number");
 //   for (int i = 0; i < 5; i++) {
 //     EXPECT_DEATH(server.ProcessRequest(i),
-//                  "Invalid request .* in ProcessRequest()")
-//                  << "Failed to die on request " << i;
+//                  "Invalid params .* in ProcessRequest()")
+//                  << "Failed to die on params " << i;
 //   }
 //
 //   ASSERT_EXIT(server.ExitNow(), ::testing::ExitedWithCode(0), "Exiting");

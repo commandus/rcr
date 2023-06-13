@@ -12,11 +12,10 @@
 
 #include <csignal>
 #include <memory.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <argtable3/argtable3.h>
 
 #include <grpc++/server.h>
-#include <grpc++/server_builder.h>
 #include <grpcpp/create_channel.h>
 
 #include "svcconfig.h"
@@ -25,12 +24,34 @@
 #include "SSLValidator.h"
 
 #include "passphrase.h"
+
+#ifdef ENABLE_HTTP
+// embedded HTTP service
+#include "rcr-ws.h"
+// print version
+#include <microhttpd.h>
+#endif
+
 // i18n
 #include <libintl.h>
 #define _(String) gettext (String)
 
 const char* progname = "rcr-svc";
 const char* DEF_DB_SQLITE = "rcr.db";
+
+/**
+ * Number of threads to run in the thread pool.  Should (roughly) match
+ * the number of cores on your system.
+ */
+
+#if defined(CPU_COUNT) && (CPU_COUNT+0) < 2
+#undef CPU_COUNT
+#endif
+#if !defined(CPU_COUNT)
+#define CPU_COUNT 2
+#endif
+
+#define NUMBER_OF_THREADS CPU_COUNT
 
 #define CODE_WRONG_OPTIONS              1
 #define DEF_DATABASESOCKET				""
@@ -41,6 +62,7 @@ typedef void (*TDaemonRunner)();
 
 static ServiceConfig config;		//<	program configuration read from command line
 static std::unique_ptr<Server> server;
+static WSConfig wsConfig;
 
 using grpc::ServerBuilder;
 
@@ -59,13 +81,16 @@ void done()
 	if (server)	{
 		// TODO wait smth
 		// delete server.release();
-		// server = NULL;
-	}
+		// server = nullptr;
+#ifdef ENABLE_HTTP
+        doneWS(wsConfig);
+#endif
+    }
 }
 
 int reslt;
 
-void runSSL()
+static void runGrpcSSL()
 {
 	std::stringstream ss;
 	ss << config.address << ":" << config.port;
@@ -97,14 +122,11 @@ void runSSL()
 		std::cerr << _("Can not start server") << std::endl;
 }
 
-void run()
+static void runGrpc()
 {
     std::stringstream ss;
     ss << config.address << ":" << config.port;
-    std::cout << ss.str() << std::endl;
-
     RcrImpl service(&config);
-
     ServerBuilder builder;
     builder.SetMaxMessageSize(2147483647);
     builder.SetMaxSendMessageSize(2147483647);
@@ -112,11 +134,46 @@ void run()
     builder.RegisterService(&service);
     server = builder.BuildAndStart();
     if (server)	{
-        if (config.verbosity > 0)
+        if (config.verbosity > 0) {
             std::cout << _("Server listening on ") << ss.str() << std::endl;
+#ifdef ENABLE_HTTP
+            if (config.httpJsonOn)
+                std::cout << _("HTTP JSON port ") << config.httpJsonPort << std::endl;
+#endif
+        }
         server->Wait();
     } else
         std::cerr << _("Can not start server") << std::endl;
+}
+
+#ifdef ENABLE_HTTP
+static void runHttpJson(uint16_t port)
+{
+    wsConfig.dirRoot = config.path.c_str();
+    wsConfig.connectionLimit = 100;
+    wsConfig.descriptor = nullptr;
+    wsConfig.flags = 0;
+    wsConfig.lasterr = 0;
+    wsConfig.onLog = nullptr;
+    wsConfig.port = port;
+    wsConfig.svc = nullptr;
+    if (!startWS(wsConfig)) {
+        std::cerr << "Can not start web service errno "
+                  << errno << ": " << strerror(errno) << std::endl;
+        std::cerr << "libmicrohttpd version " << std::hex << MHD_VERSION << std::endl;
+    }
+}
+#endif
+
+static void run() {
+#ifdef ENABLE_HTTP
+    if (config.httpJsonOn)
+        runHttpJson(config.httpJsonPort);
+#endif
+    if (config.sslOn)
+        runGrpcSSL();
+    else
+        runGrpc();
 }
 
 void signalHandler(int signal)
@@ -150,6 +207,7 @@ int parseCmd(
 	struct arg_int *a_port = arg_int0("l", "listen", _("<port>"), _("service port. Default 50051"));
 #ifdef ENABLE_SQLITE
     struct arg_str *a_sqliteDbName = arg_str0(nullptr, "db", _("<SQLite# database>"), _("database, default \"rcr.db\""));
+    struct arg_str *a_http_json_dirroot = arg_str0("r", "root", _("<path>"), _("web root path. Default './html'"));
 #endif
 #ifdef ENABLE_PG
 	// database connection
@@ -166,25 +224,41 @@ int parseCmd(
 #endif
     struct arg_lit *a_ssl = arg_lit0("s", "ssl", _("enable SSL"));
 	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", _("start as daemon/service"));
+#ifdef ENABLE_HTTP
+    struct arg_lit *a_http_json_on = arg_lit0("j", "json", _("run JSON HTTP service"));
+    struct arg_int *a_http_json_port = arg_int0("p", "port", "_(<number>)", _("HTTP service port number. Default 8050"));
 
+    if (a_http_json_dirroot->count)
+        wsConfig.dirRoot = *a_http_json_dirroot->sval;
+    else
+        wsConfig.dirRoot = "html";
+    wsConfig.connectionLimit = NUMBER_OF_THREADS;
+#endif
+    struct arg_lit *a_verbosity = arg_litn("v", "verbosity", 0, 1, _("-v- verbose"));
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
 
 	void* argtable[] = { a_interface, a_port,
 #ifdef ENABLE_PG
-			a_conninfo, a_user, a_database, a_password, a_host, a_dbport, a_optionsfile, a_dbsocket, a_dbcharset, a_dbclientflags,
+        a_conninfo, a_user, a_database, a_password, a_host, a_dbport, a_optionsfile, a_dbsocket, a_dbcharset, a_dbclientflags,
 #endif
 #ifdef ENABLE_SQLITE
-            a_sqliteDbName,
+        a_sqliteDbName,
+#endif
+#ifdef ENABLE_HTTP
+        a_http_json_on,
+        a_http_json_port,
+        a_http_json_dirroot,
 #endif
         a_ssl,
-        a_help, a_end };
+        a_verbosity,
+        a_help, a_end
+    };
 
 	int nerrors;
 
 	// verify the argtable[] entries were allocated successfully
-	if (arg_nullcheck(argtable) != 0)
-	{
+	if (arg_nullcheck(argtable) != 0) {
 		arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 		return 1;
 	}
@@ -212,7 +286,7 @@ int parseCmd(
 	else
 		value->port = DEF_PORT;
     value->sslOn = a_ssl->count > 0;
-    value->verbosity = 0;
+    value->verbosity = a_verbosity->count;
 
 #ifdef ENABLE_SQLITE
     // database
@@ -263,9 +337,13 @@ int parseCmd(
     }
 	PQfinish(conn);
 #endif
-
+#ifdef ENABLE_HTTP
+    value->httpJsonOn = a_http_json_on->count > 0;
+    value->httpJsonPort = 8050;
+    if (a_http_json_port->count)
+        value->httpJsonPort = *a_http_json_port->ival;
+#endif
 	value->daemonize = a_daemonize->count > 0;
-
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 
 #ifdef _MSC_VER
@@ -286,7 +364,7 @@ void setSignalHandler(
 	struct sigaction action;
 	memset(&action, 0, sizeof(struct sigaction));
 	action.sa_handler = &signalHandler;
-	sigaction(signal, &action, NULL);
+	sigaction(signal, &action, nullptr);
 #endif
 }
 
@@ -307,10 +385,10 @@ int main(int argc, char* argv[])
 	if (config.daemonize) {
 		if (config.verbosity)
 			std::cerr << _("Start as daemon, use syslog") << std::endl;
-		Daemonize daemonize(progname, config.path, config.sslOn ? runSSL : run, stopNWait, done);
+		Daemonize daemonize(progname, config.path, run, stopNWait, done);
 	}
 	else {
-        config.sslOn ? runSSL() : run();
+        run();
 		done();
 	}
 	exit(reslt);

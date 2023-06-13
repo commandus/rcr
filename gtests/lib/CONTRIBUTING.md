@@ -42,7 +42,7 @@ PR is acceptable as an alternative.
 6.  Ensure that your code adheres to the existing style in the sample to which
     you are contributing.
 7.  Ensure that your code has an appropriate set of unit tests which all pass.
-8.  Submit a pull request.
+8.  Submit a pull params.
 
 ## The Google Test and Google Mock Communities
 
