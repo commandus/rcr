@@ -108,20 +108,16 @@ const static char *MSG500[5] = {
 	"Binding parameter failed"              // 4
 };
 
-typedef struct 
-{
-	RequestType requestType;
-    std::string value;
-} RequestParams;
-
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
 
-typedef struct {
-	RequestParams params;
+class RequestEnv {
+public:
+    RequestType requestType;
+    std::string value;
 	WSConfig *config;
-} RequestEnv;
+};
 
 google::protobuf::util::JsonParseOptions jsonParseOptions;
 google::protobuf::util::JsonPrintOptions jsonPrintOptions;
@@ -156,13 +152,6 @@ void *uri_logger_callback(void *cls, const char *uri)
 	}
 	*/
 	return nullptr;
-}
-
-static int doneFetch(
-	RequestEnv *env
-)
-{
-	return 0;
 }
 
 const char *NULLSTR = "";
@@ -280,53 +269,135 @@ static std::string buildFileName(const char *dirRoot, const char *url)
 	return r.str();
 }
 
-static START_FETCH_DB_RESULT fetchJson(
+static bool fetchJson(
     std::string &retval,
 	struct MHD_Connection *connection,
-	RequestEnv *env
+	RequestEnv &env
 )
 {
-    grpc::ServerContext svcContext;
-	switch (env->params.requestType) {
+    // grpc::ServerContext svcContext;
+	switch (env.requestType) {
         case RT_LOGIN: {
             rcr::LoginRequest request;
-            google::protobuf::util::JsonStringToMessage(env->params.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
             rcr::LoginResponse response;
-            env->config->svc->login(&svcContext, &request, &response);
+            env.config->svc->login(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_GETDICTIONARIES:
+        {
+            rcr::DictionariesRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::DictionariesResponse response;
+            env.config->svc->getDictionaries(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_GETSETTINGS:
+        {
+            rcr::Settings request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::Settings response;
+            env.config->svc->getSettings(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_SETSETTINGS:
+        {
+            rcr::Settings request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::Settings response;
+            env.config->svc->setSettings(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHPROPERTYTYPE:
+        {
+            rcr::ChPropertyTypeRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chPropertyType(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHCARD:
+        {
+            rcr::ChCardRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chCard(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHBOX:
+        {
+            rcr::ChBoxRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chBox(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CARDQUERY:
+        {
+            rcr::CardQueryRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::CardQueryResponse response;
+            env.config->svc->cardQuery(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_GETBOX:
-            break;
-        case RT_LSUSER:
+        {
+            rcr::BoxRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::BoxResponse response;
+            env.config->svc->getBox(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHUSER:
+        {
+            rcr::UserRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chUser(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHGROUP:
+        {
+            rcr::GroupRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chGroup(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_CHGROUPUSER:
+        {
+            rcr::GroupUserRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->chGroupUser(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         case RT_IMPORTEXCEL:
+        {
+            rcr::ImportExcelRequest request;
+            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            env.config->svc->importExcel(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
             break;
         default:
-            // never happens
-            return START_FETCH_FILE;
+            // case RT_LSUSER:
+            return false;
     }
-	return START_FETCH_JSON_OK;
+	return true;
 }
 
 static void addCORS(MHD_Response *response) {
@@ -405,18 +476,18 @@ static MHD_Result request_callback(
     }
     *ptr = nullptr;					// reset when done
 
-    RequestEnv *requestenv = (RequestEnv *) malloc(sizeof(RequestEnv));
-	requestenv->config = (WSConfig*) cls;
-	requestenv->params.requestType = parseRequestType(url);
+    RequestEnv requestenv;
+	requestenv.config = (WSConfig*) cls;
+	requestenv.requestType = parseRequestType(url);
 
     if (*upload_data_size != 0) {
-        // requestenv->params.value = std::string(upload_data, *upload_data_size);
-        requestenv->params.value = "{\"user\":{\"name\":\"\", \"password\":\"\"}}";
-    }
+        requestenv.value = std::string(upload_data, *upload_data_size);
+    } else
+        requestenv.value = "{\"user\":{\"name\":\"\", \"password\":\"\"}}";
 
     // if JSON service not found, try load from the file
-    if (requestenv->params.requestType == RT_UNKNOWN) {
-        return processFile(connection, buildFileName(requestenv->config->dirRoot, url));
+    if (requestenv.requestType == RT_UNKNOWN) {
+        return processFile(connection, buildFileName(requestenv.config->dirRoot, url));
 	}
     int hc;
     if (strcmp(method, "DELETE") == 0) {
@@ -425,9 +496,9 @@ static MHD_Result request_callback(
     } else {
         // Service
         std::string json;
-        // int r = (int) fetchJson(json, connection, requestenv);
-        int r = 0;json = "{}";
-        if (r) {
+        bool r = fetchJson(json, connection, requestenv);
+        // bool r = true; json = "{}";
+        if (!r) {
             hc = MHD_HTTP_INTERNAL_SERVER_ERROR;
             response = MHD_create_response_from_buffer(strlen(MSG500[r]), (void *) MSG500[r], MHD_RESPMEM_PERSISTENT);
         } else {
@@ -439,7 +510,7 @@ static MHD_Result request_callback(
     addCORS(response);
 	ret = MHD_queue_response(connection, hc, response);
 	MHD_destroy_response(response);
-	return MHD_YES;
+	return ret;
 }
 
 bool startWS(

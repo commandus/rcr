@@ -49,12 +49,6 @@ private:
         rcr::DictionariesResponse *pResponse,
         MEASURE_LOCALE locale
     );
-    grpc::Status importExcel(
-        grpc::ServerContext* context,
-        const rcr::ImportExcelRequest* request,
-        rcr::OperationResponse* response
-    );
-
     /**
      *
      * @param t
@@ -162,6 +156,11 @@ public:
     grpc::Status cardPush(::grpc::ServerContext* context, ::grpc::ServerReader< ::rcr::CardRequest>* reader, ::rcr::OperationResponse* response) override;
     grpc::Status getDictionaries(::grpc::ServerContext* context, const ::rcr::DictionariesRequest* request, ::rcr::DictionariesResponse* response) override;
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, ::rcr::BoxResponse* response) override;
+    grpc::Status importExcel(
+            grpc::ServerContext* context,
+            const rcr::ImportExcelRequest* request,
+            rcr::OperationResponse* response
+    );
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
 };
