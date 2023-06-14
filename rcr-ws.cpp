@@ -459,8 +459,7 @@ static MHD_Result request_callback(
 	static int aptr;
 	struct MHD_Response *response;
 	MHD_Result ret;
-
-	if (&aptr != *ptr) {
+    if (&aptr != *ptr) {
 		// do never respond on first call
 		*ptr = &aptr;
 		return MHD_YES;
@@ -477,13 +476,16 @@ static MHD_Result request_callback(
     *ptr = nullptr;					// reset when done
 
     RequestEnv requestenv;
-	requestenv.config = (WSConfig*) cls;
-	requestenv.requestType = parseRequestType(url);
 
     if (*upload_data_size != 0) {
         requestenv.value = std::string(upload_data, *upload_data_size);
+        *upload_data_size = 0;
+        return MHD_YES;
     } else
         requestenv.value = "{\"user\":{\"name\":\"\", \"password\":\"\"}}";
+
+    requestenv.config = (WSConfig*) cls;
+	requestenv.requestType = parseRequestType(url);
 
     // if JSON service not found, try load from the file
     if (requestenv.requestType == RT_UNKNOWN) {
