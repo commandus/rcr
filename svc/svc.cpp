@@ -69,6 +69,8 @@ using grpc::ServerBuilder;
 bool stopRequest = false;
 bool stopBookingRequest = false;
 
+RcrImpl *service = nullptr;
+
 void stopNWait()
 {
 	stopRequest = true;
@@ -85,6 +87,10 @@ void done()
 #ifdef ENABLE_HTTP
         doneWS(wsConfig);
 #endif
+        if (service) {
+            delete service;
+            service = nullptr;
+        }
     }
 }
 
@@ -94,8 +100,6 @@ static void runGrpcSSL()
 {
 	std::stringstream ss;
 	ss << config.address << ":" << config.port;
-	RcrImpl service(&config);
-
     if (config.verbosity > 0)
         std::cerr << _("SSL on") << std::endl;
 
@@ -111,7 +115,7 @@ static void runGrpcSSL()
     builder.SetMaxMessageSize(2147483647);
     builder.SetMaxSendMessageSize(2147483647);
     builder.AddListeningPort(ss.str(), serverCredentials);
-	builder.RegisterService(&service);
+	builder.RegisterService(service);
 	server = builder.BuildAndStart();
 	if (server)	{
 		if (config.verbosity > 0)
@@ -126,12 +130,11 @@ static void runGrpc()
 {
     std::stringstream ss;
     ss << config.address << ":" << config.port;
-    RcrImpl service(&config);
     ServerBuilder builder;
     builder.SetMaxMessageSize(2147483647);
     builder.SetMaxSendMessageSize(2147483647);
     builder.AddListeningPort(ss.str(), grpc::InsecureServerCredentials());
-    builder.RegisterService(&service);
+    builder.RegisterService(service);
     server = builder.BuildAndStart();
     if (server)	{
         if (config.verbosity > 0) {
@@ -149,14 +152,12 @@ static void runGrpc()
 #ifdef ENABLE_HTTP
 static void runHttpJson(uint16_t port)
 {
-    wsConfig.dirRoot = config.path.c_str();
-    wsConfig.connectionLimit = 100;
     wsConfig.descriptor = nullptr;
     wsConfig.flags = 0;
     wsConfig.lasterr = 0;
     wsConfig.onLog = nullptr;
     wsConfig.port = port;
-    wsConfig.svc = nullptr;
+    wsConfig.svc = service;
     if (!startWS(wsConfig)) {
         std::cerr << "Can not start web service errno "
                   << errno << ": " << strerror(errno) << std::endl;
@@ -166,6 +167,7 @@ static void runHttpJson(uint16_t port)
 #endif
 
 static void run() {
+    service = new RcrImpl(&config);
 #ifdef ENABLE_HTTP
     if (config.httpJsonOn)
         runHttpJson(config.httpJsonPort);
@@ -232,7 +234,8 @@ int parseCmd(
         wsConfig.dirRoot = *a_http_json_dirroot->sval;
     else
         wsConfig.dirRoot = "html";
-    wsConfig.connectionLimit = NUMBER_OF_THREADS;
+    wsConfig.threadCount = NUMBER_OF_THREADS;
+    wsConfig.connectionLimit = 1024;
 #endif
     struct arg_lit *a_verbosity = arg_litn("v", "verbosity", 0, 1, _("-v- verbose"));
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
@@ -391,5 +394,5 @@ int main(int argc, char* argv[])
         run();
 		done();
 	}
-	exit(reslt);
+	return reslt;
 }

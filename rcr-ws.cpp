@@ -120,7 +120,6 @@ typedef struct
 
 typedef struct {
 	RequestParams params;
-    std::string response;
 	WSConfig *config;
 } RequestEnv;
 
@@ -281,13 +280,12 @@ static std::string buildFileName(const char *dirRoot, const char *url)
 	return r.str();
 }
 
-static START_FETCH_DB_RESULT startFetchJson(
+static START_FETCH_DB_RESULT fetchJson(
+    std::string &retval,
 	struct MHD_Connection *connection,
 	RequestEnv *env
 )
 {
-    if (!env->config->svc)
-        return START_FETCH_FILE;
     grpc::ServerContext svcContext;
 	switch (env->params.requestType) {
         case RT_LOGIN: {
@@ -295,7 +293,7 @@ static START_FETCH_DB_RESULT startFetchJson(
             google::protobuf::util::JsonStringToMessage(env->params.value, &request, jsonParseOptions);
             rcr::LoginResponse response;
             env->config->svc->login(&svcContext, &request, &response);
-            google::protobuf::util::MessageToJsonString(response, &env->response, jsonPrintOptions);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_GETDICTIONARIES:
@@ -329,27 +327,6 @@ static START_FETCH_DB_RESULT startFetchJson(
             return START_FETCH_FILE;
     }
 	return START_FETCH_JSON_OK;
-}
-
-static ssize_t chunk_callbackFetchJson(void *cls, uint64_t pos, char *buf, size_t max)
-{
-	RequestEnv *env = (RequestEnv*) cls;
-	if (pos >= env->response.size())
-		return MHD_CONTENT_READER_END_OF_STREAM;
-    size_t sz = env->response.size() - pos;
-    if (sz > max)
-        sz = max;
-    memmove(buf, env->response.c_str() + pos, sz);
-	return sz;
-}
-
-static void chunk_done_callback(void *cls)
-{
-	RequestEnv *e = (RequestEnv*) cls;
-	if (e != nullptr) {
-		doneFetch(e);
-		free(e);
-	}
 }
 
 static void addCORS(MHD_Response *response) {
@@ -422,7 +399,7 @@ static MHD_Result request_callback(
         response = MHD_create_response_from_buffer(strlen(MSG500[0]), (void *) MSG500[0], MHD_RESPMEM_PERSISTENT);
         MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, CT_JSON);
         addCORS(response);
-        ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+        MHD_queue_response(connection, MHD_HTTP_OK, response);
         MHD_destroy_response(response);
         return MHD_YES;
     }
@@ -431,6 +408,11 @@ static MHD_Result request_callback(
     RequestEnv *requestenv = (RequestEnv *) malloc(sizeof(RequestEnv));
 	requestenv->config = (WSConfig*) cls;
 	requestenv->params.requestType = parseRequestType(url);
+
+    if (*upload_data_size != 0) {
+        // requestenv->params.value = std::string(upload_data, *upload_data_size);
+        requestenv->params.value = "{\"user\":{\"name\":\"\", \"password\":\"\"}}";
+    }
 
     // if JSON service not found, try load from the file
     if (requestenv->params.requestType == RT_UNKNOWN) {
@@ -442,21 +424,22 @@ static MHD_Result request_callback(
         response = MHD_create_response_from_buffer(strlen(MSG501), (void *) MSG501, MHD_RESPMEM_PERSISTENT);
     } else {
         // Service
-        int r = (int) startFetchJson(connection, requestenv);
+        std::string json;
+        // int r = (int) fetchJson(json, connection, requestenv);
+        int r = 0;json = "{}";
         if (r) {
             hc = MHD_HTTP_INTERNAL_SERVER_ERROR;
             response = MHD_create_response_from_buffer(strlen(MSG500[r]), (void *) MSG500[r], MHD_RESPMEM_PERSISTENT);
         } else {
             hc = MHD_HTTP_OK;
-            response = MHD_create_response_from_callback(MHD_SIZE_UNKNOWN, 1024, &chunk_callbackFetchJson, requestenv,
-                &chunk_done_callback);
+            response = MHD_create_response_from_buffer(json.size(), (void *) json.c_str(), MHD_RESPMEM_MUST_COPY);
         }
     }
     MHD_add_response_header(response, MHD_HTTP_HEADER_CONTENT_TYPE, CT_JSON);
     addCORS(response);
 	ret = MHD_queue_response(connection, hc, response);
 	MHD_destroy_response(response);
-	return ret;
+	return MHD_YES;
 }
 
 bool startWS(
@@ -473,7 +456,7 @@ bool startWS(
     struct MHD_Daemon *d = MHD_start_daemon(
 		config.flags, config.port, nullptr, nullptr,
 		&request_callback, &config,
-		MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int) 120,  // 2 minutes timout
+		MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int) 30,  // 30s timeout
 		MHD_OPTION_THREAD_POOL_SIZE, config.threadCount,
 		MHD_OPTION_URI_LOG_CALLBACK, &uri_logger_callback, nullptr,
 		MHD_OPTION_CONNECTION_LIMIT, config.connectionLimit,
