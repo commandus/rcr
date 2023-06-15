@@ -52,9 +52,14 @@ typedef enum {
     RT_CHGROUP = 11,
     RT_CHGROUPUSER = 12,
     RT_IMPORTEXCEL = 13,
-	RT_UNKNOWN = 100	//< FILE params
-
+    RT_UNKNOWN = 100	//< FILE params
 } RequestType;
+
+class RequestContext {
+public:
+    RequestType requestType;
+    std::string postData;
+};
 
 static const char *paths[PATH_COUNT] = {
     "/login",
@@ -111,13 +116,6 @@ const static char *MSG500[5] = {
 #ifdef _MSC_VER
 #pragma warning(disable: 4996)
 #endif
-
-class RequestEnv {
-public:
-    RequestType requestType;
-    std::string value;
-	WSConfig *config;
-};
 
 google::protobuf::util::JsonParseOptions jsonParseOptions;
 google::protobuf::util::JsonPrintOptions jsonPrintOptions;
@@ -272,124 +270,125 @@ static std::string buildFileName(const char *dirRoot, const char *url)
 static bool fetchJson(
     std::string &retval,
 	struct MHD_Connection *connection,
-	RequestEnv &env
+    const WSConfig *config,
+	const RequestContext *env
 )
 {
     // grpc::ServerContext svcContext;
-	switch (env.requestType) {
+	switch (env->requestType) {
         case RT_LOGIN: {
             rcr::LoginRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::LoginResponse response;
-            env.config->svc->login(nullptr, &request, &response);
+            config->svc->login(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_GETDICTIONARIES:
         {
             rcr::DictionariesRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::DictionariesResponse response;
-            env.config->svc->getDictionaries(nullptr, &request, &response);
+            config->svc->getDictionaries(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_GETSETTINGS:
         {
             rcr::Settings request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::Settings response;
-            env.config->svc->getSettings(nullptr, &request, &response);
+            config->svc->getSettings(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_SETSETTINGS:
         {
             rcr::Settings request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::Settings response;
-            env.config->svc->setSettings(nullptr, &request, &response);
+            config->svc->setSettings(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHPROPERTYTYPE:
         {
             rcr::ChPropertyTypeRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chPropertyType(nullptr, &request, &response);
+            config->svc->chPropertyType(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHCARD:
         {
             rcr::ChCardRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chCard(nullptr, &request, &response);
+            config->svc->chCard(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHBOX:
         {
             rcr::ChBoxRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chBox(nullptr, &request, &response);
+            config->svc->chBox(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CARDQUERY:
         {
             rcr::CardQueryRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::CardQueryResponse response;
-            env.config->svc->cardQuery(nullptr, &request, &response);
+            config->svc->cardQuery(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_GETBOX:
         {
             rcr::BoxRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::BoxResponse response;
-            env.config->svc->getBox(nullptr, &request, &response);
+            config->svc->getBox(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHUSER:
         {
             rcr::UserRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chUser(nullptr, &request, &response);
+            config->svc->chUser(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHGROUP:
         {
             rcr::GroupRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chGroup(nullptr, &request, &response);
+            config->svc->chGroup(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_CHGROUPUSER:
         {
             rcr::GroupUserRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->chGroupUser(nullptr, &request, &response);
+            config->svc->chGroupUser(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
         case RT_IMPORTEXCEL:
         {
             rcr::ImportExcelRequest request;
-            google::protobuf::util::JsonStringToMessage(env.value, &request, jsonParseOptions);
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
-            env.config->svc->importExcel(nullptr, &request, &response);
+            config->svc->importExcel(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
@@ -456,12 +455,12 @@ static MHD_Result request_callback(
 	void **ptr
 )
 {
-	static int aptr;
 	struct MHD_Response *response;
 	MHD_Result ret;
-    if (&aptr != *ptr) {
+
+    if (!*ptr) {
 		// do never respond on first call
-		*ptr = &aptr;
+		*ptr = new RequestContext;
 		return MHD_YES;
 	}
 
@@ -473,23 +472,22 @@ static MHD_Result request_callback(
         MHD_destroy_response(response);
         return MHD_YES;
     }
-    *ptr = nullptr;					// reset when done
 
-    RequestEnv requestenv;
-
+    RequestContext *requestCtx = (RequestContext *) *ptr;
     if (*upload_data_size != 0) {
-        requestenv.value = std::string(upload_data, *upload_data_size);
+        requestCtx->postData = std::string(upload_data, *upload_data_size);
         *upload_data_size = 0;
         return MHD_YES;
-    } else
-        requestenv.value = "{\"user\":{\"name\":\"\", \"password\":\"\"}}";
+    }
 
-    requestenv.config = (WSConfig*) cls;
-	requestenv.requestType = parseRequestType(url);
+    requestCtx->requestType = parseRequestType(url);
 
     // if JSON service not found, try load from the file
-    if (requestenv.requestType == RT_UNKNOWN) {
-        return processFile(connection, buildFileName(requestenv.config->dirRoot, url));
+    if (requestCtx->requestType == RT_UNKNOWN) {
+        MHD_Result r = processFile(connection, buildFileName(((WSConfig*) cls)->dirRoot, url));
+        delete requestCtx;
+        *ptr = nullptr;
+        return r;
 	}
     int hc;
     if (strcmp(method, "DELETE") == 0) {
@@ -498,7 +496,7 @@ static MHD_Result request_callback(
     } else {
         // Service
         std::string json;
-        bool r = fetchJson(json, connection, requestenv);
+        bool r = fetchJson(json, connection, (WSConfig*) cls, requestCtx);
         // bool r = true; json = "{}";
         if (!r) {
             hc = MHD_HTTP_INTERNAL_SERVER_ERROR;
@@ -512,6 +510,8 @@ static MHD_Result request_callback(
     addCORS(response);
 	ret = MHD_queue_response(connection, hc, response);
 	MHD_destroy_response(response);
+    delete requestCtx;
+    *ptr = nullptr;
 	return ret;
 }
 
