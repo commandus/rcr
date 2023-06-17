@@ -109,7 +109,7 @@ if(ENABLE_PG)
 endif()
 
 if(ENABLE_HTTP)
-	find_library(LIBMICROHTTPD NAMES microhttpd HINTS /usr/lib/x86_64-linux-gnu/)
+	find_library(LIBMICROHTTPD NAMES microhttpd libmicrohttpd-dll.lib HINTS /usr/lib/x86_64-linux-gnu/)
 	set(SVC_EXTRA_SRC rcr-ws.cpp)
 	set(SVC_EXTRA_LIB ${LIBMICROHTTPD})
 	set(SVC_EXTRA_DEFS ENABLE_HTTP)

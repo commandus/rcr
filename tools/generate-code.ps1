@@ -1,5 +1,5 @@
 # Attention! Check this hardcoded path!
-$GRPC_PLUGIN = "c:\p\bin\grpc_cpp_plugin.exe"
+$GRPC_PLUGIN = "c:\bin\grpc_cpp_plugin.exe"
 # -------------------------- Do not edit below this line --------------------------
 $WORK_DIR = $($args[0])
 $ODB_DATABASE_NAME = $($args[1])
