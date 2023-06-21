@@ -18,7 +18,6 @@ $GEN_FILES="$GEN_HDR $GEN_SRC"
 $PROTO_DIR = "proto"
 $PROTO = "$PROTO_DIR/rcr.proto"
 $H = "$GEN/rcr.pb.h"
-$HVIEWS = "$DEST/odb-views.h"
 
 if ($null -ne $WORK_DIR) {
     cd $WORK_DIR
@@ -96,8 +95,8 @@ function Odb-Db {
     param (
         $Driver, $OutDir, $SetDef, $HeaderFile
     )
-    Write-Output("odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile")
-    odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile
+    Write-Output("odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I . -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile")
+    odb -o $OutDir -d $Driver -x -std=c++14 --options-file odb\options.pgsql --fkeys-deferrable-mode not_deferrable --generate-query --generate-schema -I . -I $ODB_OPT_DIR -I $PROTOBUF_INC $SetDef $HeaderFile
 }
 
 New-Item -ItemType Directory -Force -Path $GEN | Out-Null

@@ -4,6 +4,7 @@
 #include <string>
 #include <stdint.h>
 #include <odb/core.hxx>
+#include "gen/rcr.pb.h"
 
 namespace rcr
 {
