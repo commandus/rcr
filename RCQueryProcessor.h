@@ -26,7 +26,18 @@ public:
         size_t &sum
     );
 
-    void loadCards(
+    /**
+     * Return total found record count
+     * @param db
+     * @param t
+     * @param dictionaries
+     * @param retCards
+     * @param query
+     * @param componentFlags
+     * @param list offset, count of records
+     * @return
+     */
+    size_t loadCards(
         odb::database *db,
         odb::transaction *t,
         const rcr::DictionariesResponse *dictionaries,

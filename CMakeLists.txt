@@ -200,7 +200,7 @@ target_link_libraries(box PRIVATE ${ICU_LIBS} ${Intl_LIBRARY})
 # rcr-svc
 #
 add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
-	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC}
+	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
 )
 target_link_libraries(rcr-svc PRIVATE
 	rcr ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}

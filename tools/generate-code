@@ -22,6 +22,7 @@ DT=`date --rfc-2822`
 SRC=.
 PROTO=rcr.proto
 H="$SRC/gen/rcr.pb.h"
+HVIEWS="$SRC/odb/odb-views.h"
 # Seriaization
 protoc -I $SRC/proto --cpp_out=$SRC/gen $PROTO
 # gRPC
@@ -72,3 +73,4 @@ odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --options-file $SRC/odb/options.pg
     --generate-query --generate-schema --schema-format sql $ODBINC $ODBDEFS $H
 odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable \
     --generate-query --generate-schema --schema-format embedded $ODBINC $ODBDEFS $H
+odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --fkeys-deferrable-mode not_deferrable --generate-query $ODBINC $ODBDEFS $HVIEWS

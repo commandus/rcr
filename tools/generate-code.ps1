@@ -9,6 +9,8 @@ $GEN = "gen"
 $ODB_OPT_DIR = "odb"
 $DT = Get-Date -F "yyyy-MM-dd hh:mm"
 $GEN_HDR_PB = "$GEN/rcr.pb.h"
+$HVIEWS = "odb/odb-views.h"
+
 $GEN_HDR_GRPC = "GEN/rcr.grpc.pb.h"
 $GEN_HDR = "$GEN_HDR_PB $GEN_HDR_GRPC"
 $GEN_SRC="$GEN/rcr.pb.cc $GEN/rcr.grpc.pb.cc"
@@ -111,6 +113,7 @@ Add-Odb -HeadefFile $GEN_HDR_PB -AdditionalComment $DT
 
 # generate ODB ORM
 Odb-Db -Driver $ODB_DATABASE_NAME -OutDir $GEN -SetDef "-DGEN_ODB" -HeaderFile $GEN_HDR_PB
+Odb-Db -Driver $ODB_DATABASE_NAME -OutDir $GEN -SetDef "-DGEN_ODB" -HeaderFile $HVIEWS
 
 # sed -i "s//" $F
 # SET ODBINC="-I/usr/include/x86_64-linux-gnu -I/usr/local/include -I%DEST%/odb"

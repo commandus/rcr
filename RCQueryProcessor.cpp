@@ -9,9 +9,12 @@
 // ODB ORM
 #include "gen/rcr.pb-odb.hxx"
 #include "string-helper.h"
+#include "gen/odb-views-odb.hxx"
 
 #ifdef ENABLE_SQLITE
 #include <odb/sqlite/database.hxx>
+#include <sstream>
+
 #endif
 #ifdef ENABLE_PG
 #include <odb/pgsql/database.hxx>
@@ -59,7 +62,7 @@ void RCQueryProcessor::exec(
     switch (query->code) {
         case SO_LIST_NO_BOX:
         case SO_LIST:
-            loadCards(db, t, dictionaries,cards, query, componentFlags, list);
+            count = loadCards(db, t, dictionaries,cards, query, componentFlags, list);
             break;
         case SO_SET:
         case SO_ADD:
@@ -72,20 +75,52 @@ void RCQueryProcessor::exec(
     }
 }
 
-static void mkCardQuery(
+static size_t countCards(
     odb::database *db,
-    odb::transaction *t,
-    const rcr::DictionariesResponse *dictionaries,
-    odb::result<rcr::Card> &retVal,
+    uint64_t symbId,
     const RCQuery *query,
     uint32_t componentFlags
 )
 {
-    uint64_t symbId;
-    if (componentFlags == FLAG_ALL_COMPONENTS)
-        symbId = 0;
-    else
-        symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+// Find the number of employees with the Doe last name. Result of this
+// aggregate query contains only one element so use the query_value()
+// shortcut function.
+//
+    odb::result<rcr::CardCount> r;
+    std::stringstream ss;
+    std::string cn = toUpperCase(query->componentName);
+
+    if (cn.empty() || cn == "*") {  // just all
+        if (symbId)
+            ss << "nominal = " << query->nominal << " and symbol_id = " << symbId;
+        else
+            ss << "nominal = " << query->nominal;
+    } else {
+        if (cn.find("*") != std::string::npos) {    // LIKE 'K%'
+            std::replace(cn.begin(), cn.end(), '*', '%');
+            if (symbId)
+                ss << "uname LIKE '" << cn << "' and nominal = " << query->nominal << " and symbol_id = " << symbId;
+            else
+                ss << "uname LIKE '" << cn << "' and nominal = " << query->nominal;
+        } else {
+            if (symbId)
+                ss << "uname = '" << cn << "' and nominal = " << query->nominal << " and symbol_id = " << symbId;
+            else
+                ss << "uname = '" << cn << "' and nominal = " << query->nominal << symbId;
+        }
+    }
+    return db->query_value<rcr::CardCount>(ss.str()).count;
+}
+
+static void mkCardQuery(
+    odb::database *db,
+    uint64_t symbId,
+    odb::result<rcr::Card> &retVal,
+    const RCQuery *query,
+    uint32_t componentFlags,
+    const rcr::List &list
+)
+{
     std::string cn = toUpperCase(query->componentName);
     if (cn.empty() || cn == "*") {  // just all
         if (symbId)
@@ -126,7 +161,7 @@ static void mkCardQuery(
                 ));
             else
                 retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                        odb::query<rcr::Card>::uname == toUpperCase(query->componentName)
+                        odb::query<rcr::Card>::uname == cn
                         &&
                         odb::query<rcr::Card>::nominal == query->nominal
                 ));
@@ -134,7 +169,7 @@ static void mkCardQuery(
     }
 }
 
-void RCQueryProcessor::loadCards(
+size_t RCQueryProcessor::loadCards(
     odb::database *db,
     odb::transaction *t,
     const rcr::DictionariesResponse *dictionaries,
@@ -145,15 +180,24 @@ void RCQueryProcessor::loadCards(
 ) {
     size_t cnt = 0;
     size_t sz = 0;
+    size_t r = 0;
     try {
+        uint64_t symbId;
+        if (componentFlags == FLAG_ALL_COMPONENTS)
+            symbId = 0;
+        else
+            symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+        r = countCards(db, symbId, query, componentFlags);
         odb::result<rcr::Card> q;
-        mkCardQuery(db, t, dictionaries, q, query, componentFlags);
+        // list is ignored
+        mkCardQuery(db, symbId, q, query, componentFlags, list);
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
                 continue;
             google::protobuf::RepeatedPtrField<rcr::Package> pkgs;
             if (!loadPackages(db, t, query->boxes, itCard->id(), &pkgs))
                 continue;
+            // emulate LIMIT OFFSET clause
             cnt++;
             if (cnt - 1 < list.offset())
                 continue;
@@ -171,6 +215,7 @@ void RCQueryProcessor::loadCards(
     } catch (...) {
         LOG(ERROR) << "findCardByNameNominalProperties unknown error";
     }
+    return r;
 }
 
 int RCQueryProcessor::saveCard(
@@ -687,7 +732,13 @@ size_t RCQueryProcessor::setCards(
     size_t cnt = 0;
     try {
         odb::result<rcr::Card> q;
-        mkCardQuery(db, t, dictionaries, q, query, componentFlags);
+        uint64_t symbId;
+        if (componentFlags == FLAG_ALL_COMPONENTS)
+            symbId = 0;
+        else
+            symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
+
+        mkCardQuery(db, symbId, q, query, componentFlags, rcr::List());
         odb::result<rcr::Card>::iterator itCard(q.begin());
         for (; itCard != q.end(); itCard++) {
             if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
