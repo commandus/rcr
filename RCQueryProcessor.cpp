@@ -78,6 +78,7 @@ void RCQueryProcessor::exec(
 static size_t countCards(
     odb::database *db,
     uint64_t symbId,
+    const rcr::DictionariesResponse *dictionaries,
     const RCQuery *query,
     uint32_t componentFlags
 )
@@ -89,6 +90,36 @@ static size_t countCards(
     odb::result<rcr::CardCount> r;
     std::stringstream ss;
     std::string cn = toUpperCase(query->componentName);
+
+    // check box
+    if (query->boxes) {
+        uint64_t startBox = query->boxes;
+        int dp;
+        uint64_t finishBox = StockOperation::maxBox(query->boxes, dp);
+#ifdef ENABLE_SQLITE
+        // Sqlite support int64 not uint64
+        if (finishBox == std::numeric_limits<uint64_t>::max())
+            finishBox = std::numeric_limits<int64_t>::max();
+#endif
+        ss << "id in (select p.card_id from Package p where p.box >= "
+            << startBox << " and p.box <= " << finishBox << ") and ";
+    }
+    // check properties
+    if (!query->properties.empty()) {
+        for (std::pair<std::string, std::string> p: query->properties) {
+            uint64_t ptid = 0;
+            for (auto it = dictionaries->property_type().begin(); it != dictionaries->property_type().end(); it++) {
+                if (it->key() == p.first)
+                    ptid = it->id();
+                break;
+            }
+            // check does it exists
+            if (!ptid)
+                continue;
+            ss << "id in (select p.card_id from Property p where p.property_type_id = "
+               << ptid << ") and ";
+        }
+    }
 
     if (cn.empty() || cn == "*") {  // just all
         if (symbId)
@@ -187,7 +218,7 @@ size_t RCQueryProcessor::loadCards(
             symbId = 0;
         else
             symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
-        r = countCards(db, symbId, query, componentFlags);
+        r = countCards(db, symbId, dictionaries, query, componentFlags);
         odb::result<rcr::Card> q;
         // list is ignored
         mkCardQuery(db, symbId, q, query, componentFlags, list);
