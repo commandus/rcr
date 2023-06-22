@@ -475,7 +475,7 @@ static MHD_Result request_callback(
 
     RequestContext *requestCtx = (RequestContext *) *ptr;
     if (*upload_data_size != 0) {
-        requestCtx->postData = std::string(upload_data, *upload_data_size);
+        requestCtx->postData += std::string(upload_data, *upload_data_size);
         *upload_data_size = 0;
         return MHD_YES;
     }
