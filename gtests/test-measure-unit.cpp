@@ -10,6 +10,18 @@
 #include "BoxName.h"
 #include "string-helper.h"
 
+TEST(RCQuery, ParseDigits) {
+    size_t position;
+
+    position = 0;
+    RCQuery q;
+    q.parse(ML_RU, "2S*", position, COMPONENT_D);
+    ASSERT_EQ(q.measure, COMPONENT_D);
+    ASSERT_EQ(q.componentName, "2S*");
+    ASSERT_EQ(q.code, SO_LIST_NO_BOX);
+    ASSERT_EQ(q.nominal, 0);
+}
+
 TEST(BoxId, Rename) {
     // 1-2 to 3
     uint64_t srcBoxRoot = StockOperation::parseBoxes("1-2");

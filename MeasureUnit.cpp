@@ -461,6 +461,8 @@ int MeasureUnit::parse(
     }
     // by default IC
     measure = defaultMeasure;
+    // if component name starting with digit, nominal is not 0, in this case reset mominal
+    nominal = 0;
     // skip spaces if exists
     start = position;
     finish = eolp;
