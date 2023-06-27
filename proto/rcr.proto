@@ -316,6 +316,11 @@ message GroupUserRequest
     GroupUser value = 3;
 }
 
+message GetItemRequest
+{
+    User user = 1;
+    uint64 id = 2;
+}
 // ------------ RPC -------------
 
 service Rcr
@@ -326,6 +331,7 @@ service Rcr
     rpc setSettings(Settings) returns (Settings) {}
 
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
+    rpc getCard(GetItemRequest) returns (CardNPropetiesPackages) {}
     rpc chCard(ChCardRequest) returns (OperationResponse) {}
     rpc chBox(ChBoxRequest) returns (OperationResponse) {}
 

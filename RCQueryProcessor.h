@@ -78,7 +78,7 @@ public:
         const std::string &key
     );
 
-    // return nullptr if not found
+    // return empty string if not found
     static const std::string& findPropertyTypeName(
         const rcr::DictionariesResponse *dictionaries,
         uint64_t key

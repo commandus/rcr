@@ -285,6 +285,54 @@ struct ServiceConfig *RcrImpl::getConfig()
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }
 
+grpc::Status RcrImpl::getCard(
+    grpc::ServerContext* context,
+    const rcr::GetItemRequest* request,
+    rcr::CardNPropetiesPackages* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (request->id() == 0)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("getCard", request, t)
+    rcr::DictionariesResponse dictionaries;
+    loadDictionaries(&dictionaries, ML_INTL);
+
+    try {
+        odb::result<rcr::Card> qc = mDb->query<rcr::Card>(odb::query<rcr::Card>::id == request->id());
+        odb::result<rcr::Card>::iterator it(qc.begin());
+        if (it == qc.end())
+            return grpc::Status::OK;
+        *response->mutable_card() = *it;
+        // properties
+        odb::result<rcr::Property> qp = mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->id());
+        for (odb::result<rcr::Property>::iterator itp(qp.begin()); itp != qp.begin(); itp++) {
+            rcr::PropertyWithName *e = response->mutable_properties()->Add();
+            e->set_id(itp->id());
+            const std::string &s = RCQueryProcessor::findPropertyTypeName(&dictionaries, itp->property_type_id());
+            if (s.empty())
+                continue;
+            e->set_property_type(s);
+            e->set_value(itp->value());
+        }
+        // packages
+        odb::result<rcr::Package> qb = mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->id());
+        for (odb::result<rcr::Package>::iterator itb(qb.begin()); itb != qb.begin(); itb++) {
+            rcr::Package *p = response->mutable_packages()->Add();
+            *p = *itb;
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("get card error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("get card unknown error");
+    }
+    END_GRPC_METHOD("getCard", request, response, t)
+    return grpc::Status::OK;
+}
+
 grpc::Status RcrImpl::chCard(
     grpc::ServerContext* context,
     const rcr::ChCardRequest* request,

@@ -34,7 +34,7 @@
 
 static LogIntf *logCB = nullptr;
 
-#define PATH_COUNT 14
+#define PATH_COUNT 15
 
 typedef enum {
     RT_LOGIN = 0,
@@ -42,16 +42,17 @@ typedef enum {
     RT_GETSETTINGS = 2,
     RT_SETSETTINGS = 3,
     RT_CHPROPERTYTYPE = 4,
-    RT_CHCARD = 5,
-    RT_CHBOX = 6,
-    RT_CARDQUERY = 7,
+    RT_GETCARD = 5,
+    RT_CHCARD = 6,
+    RT_CHBOX = 7,
+    RT_CARDQUERY = 8,
     // RT_CARDPUSH,
-    RT_GETBOX = 8,
-    RT_LSUSER = 9,
-    RT_CHUSER = 10,
-    RT_CHGROUP = 11,
-    RT_CHGROUPUSER = 12,
-    RT_IMPORTEXCEL = 13,
+    RT_GETBOX = 9,
+    RT_LSUSER = 10,
+    RT_CHUSER = 11,
+    RT_CHGROUP = 12,
+    RT_CHGROUPUSER = 13,
+    RT_IMPORTEXCEL = 14,
     RT_UNKNOWN = 100	//< FILE params
 } RequestType;
 
@@ -67,6 +68,7 @@ static const char *paths[PATH_COUNT] = {
     "/getSettings",
     "/setSettings",
     "/chPropertyType",
+    "/getCard",
     "/chCard",
     "/chBox",
     "/cardQuery",
@@ -317,6 +319,15 @@ static bool fetchJson(
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
             config->svc->chPropertyType(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
+            break;
+        case RT_GETCARD:
+        {
+            rcr::GetItemRequest request;
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
+            rcr::CardNPropetiesPackages response;
+            config->svc->getCard(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;

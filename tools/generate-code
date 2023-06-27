@@ -67,7 +67,7 @@ sed -i "s/@@protoc_insertion_point(\(includes\))/@@protoc_insertion_point(\1)\n\
 # each class just in case
 sed -i "s/\ \ \/\/ @@protoc_insertion_point(class_scope:\(.*\)\.\(.*\))/  \/\/ @@protoc_insertion_point(class_scope:\1\.\2)\n$PRECLASS/" $H
 
-ODBINC="-I/usr/include/x86_64-linux-gnu -I/usr/local/include -I$SRC/odb"
+ODBINC="-I/usr/include/x86_64-linux-gnu -I/usr/local/include -I$SRC -I$SRC/odb"
 ODBDEFS="-DGEN_ODB -D__x86_64__ -D__LP64__"
 odb -o $SRC/gen -d $ODB_DB_NAME -x -std=c++14 --options-file $SRC/odb/options.pgsql --fkeys-deferrable-mode not_deferrable \
     --generate-query --generate-schema --schema-format sql $ODBINC $ODBDEFS $H
