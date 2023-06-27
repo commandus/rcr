@@ -309,7 +309,7 @@ grpc::Status RcrImpl::getCard(
         *response->mutable_card() = *it;
         // properties
         odb::result<rcr::Property> qp = mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->id());
-        for (odb::result<rcr::Property>::iterator itp(qp.begin()); itp != qp.begin(); itp++) {
+        for (odb::result<rcr::Property>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
             rcr::PropertyWithName *e = response->mutable_properties()->Add();
             e->set_id(itp->id());
             const std::string &s = RCQueryProcessor::findPropertyTypeName(&dictionaries, itp->property_type_id());
@@ -320,7 +320,7 @@ grpc::Status RcrImpl::getCard(
         }
         // packages
         odb::result<rcr::Package> qb = mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->id());
-        for (odb::result<rcr::Package>::iterator itb(qb.begin()); itb != qb.begin(); itb++) {
+        for (odb::result<rcr::Package>::iterator itb(qb.begin()); itb != qb.end(); itb++) {
             rcr::Package *p = response->mutable_packages()->Add();
             *p = *itb;
         }
