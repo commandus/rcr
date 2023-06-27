@@ -984,7 +984,8 @@ void RcrImpl::updateCardPackages(
     const rcr::ChCardRequest *request
 ) {
     odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
-    std::vector <uint64_t> updatedPackageIds(8);
+    std::vector <uint64_t> updatedPackageIds;
+    updatedPackageIds.reserve(8);
     for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
         auto qit = std::find_if(request->packages().begin(), request->packages().end(),
                                 [it] (auto v) {
@@ -994,14 +995,19 @@ void RcrImpl::updateCardPackages(
             // delete from database, because it removed
             mDb->erase(*it);
         } else {
-            updatedPackageIds.push_back(qit->card_id());
-            // update if it changed
-            if (!(it->card_id() == qit->card_id()
-                  && it->box() == qit->box()
-                  && it->qty() == qit->qty()
-                  && it->box_name() == qit->box_name())) {
-                // update
-                mDb->update(*qit);
+            updatedPackageIds.push_back(qit->id());
+            // remove if qty = 0
+            if (qit->qty() == 0) {
+                mDb->erase(*qit);
+            } else {
+                // update if it changed
+                if (!(it->card_id() == qit->card_id()
+                      && it->box() == qit->box()
+                      && it->qty() == qit->qty()
+                      && it->box_name() == qit->box_name())) {
+                    // update
+                    mDb->update(*qit);
+                }
             }
         }
     }
@@ -1012,12 +1018,15 @@ void RcrImpl::updateCardPackages(
                                           return it->id() == v;
                                       });
         if (alreadyIt == updatedPackageIds.end()) {
-            // not updatedPackageIds yet, insert a new one
+            // not updatedPackageIds yet, insert a new one if qty is not zero
             rcr::Package p = *it;
-            uint64_t pid = mDb->persist(p);
+            if (p.qty() != 0) {
+                uint64_t pid = mDb->persist(p);
+            }
         }
     }
 
+    /*
     for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
         rcr::Package p = *pack;
         p.set_card_id(request->value().id());
@@ -1026,6 +1035,7 @@ void RcrImpl::updateCardPackages(
         else
             mDb->persist(p);
     }
+     */
 }
 
 void RcrImpl::updateCardPackage(
