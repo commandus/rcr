@@ -355,6 +355,7 @@ grpc::Status RcrImpl::chCard(
                 rcr::Card v = request->value();
                 if (v.id())
                     v.clear_id();
+                v.set_uname(toUpperCase(v.name()));
                 uint64_t card_id = mDb->persist(v);
                 for (auto pr = request->properties().begin(); pr != request->properties().end(); pr++) {
                     rcr::Property prv = *pr;
@@ -385,8 +386,8 @@ grpc::Status RcrImpl::chCard(
                 if (!id) {
                     return grpc::Status(StatusCode::INVALID_ARGUMENT, "");
                 }
+                v.set_uname(toUpperCase(v.name()));
                 mDb->update(v);
-
                 // update property if changed
                 odb::result<rcr::Property> q(mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->value().id()));
                 std::vector <uint64_t> updatedPropertyIds;
