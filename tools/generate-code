@@ -20,6 +20,9 @@ fi
 
 DT=`date --rfc-2822`
 SRC=.
+
+mkdir -p $SRC/gen
+
 PROTO=rcr.proto
 H="$SRC/gen/rcr.pb.h"
 HVIEWS="$SRC/odb/odb-views.h"

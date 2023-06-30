@@ -77,6 +77,13 @@ public:
     bool numberInFileName;
 };
 
+size_t findFiles(
+    std::vector<std::string> &retVal,
+    const std::string &path
+) {
+    return util::filesInPath(path, ".xlsx", 0, &retVal);
+}
+
 void printSpreadSheets(
     const std::string &path,
     const std::string &boxName,
@@ -84,7 +91,7 @@ void printSpreadSheets(
     bool numberInFilename
 ) {
     std::vector<std::string> spreadSheets;
-    util::filesInPath(path, ".xlsx", 0, &spreadSheets);
+    findFiles(spreadSheets, path);
     std::cout << spreadSheets.size() << _(" *.xlsx files found in '") << path << "'" << std::endl;
     for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
         uint64_t box;
@@ -123,7 +130,7 @@ void importSpreadSheets(
     bool numberInFilename
 ) {
     std::vector<std::string> spreadSheets;
-    util::filesInPath(path, ".xlsx", 0, &spreadSheets);
+    findFiles(spreadSheets, path);
     for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
         uint64_t box;
         if (numberInFilename)
@@ -139,6 +146,7 @@ void importSpreadSheets(
         }
     }
 }
+
 /**
  * Parse command line into struct ClientConfig
  * Return 0- success
@@ -515,7 +523,6 @@ int main(int argc, char** argv)
                     rpc.chBox(boxCmd, srcBox, destBox, name, config.username, config.password);
                     continue;
                 }
-
                 if (cliCmd == "IMPORT") {
                     std::string path = nextWord(line, start);
                     std::string importSymbol = nextWord(line, start);
@@ -532,14 +539,12 @@ int main(int argc, char** argv)
                                 break;
                         }
                     }
-
                     if (importSymbol.empty() || boxName.empty())
                         printSpreadSheets(path, boxName, 1, numberInFilename);
                     else
                         importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename);
                     continue;
                 }
-
                 int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);
                 std::cout << std::endl;
                 if (r)
@@ -547,6 +552,5 @@ int main(int argc, char** argv)
             }
         }
     }
-
     return 0;
 }

@@ -230,14 +230,11 @@ size_t util::filesInPath
 )
 {
 	char *pathlist[2];
-	pathlist[1] = NULL;
-	if (flags & 1)
-	{
+	pathlist[1] = nullptr;
+	if (flags & 1) {
 		char realtapth[PATH_MAX+1];
 		pathlist[0] = realpath((char *) path.c_str(), realtapth);
-	}
-	else
-	{
+	} else {
 		pathlist[0] = (char *) path.c_str();
 	}
     if (!pathlist[0])
@@ -245,32 +242,40 @@ size_t util::filesInPath
 
 	int parent_len = strlen(pathlist[0]) + 1;	///< Arggh. Remove '/' path delimiter(I mean it 'always' present). Not sure is it works fine. It's bad, I know.
 
-	FTS* file_system = fts_open(pathlist, FTS_LOGICAL | FTS_NOSTAT, NULL);
+	FTS* file_system = fts_open(pathlist, FTS_LOGICAL | FTS_NOSTAT, nullptr);
 
     if (!file_system)
     	return 0;
     size_t count = 0;
+    if (file_system->fts_cur->fts_link->fts_info == FTS_F) {
+        std::string s(file_system->fts_cur->fts_link->fts_name);
+        if (s.find(suffix) != std::string::npos)
+            count++;
+            if (retval) {
+                if (flags & 2) {
+                    // extract parent path
+                    std::string p(&file_system->fts_cur->fts_link->fts_path[parent_len]);
+                    retval->push_back(p + s);
+                }
+                else
+                    retval->push_back(std::string(file_system->fts_cur->fts_link->fts_path) + s);
+            }
+    }
     FTSENT* parent;
 	while((parent = fts_read(file_system)))
 	{
 		FTSENT* child = fts_children(file_system, 0);
-		if (errno != 0)
-		{
+		if (errno != 0) {
 			// ignore, perhaps permission error
 		}
-		while (child)
-		{
+		while (child) {
 			switch (child->fts_info) {
-				case FTS_F:
-					{
+				case FTS_F: {
 						std::string s(child->fts_name);
-						if (s.find(suffix) != std::string::npos)
-						{
+						if (s.find(suffix) != std::string::npos) {
 							count++;
-							if (retval)
-							{
-								if (flags & 2)
-								{
+							if (retval) {
+								if (flags & 2) {
 									// extract parent path
 									std::string p(&child->fts_path[parent_len]);
 									retval->push_back(p + s);
