@@ -614,7 +614,7 @@ cd vcpkg
 
 ```
 sudo apt install grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev \
-libc-ares-dev odb libodb-sqlite-2.4 libicu-dev libmicrohttpd-dev
+libc-ares-dev odb libodb-sqlite-2.4 libicu-dev libmicrohttpd-dev gettext sqlite3 libsqlite3-dev
 ```
 
 [Install ODB unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)
@@ -648,7 +648,7 @@ sudo apt install g++-10
 
 ```
 git clone https://github.com/tfussell/xlnt.git
-cd xmake lnt
+cd xlnt
 git submodule init
 git submodule update
 mkdir build
