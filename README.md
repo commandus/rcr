@@ -71,7 +71,7 @@
 - 2SD1825
 - К155ЛА7 К-dip
 - 
-В имени компонента для поиска мождно использовать подстановочные символы:
+В имени компонента для поиска можно использовать подстановочные символы:
 
 - * или % - последовательность любых символов
 - _ - один символ
@@ -776,7 +776,7 @@ Then call ./tools/generate-code.ps1
 ### Serialzation & protocol support classes
 
 Generate in the gen/ subdirectory protobuf serialization classes  (.pb.cc, .pb.h),
-gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) usinbg protoc compiler and 
+gRPC protocol classes (.grpc.pb.cc, .pb.cc, .pb.h.pb.h) using protoc compiler and 
 protoc's grpc c++ plugin.
 
 Object relation mapping (ORM)
@@ -971,6 +971,7 @@ tools/update-translation.sh
 Созданный файл скопируйте в /usr/share/locale/ru/LC_MESSAGES/: 
 
 ```
+
 msgfmt -o locale/ru/LC_MESSAGES/rcr-cli.mo po/rcr-cli.ru_RU.UTF-8.po
 sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/ru/LC_MESSAGES/rcr-cli.mo
 sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/ru/LC_MESSAGES/rcr-cli.mo

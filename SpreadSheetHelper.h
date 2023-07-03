@@ -5,20 +5,23 @@
 #ifndef RCR_SPREADSHEETHELPER_H
 #define RCR_SPREADSHEETHELPER_H
 
-
 #include <string>
 #include <vector>
 #include <map>
+#include <xlnt/worksheet/worksheet.hpp>
 
 #include "gen/rcr.pb.h"
 
 class SheetRow {
 public:
+    char symbol;                            // 0- default
     int id;                                 // column A
     std::string name;                       // B
+    uint64_t nominal;
     std::vector <std::string> properties;   // B after ','
     int qty;                                // C
     std::string property_dip;               // D
+    int property_v;                         // B
     std::string remarks;                    // E
 
     SheetRow() = default;
@@ -32,6 +35,18 @@ public:
 };
 
 class SpreadSheetHelper {
+private:
+    static char getSymbolFromSheetName(
+        const xlnt::worksheet &worksheet
+    );
+    static bool parseR(
+        SheetRow &retVal,
+        const std::string &value
+    );
+    static bool parseC(
+        SheetRow &retVal,
+        const std::string &value
+    );
 public:
     explicit SpreadSheetHelper(
         const std::string &fileName

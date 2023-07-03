@@ -140,10 +140,8 @@ void importSpreadSheets(
         SpreadSheetHelper spreadSheet(*it);
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
-        if (r) {
-            std::cerr << _("Error: ") << r << std::endl;
+        if (r)
             break;
-        }
     }
 }
 
@@ -418,8 +416,7 @@ int main(int argc, char** argv)
                 cs = config.componentSymbol;
             cs = toUpperCase(cs);
             // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-            importSpreadSheets(rpc, config.request, config.box, cs,
-                               config.numberInFileName);
+            importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName);
         }
     }
 

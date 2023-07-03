@@ -535,7 +535,7 @@ grpc::Status RcrImpl::cardQuery(
     response->set_code(r);
     response->set_description("");
     END_GRPC_METHOD("cardPush", response, response, t)
-    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "Save card error " + std::to_string(r));
 }
 
 int RcrImpl::loadDictionaries(
