@@ -28,6 +28,7 @@ public:
     uint64_t destinationBox;
 
     RCQuery() = default;
+    RCQuery(const RCQuery &value);
 
     RCQuery(
         MEASURE_LOCALE locale,
@@ -39,7 +40,6 @@ public:
         size_t count
     );
 
-    RCQuery(const RCQuery &value) = default;
     RCQuery(
         MEASURE_LOCALE aLocale,
         const std::string &value,
@@ -54,6 +54,8 @@ public:
     );
 
     std::string toString();
+
+    bool hasNominal() const;
 };
 
 #endif //RCR_RCQUERY_H

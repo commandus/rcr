@@ -35,6 +35,7 @@ public:
      * @param query
      * @param componentFlags
      * @param list offset, count of records
+     * @param extendNominal extend nominal range
      * @return
      */
     size_t loadCards(
@@ -44,7 +45,8 @@ public:
         rcr::CardResponse *retCards,
         const RCQuery *query,
         uint32_t componentFlags,
-        const rcr::List &list
+        const rcr::List &list,
+        bool extendNominal
     );
 
     int saveCard(

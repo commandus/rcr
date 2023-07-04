@@ -62,7 +62,23 @@ void RCQueryProcessor::exec(
     switch (query->code) {
         case SO_LIST_NO_BOX:
         case SO_LIST:
-            count = loadCards(db, t, dictionaries,cards, query, componentFlags, list);
+            count = loadCards(db, t, dictionaries, cards, query, componentFlags, list, false);
+            if (count == 0) {
+                if (query->hasNominal()) {
+                    count = loadCards(db, t, dictionaries, cards, query, componentFlags, list, true);
+                } else {
+                    // try wildcards name
+                    if ((query->componentName.find('*') == std::string::npos)
+                        &&
+                        (query->componentName.find('%') == std::string::npos)
+                        &&
+                        (query->componentName.find('_') == std::string::npos)) {
+                        RCQuery q2 = *query;
+                        q2.componentName = q2.componentName + "*";
+                        count = loadCards(db, t, dictionaries, cards, &q2, componentFlags, list, false);
+                    }
+                }
+            }
             break;
         case SO_SET:
         case SO_ADD:
@@ -75,19 +91,15 @@ void RCQueryProcessor::exec(
     }
 }
 
-static size_t countCards(
+static std::string mkCardQueryClause(
     odb::database *db,
-    uint64_t symbId,
     const rcr::DictionariesResponse *dictionaries,
+    uint64_t symbId,
     const RCQuery *query,
-    uint32_t componentFlags
+    bool extendNominal
 )
 {
-// Find the number of employees with the Doe last name. Result of this
-// aggregate query contains only one element so use the query_value()
-// shortcut function.
-//
-    odb::result<rcr::CardCount> r;
+    odb::result<rcr::CardQuery> r;
     std::stringstream ss;
     std::string cn = toUpperCase(query->componentName);
 
@@ -102,7 +114,7 @@ static size_t countCards(
             finishBox = std::numeric_limits<int64_t>::max();
 #endif
         ss << "id in (select p.card_id from Package p where p.box >= "
-            << startBox << " and p.box <= " << finishBox << ") and ";
+           << startBox << " and p.box <= " << finishBox << ") and ";
     }
     // check properties
     if (!query->properties.empty()) {
@@ -121,83 +133,51 @@ static size_t countCards(
         }
     }
 
+    std::string nominalClause;
+    std::stringstream ssNominal;
+    if (extendNominal) {
+        ssNominal << " and nominal >= " << query->nominal;
+    } else {
+        ssNominal << " and nominal = " << query->nominal;
+    }
+    nominalClause = ssNominal.str();
+
     if (cn.empty() || cn == "*") {  // just all
         if (symbId)
-            ss << "nominal = " << query->nominal << " and symbol_id = " << symbId;
+            ss << "symbol_id = " << symbId << nominalClause;
         else
+        if (extendNominal)
             ss << "nominal = " << query->nominal;
+        else
+            ss << "1=1";
     } else {
         if (cn.find("*") != std::string::npos) {    // LIKE 'K%'
             std::replace(cn.begin(), cn.end(), '*', '%');
             if (symbId)
-                ss << "uname LIKE '" << cn << "' and nominal = " << query->nominal << " and symbol_id = " << symbId;
+                ss << "uname LIKE '" << cn << "' and symbol_id = " << symbId << nominalClause;
             else
-                ss << "uname LIKE '" << cn << "' and nominal = " << query->nominal;
+                ss << "uname LIKE '" << cn << "'" << nominalClause;
         } else {
             if (symbId)
-                ss << "uname = '" << cn << "' and nominal = " << query->nominal << " and symbol_id = " << symbId;
+                ss << "uname = '" << cn << "' and symbol_id = " << symbId << nominalClause;
             else
-                ss << "uname = '" << cn << "' and nominal = " << query->nominal << symbId;
+                ss << "uname = '" << cn << "'" << nominalClause;
         }
     }
-    return db->query_value<rcr::CardCount>(ss.str()).count;
+    return ss.str();
 }
 
-static void mkCardQuery(
+static size_t countCards(
     odb::database *db,
     uint64_t symbId,
-    odb::result<rcr::Card> &retVal,
+    const rcr::DictionariesResponse *dictionaries,
     const RCQuery *query,
-    uint32_t componentFlags,
-    const rcr::List &list
+    bool extendNominal
 )
 {
-    std::string cn = toUpperCase(query->componentName);
-    if (cn.empty() || cn == "*") {  // just all
-        if (symbId)
-            retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                    odb::query<rcr::Card>::nominal == query->nominal
-                    &&
-                    odb::query<rcr::Card>::symbol_id == symbId
-            ));
-        else
-            retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                    odb::query<rcr::Card>::nominal == query->nominal
-            ));
-    } else {
-        if (cn.find("*") != std::string::npos) {    // LIKE 'K%'
-            std::replace(cn.begin(), cn.end(), '*', '%');
-            if (symbId)
-                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                    odb::query<rcr::Card>::uname.like(cn)
-                    &&
-                    odb::query<rcr::Card>::nominal == query->nominal
-                    &&
-                    odb::query<rcr::Card>::symbol_id == symbId
-                ));
-            else
-                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                    odb::query<rcr::Card>::uname.like(cn)
-                    &&
-                    odb::query<rcr::Card>::nominal == query->nominal
-                ));
-        } else {
-            if (symbId)
-                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                        odb::query<rcr::Card>::uname == cn
-                        &&
-                        odb::query<rcr::Card>::nominal == query->nominal
-                        &&
-                        odb::query<rcr::Card>::symbol_id == symbId
-                ));
-            else
-                retVal = odb::result<rcr::Card>(db->query<rcr::Card>(
-                        odb::query<rcr::Card>::uname == cn
-                        &&
-                        odb::query<rcr::Card>::nominal == query->nominal
-                ));
-        }
-    }
+    odb::result<rcr::CardCount> r;
+    std::string clause = mkCardQueryClause(db, dictionaries, symbId, query, extendNominal);
+    return db->query_value<rcr::CardCount>(clause).count;
 }
 
 size_t RCQueryProcessor::loadCards(
@@ -207,7 +187,8 @@ size_t RCQueryProcessor::loadCards(
     rcr::CardResponse *retCards,
     const RCQuery *query,
     uint32_t componentFlags,
-    const rcr::List &list
+    const rcr::List &list,
+    bool extendNominal
 ) {
     size_t cnt = 0;
     size_t sz = 0;
@@ -218,15 +199,16 @@ size_t RCQueryProcessor::loadCards(
             symbId = 0;
         else
             symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
-        r = countCards(db, symbId, dictionaries, query, componentFlags);
-        odb::result<rcr::Card> q;
-        // list is ignored
-        mkCardQuery(db, symbId, q, query, componentFlags, list);
-        for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
-            if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
+        r = countCards(db, symbId, dictionaries, query, extendNominal);
+        std::stringstream ssClause;
+        ssClause << mkCardQueryClause(db, dictionaries, symbId, query, extendNominal);
+        std::string clause = ssClause.str();
+        odb::result<rcr::CardQuery> q = odb::result<rcr::CardQuery>(db->query<rcr::CardQuery>(clause));
+        for (odb::result<rcr::CardQuery>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
+            if (!hasAllProperties(db, t, query->properties, itCard->id, dictionaries))
                 continue;
             google::protobuf::RepeatedPtrField<rcr::Package> pkgs;
-            if (!loadPackages(db, t, query->boxes, itCard->id(), &pkgs))
+            if (!loadPackages(db, t, query->boxes, itCard->id, &pkgs))
                 continue;
             // emulate LIMIT OFFSET clause
             cnt++;
@@ -235,16 +217,19 @@ size_t RCQueryProcessor::loadCards(
             sz++;
             if (sz > list.size())
                 break;
-            //
             rcr::CardNPropetiesPackages *c = retCards->mutable_cards()->Add();
-            c->mutable_card()->CopyFrom(*itCard);
+            c->mutable_card()->set_id(itCard->id);
+            c->mutable_card()->set_name(itCard->name);
+            c->mutable_card()->set_uname(toUpperCase(itCard->name));
+            c->mutable_card()->set_nominal(itCard->nominal);
+            c->mutable_card()->set_symbol_id(itCard->symbol_id);
             c->mutable_packages()->CopyFrom(pkgs);
-            loadPropertiesWithName(db, t, itCard->id(), c->mutable_properties(), dictionaries);
+            loadPropertiesWithName(db, t, itCard->id, c->mutable_properties(), dictionaries);
         }
     } catch (const odb::exception &e) {
-        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+        LOG(ERROR) << "loadCards error: " << e.what();
     } catch (...) {
-        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
+        LOG(ERROR) << "loadCards unknown error";
     }
     return r;
 }
@@ -689,6 +674,8 @@ bool RCQueryProcessor::loadPackages(
                 odb::query<rcr::Package>::card_id == cardId
         ));
         for (odb::result<rcr::Package>::iterator it(q.begin()); it != q.end(); it++) {
+            std::cerr << "=== requested box " << StockOperation::boxes2string(boxId)
+                << " is box " << StockOperation::boxes2string(it->box()) << " is in?" << std::endl;
             if (!StockOperation::isBoxInBoxes(it->box(), boxId))
                 continue;
             auto p = retPackages->Add();
@@ -762,46 +749,46 @@ size_t RCQueryProcessor::setCards(
 ) {
     size_t cnt = 0;
     try {
-        odb::result<rcr::Card> q;
         uint64_t symbId;
         if (componentFlags == FLAG_ALL_COMPONENTS)
             symbId = 0;
         else
             symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
 
-        mkCardQuery(db, symbId, q, query, componentFlags, rcr::List());
-        odb::result<rcr::Card>::iterator itCard(q.begin());
+        std::string clause = mkCardQueryClause(db, dictionaries, symbId, query, false);
+        odb::result<rcr::CardQuery> q = odb::result<rcr::CardQuery>(db->query<rcr::CardQuery>(clause));
+        odb::result<rcr::CardQuery>::iterator itCard(q.begin());
         for (; itCard != q.end(); itCard++) {
-            if (!hasAllProperties(db, t, query->properties, itCard->id(), dictionaries))
+            if (!hasAllProperties(db, t, query->properties, itCard->id, dictionaries))
                 continue;
             //
             uint64_t packageId;
             // get packageId, if not, ret 0
-            uint64_t q = getQuantity(db, t, packageId, itCard->id(), query->boxes);
+            uint64_t q = getQuantity(db, t, packageId, itCard->id, query->boxes);
             if (sum)
                 *sum += q;
 
             switch(query->code) {
                 case SO_SET:
-                    setQuantity(db, t, packageId, itCard->id(), query->boxes, query->count);
+                    setQuantity(db, t, packageId, itCard->id, query->boxes, query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
                     break;
                 case SO_ADD:
-                    setQuantity(db, t, packageId, itCard->id(), query->boxes, q + query->count);
+                    setQuantity(db, t, packageId, itCard->id, query->boxes, q + query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
                     break;
                 case SO_SUB:
-                    setQuantity(db, t, packageId, itCard->id(), query->boxes,
+                    setQuantity(db, t, packageId, itCard->id, query->boxes,
                     q > query->count ? q - query->count : 0);
                     updateBoxOnRemove(db, t, query->boxes);
                     break;
                 case SO_MOV: {
                     // remove from the source box
-                    setQuantity(db, t, packageId, itCard->id(), query->boxes,
+                    setQuantity(db, t, packageId, itCard->id, query->boxes,
                         q > query->count ? q - query->count : 0);
                     updateBoxOnRemove(db, t, query->boxes);
                     // put to destination box
-                    uint64_t destCardId = itCard->id(); // same card
+                    uint64_t destCardId = itCard->id; // same card
                     // get destination packageId, if not, ret 0
                     uint64_t qDest = getQuantity(db, t, packageId, destCardId, query->destinationBox);
                     setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);

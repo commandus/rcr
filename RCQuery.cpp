@@ -15,6 +15,25 @@ RCQuery::RCQuery(
     parse(aLocale, aValue, p, defaultMeasure);
 }
 
+RCQuery::RCQuery(
+    const RCQuery &value
+) {
+    locale = value.locale;
+    measure = value.measure;
+    nominal = value.nominal;
+    componentName = value.componentName;
+
+    // properties
+    properties = value.properties;
+
+    // operation
+    code = value.code;
+    int boxBlocks;
+    boxes = value.boxes;
+    count = value.count;
+    destinationBox = value.destinationBox;
+}
+
 int RCQuery::parse(
     MEASURE_LOCALE aLocale,
     const std::string &value,
@@ -89,4 +108,8 @@ std::string RCQuery::toString()
             break;
     }
     return ss.str();
+}
+
+bool RCQuery::hasNominal() const {
+    return MeasureUnit::hasNominal(measure);
 }

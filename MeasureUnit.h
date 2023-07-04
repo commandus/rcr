@@ -89,6 +89,8 @@ public:
         std::string &retname,
         COMPONENT param
     );
+
+    static bool hasNominal(COMPONENT value);
 };
 
 // Helper functions
