@@ -68,15 +68,15 @@ void RCQueryProcessor::exec(
                     count = loadCards(db, t, dictionaries, cards, query, componentFlags, list, true);
                 } else {
                     // try wildcards name
+                    RCQuery q2 = *query;
                     if ((query->componentName.find('*') == std::string::npos)
                         &&
                         (query->componentName.find('%') == std::string::npos)
                         &&
                         (query->componentName.find('_') == std::string::npos)) {
-                        RCQuery q2 = *query;
                         q2.componentName = q2.componentName + "*";
-                        count = loadCards(db, t, dictionaries, cards, &q2, componentFlags, list, false);
                     }
+                    count = loadCards(db, t, dictionaries, cards, &q2, componentFlags, list, true);
                 }
             }
             break;
