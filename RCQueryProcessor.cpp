@@ -135,10 +135,11 @@ static std::string mkCardQueryClause(
 
     std::string nominalClause;
     std::stringstream ssNominal;
+    ssNominal << " and ";
     if (extendNominal) {
-        ssNominal << " and nominal >= " << query->nominal;
+        ssNominal << "nominal >= " << query->nominal;
     } else {
-        ssNominal << " and nominal = " << query->nominal;
+        ssNominal << "nominal = " << query->nominal;
     }
     nominalClause = ssNominal.str();
 
@@ -147,9 +148,9 @@ static std::string mkCardQueryClause(
             ss << "symbol_id = " << symbId << nominalClause;
         else
         if (extendNominal)
-            ss << "nominal = " << query->nominal;
+            ss << "nominal >= " << query->nominal;
         else
-            ss << "1=1";
+            ss << "nominal = " << query->nominal;
     } else {
         if (cn.find("*") != std::string::npos) {    // LIKE 'K%'
             std::replace(cn.begin(), cn.end(), '*', '%');
@@ -164,6 +165,10 @@ static std::string mkCardQueryClause(
                 ss << "uname = '" << cn << "'" << nominalClause;
         }
     }
+#if CMAKE_BUILD_TYPE == Debug
+    std::cerr << "Card query: " << ss.str() << std::endl;
+#endif
+
     return ss.str();
 }
 
@@ -674,8 +679,6 @@ bool RCQueryProcessor::loadPackages(
                 odb::query<rcr::Package>::card_id == cardId
         ));
         for (odb::result<rcr::Package>::iterator it(q.begin()); it != q.end(); it++) {
-            std::cerr << "=== requested box " << StockOperation::boxes2string(boxId)
-                << " is box " << StockOperation::boxes2string(it->box()) << " is in?" << std::endl;
             if (!StockOperation::isBoxInBoxes(it->box(), boxId))
                 continue;
             auto p = retPackages->Add();
