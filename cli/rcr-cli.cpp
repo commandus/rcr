@@ -7,6 +7,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <iomanip>
 
 #include "argtable3/argtable3.h"
@@ -25,6 +26,7 @@
 #include "utilfile.h"
 #include "string-helper.h"
 #include "utilstring.h"
+#include "config-filename.h"
 
 const char* progname = "rcr-cli";
 const char* DEF_COMMAND = "stream-query";
@@ -75,6 +77,24 @@ public:
     std::string box;
     std::string componentSymbol;
     bool numberInFileName;
+
+    bool load(const char *programPath) {
+        username = "SYSDBA";
+        password = "masterkey";
+        std::string fn = getDefaultConfigFileName(programPath, "rcr.config");
+        if (!fn.empty()) {
+            std::ifstream f(fn.c_str());
+            std::string line;
+            if (std::getline(f, line)) {
+                std::istringstream iss(line);
+                if (!(iss >> username >> password)) {
+                    // error
+                }
+            }
+            f.close();
+        }
+        return true;
+    }
 };
 
 size_t findFiles(
@@ -241,12 +261,8 @@ int parseCmd
 
     if (a_user_name->count)
         value->username = *a_user_name->sval;
-    else
-        value->username = "";
     if (a_user_password->count)
         value->password = *a_user_password->sval;
-    else
-        value->password = "";
 
     if (a_offset->count)
         value->offset = *a_offset->ival;
@@ -327,6 +343,7 @@ int main(int argc, char** argv)
     textdomain(progname);
 
 	ClientConfig config;
+    config.load(argv[0]);
 	int r;
 	if (r = parseCmd(argc, argv, &config))
 		exit(r);

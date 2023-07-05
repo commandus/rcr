@@ -40,6 +40,7 @@ RCQueryProcessor::RCQueryProcessor(
 void RCQueryProcessor::exec(
     odb::database *db,
     odb::transaction *t,
+    int rights,
     const rcr::DictionariesResponse *dictionaries,
     const rcr::List &list,
     rcr::OperationResponse *operationResponse,
@@ -84,6 +85,11 @@ void RCQueryProcessor::exec(
         case SO_ADD:
         case SO_SUB:
         case SO_MOV:
+            if (rights > 0)
+                count = setCards(db, t, dictionaries, query, componentFlags, &sum);
+            else
+                count = 0;
+            break;
         case SO_COUNT:
         case SO_SUM:
             count = setCards(db, t, dictionaries, query, componentFlags, &sum);

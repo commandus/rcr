@@ -17,6 +17,7 @@ public:
     void exec(
         odb::database *db,
         odb::transaction *t,
+        int rights,
         const rcr::DictionariesResponse *dictionaries,
         const rcr::List &list,
         rcr::OperationResponse *operationResponse,

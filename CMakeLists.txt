@@ -214,6 +214,7 @@ target_include_directories(rcr-svc PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_
 #
 set(RCR_CLI_SRC
 	cli/grpcClient.cpp cli/rcr-cli.cpp
+	third-party/config-filename.cpp
 	${GEN_GRPC_SRC} ${ARGTABLE}
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})

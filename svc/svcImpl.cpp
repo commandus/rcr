@@ -39,6 +39,7 @@ using odb::query;
 
 const int DEF_LIST_SIZE = 1000;
 const std::string ERR_SVC_INVALID_ARGS = _("Invalid arguments");
+const std::string ERR_SVC_PERMISSION_DENIED = _("Permission denied");
 
 // default list size
 #define DEF_LABEL_LIST_SIZE		100
@@ -116,11 +117,10 @@ std::string logString (
     return ss.str();
 }
 
-#define CHECK_PERMISSION(permission) \
-	UserIds uids; \
-	int flags = getAuthUser(context, &uids); \
-	if ((flags == 0) && (permission != 0)) \
-		return Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
+#define CHECK_PERMISSION(db, user, lvl) \
+	int rights = checkUserRights(db, user); \
+	if (rights < lvl) \
+		return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
 
 #define BEGIN_GRPC_METHOD(signature, requestMessage, transact) \
 		odb::transaction transact; \
@@ -225,61 +225,62 @@ struct ServiceConfig *RcrImpl::getConfig()
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     BEGIN_GRPC_METHOD("chPropertyType", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
     char op;
     if (request->operationsymbol().empty())
-        op = 'l';
+        op = 'l';   // '=' ?!!
     else
         op = request->operationsymbol()[0];
 
-        try {
-            odb::result<rcr::PropertyType> qs;
-            if (request->value().id())
-                qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::id == request->value().id());
-            else
-                qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::key == request->value().key());
+    try {
+        odb::result<rcr::PropertyType> qs;
+        if (request->value().id())
+            qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::id == request->value().id());
+        else
+            qs = mDb->query<rcr::PropertyType>(odb::query<rcr::PropertyType>::key == request->value().key());
 
-            odb::result<rcr::PropertyType>::iterator it(qs.begin());
-            switch (op) {
-                case '=':
-                    if (it == qs.end()) {
-                        rcr::PropertyType pt = request->value();
-                        response->set_id(mDb->persist(pt));
-                    } else {
-                        it->set_key(request->value().key());
-                        it->set_description(request->value().description());
-                        mDb->update(*it);
-                    }
+        odb::result<rcr::PropertyType>::iterator it(qs.begin());
+        switch (op) {
+            case '=':
+                if (it == qs.end()) {
+                    rcr::PropertyType pt = request->value();
+                    response->set_id(mDb->persist(pt));
+                } else {
+                    it->set_key(request->value().key());
+                    it->set_description(request->value().description());
+                    mDb->update(*it);
+                }
+                response->set_code(0);
+                break;
+            case '+':
+                if (it != qs.end()) {
+                    response->set_code(-3);
+                    response->set_description(_("Property already exists"));
+                } else {
+                    rcr::PropertyType pt = request->value();
+                    response->set_id(mDb->persist(pt));
                     response->set_code(0);
-                    break;
-                case '+':
-                    if (it != qs.end()) {
-                        response->set_code(-3);
-                        response->set_description(_("Property already exists"));
-                    } else {
-                        rcr::PropertyType pt = request->value();
-                        response->set_id(mDb->persist(pt));
-                        response->set_code(0);
-                    }
-                    break;
-                case '-':
-                    if (it == qs.end()) {
-                        response->set_code(-3);
-                        response->set_description(_("Property does not exists"));
-                    } else {
-                        removePropertyFromCards(mDb, t, it->id());
-                        mDb->erase(*it);
-                        response->set_code(0);
-                    }
-                    break;
-                default:
-                    response->set_code(-2);
-                    response->set_description(_("Invalid operation"));
-            }
-        } catch (const odb::exception &e) {
-            LOG(ERROR) << _("change property error: ") << e.what();
-        } catch (...) {
-            LOG(ERROR) << _("change property unknown error");
+                }
+                break;
+            case '-':
+                if (it == qs.end()) {
+                    response->set_code(-3);
+                    response->set_description(_("Property does not exists"));
+                } else {
+                    removePropertyFromCards(mDb, t, it->id());
+                    mDb->erase(*it);
+                    response->set_code(0);
+                }
+                break;
+            default:
+                response->set_code(-2);
+                response->set_description(_("Invalid operation"));
         }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("change property error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("change property unknown error");
+    }
 
     END_GRPC_METHOD("chPropertyType", request, response, t)
     return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
@@ -345,6 +346,7 @@ grpc::Status RcrImpl::chCard(
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r = 0;
     BEGIN_GRPC_METHOD("chCard", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
     char op = 'L';
     if (!request->operationsymbol().empty()) {
         op = request->operationsymbol()[0];
@@ -458,6 +460,7 @@ grpc::Status RcrImpl::cardQuery(
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r = 0;
     BEGIN_GRPC_METHOD("cardQuery", request, t)
+    int rights = checkUserRights(mDb, request->user());
     rcr::DictionariesResponse dictionaries;
     r = loadDictionaries(&dictionaries, ML_INTL);
     if (!r) {
@@ -473,13 +476,13 @@ grpc::Status RcrImpl::cardQuery(
         int r = q.parse(ML_RU, request->query(), position, firstComponentInFlags(componentFlags));
         if (!r) {
 #if CMAKE_BUILD_TYPE == Debug
-    LOG(INFO) << "card query: " << q.toString() << std::endl;
+            // LOG(INFO) << "card query: " << q.toString() << std::endl;
 #endif
             RCQueryProcessor p(q);
             rcr::CardQueryResponse qr;
             uint64_t cnt = 0;
             uint64_t sum = 0;
-            p.exec(mDb, &t, &dictionaries, request->list(),
+            p.exec(mDb, &t, rights, &dictionaries, request->list(),
                    response->mutable_rslt(), response->mutable_cards(),
                    componentFlags,
                    cnt, sum);
@@ -510,10 +513,10 @@ grpc::Status RcrImpl::cardQuery(
     return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
 }
 
-::grpc::Status RcrImpl::cardPush(
-    ::grpc::ServerContext* context,
-    ::grpc::ServerReader<::rcr::CardRequest>* reader,
-    ::rcr::OperationResponse* response
+grpc::Status RcrImpl::cardPush(
+    grpc::ServerContext* context,
+    grpc::ServerReader<::rcr::CardRequest>* reader,
+    rcr::OperationResponse* response
 )
 {
     if (reader == nullptr)
@@ -526,6 +529,9 @@ grpc::Status RcrImpl::cardQuery(
     r = loadDictionaries(&dictionaries, ML_INTL);
     rcr::CardRequest cardRequest;
     while (reader->Read(&cardRequest)) {
+        int rights = checkUserRights(mDb, cardRequest.user());
+	    if (rights < 0)
+            break;
         RCQueryProcessor p;
         r = p.saveCard(mDb, &t, cardRequest, &dictionaries);
         if (r)
@@ -652,6 +658,7 @@ grpc::Status RcrImpl::importExcel(
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r = 0;
     BEGIN_GRPC_METHOD("importExcel", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
     rcr::DictionariesResponse dictionaries;
     loadDictionaries(&dictionaries, ML_INTL);
 
@@ -698,7 +705,6 @@ size_t RcrImpl::importExcelFile(
 }
 
 int RcrImpl::checkUserRights(
-    odb::transaction &t,
     odb::database *db,
     const rcr::User &user
 ) {
@@ -737,7 +743,7 @@ bool RcrImpl::checkCredentialsNSetToken(
             return false;
         *retVal = *it;
         retVal->set_token(generateNewToken());
-        db->persist(*retVal);   // save token
+        db->update(*retVal);   // save token
         return true;
     } catch (const odb::exception &e) {
         LOG(ERROR) << _("Check credentials & set token error: ") << e.what();
@@ -760,7 +766,7 @@ grpc::Status RcrImpl::lsUser(
     BEGIN_GRPC_METHOD("lsUser", request, t)
     // std::cerr << pb2JsonString(params->user()) << std::endl;
     rcr::User u;
-    int rights = checkUserRights(t, mDb, request->user());
+    int rights = checkUserRights(mDb, request->user());
     try {
         odb::result<rcr::User> qs(mDb->query<rcr::User>(
             odb::query<rcr::User>::id != 0
@@ -813,6 +819,7 @@ grpc::Status RcrImpl::chBox(
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     BEGIN_GRPC_METHOD("chBox", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
         char op;
         if (request->operationsymbol().empty())
             op = 'l';

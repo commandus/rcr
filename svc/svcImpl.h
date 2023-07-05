@@ -51,13 +51,11 @@ private:
     );
     /**
      *
-     * @param t
      * @param db
      * @param user
      * @return -1 if user not found or password is incorrect
      */
     int checkUserRights(
-        odb::transaction &t,
         odb::database *db,
         const rcr::User &user
     );
@@ -157,11 +155,7 @@ public:
     grpc::Status cardPush(::grpc::ServerContext* context, grpc::ServerReader< rcr::CardRequest>* reader, rcr::OperationResponse* response) override;
     grpc::Status getDictionaries(::grpc::ServerContext* context, const rcr::DictionariesRequest* request, rcr::DictionariesResponse* response) override;
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, rcr::BoxResponse* response) override;
-    grpc::Status importExcel(
-            grpc::ServerContext* context,
-            const rcr::ImportExcelRequest* request,
-            rcr::OperationResponse* response
-    );
+    grpc::Status importExcel(grpc::ServerContext* context, const rcr::ImportExcelRequest* request, rcr::OperationResponse* response);
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
 };
