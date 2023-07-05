@@ -139,6 +139,7 @@ void importSpreadSheets(
             box = BoxName::extractFromFileName(boxName);
         SpreadSheetHelper spreadSheet(*it);
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+        std::cerr << *it << std::endl;
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
         if (r)
             break;

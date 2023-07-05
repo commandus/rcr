@@ -211,14 +211,12 @@ msgid "change property unknown error"
 msgstr "неизвестная ошибка изменения свойства"
 
 #: svc/svcImpl.cpp:328
-#, fuzzy
 msgid "get card error: "
-msgstr "ошибка изменения карточки: "
+msgstr "ошибка получения карточки: "
 
 #: svc/svcImpl.cpp:330
-#, fuzzy
 msgid "get card unknown error"
-msgstr "неизвестная ошибка изменения карточки"
+msgstr "неизвестная ошибка получения карточки"
 
 #: svc/svcImpl.cpp:441
 msgid "chCard error: "

@@ -975,7 +975,7 @@ tools/update-translation.sh
 msgfmt -o locale/ru/LC_MESSAGES/rcr-cli.mo po/rcr-cli.ru_RU.UTF-8.po
 sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/share/locale/ru/LC_MESSAGES/rcr-cli.mo
 sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/ru/LC_MESSAGES/rcr-cli.mo
+sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 ```
 
 Скрипт tools/l10n создает начальный файл. Файл уже существует в проекте, скрипт вызывать не надо.
-
