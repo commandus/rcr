@@ -45,7 +45,8 @@ public:
     int saveSpreadsheet(
         uint64_t box,
         const std::string componentSymbol,  ///< "U"- IC
-        const std::vector<SheetRow> &rows
+        const std::vector<SheetRow> &rows,
+        const rcr::User *user
     );
 
     std::string getDictionariesJson();
@@ -56,26 +57,37 @@ public:
         size_t size
     );
 
-    void printBox(std::ostream &strm, uint64_t boxId, size_t offset, size_t size);
+    void printBox(
+        std::ostream &strm,
+        uint64_t boxId,
+        size_t offset,
+        size_t size
+    );
 
-    void printUser(std::ostream &strm, rcr::User *user);
+    void printUser(
+        std::ostream &strm,
+        const rcr::User *user
+    );
 
-    void printSymbols(std::ostream &strm, MEASURE_LOCALE locale);
+    void printSymbols(
+        std::ostream &strm,
+        MEASURE_LOCALE locale
+    );
 
-    void printProperty(std::ostream &strm);
+    void printProperty(
+        std::ostream &strm
+    );
 
     void printBoxes(
         std::ostream &ostream,
         size_t offset,
         size_t size,
-        const std::string &user,
-        const std::string &password
+        const rcr::User *user
     );
 
     void changeProperty(
         const std::string &clause,
-        std::string &user,
-        std::string &password
+        const rcr::User *user
     );
 
     void chBox(
@@ -83,8 +95,7 @@ public:
         uint64_t sourceBox,
         uint64_t destBox,
         const std::string &name,
-        const std::string &user,
-        const std::string &passwd
+        const rcr::User *user
     );
 };
 

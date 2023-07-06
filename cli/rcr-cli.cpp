@@ -147,7 +147,8 @@ void importSpreadSheets(
     const std::string &path,
     const std::string &symbol,
     const std::string &boxName,
-    bool numberInFilename
+    bool numberInFilename,
+    const rcr::User *user
 ) {
     std::vector<std::string> spreadSheets;
     findFiles(spreadSheets, path);
@@ -160,7 +161,7 @@ void importSpreadSheets(
         SpreadSheetHelper spreadSheet(*it);
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
         std::cerr << *it << std::endl;
-        int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items);
+        int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items, user);
         if (r)
             break;
     }
@@ -416,7 +417,7 @@ int main(int argc, char** argv)
         std::cout << std::endl;
     }
     if (config.command == "boxes") {
-        rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
+        rpc.printBoxes(std::cout, config.offset, config.size, &u);
         std::cout << std::endl;
     }
     if (config.command == "dictionaries") {
@@ -434,7 +435,7 @@ int main(int argc, char** argv)
                 cs = config.componentSymbol;
             cs = toUpperCase(cs);
             // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-            importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName);
+            importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName, &u);
         }
     }
 
@@ -489,7 +490,7 @@ int main(int argc, char** argv)
                         case '+':
                         case '-':
                         case '=':
-                            rpc.changeProperty(line.substr(8), config.username, config.password);
+                            rpc.changeProperty(line.substr(8), &u);
                             break;
                         default:
                             rpc.printProperty(std::cout);
@@ -531,11 +532,11 @@ int main(int argc, char** argv)
                             name = remainText(line, start);
                             break;
                         default:    // box listing
-                            rpc.printBoxes(std::cout, config.offset, config.size, config.username, config.password);
+                            rpc.printBoxes(std::cout, config.offset, config.size, &u);
                             std::cout << std::endl;
                             continue;
                     }
-                    rpc.chBox(boxCmd, srcBox, destBox, name, config.username, config.password);
+                    rpc.chBox(boxCmd, srcBox, destBox, name, &u);
                     continue;
                 }
                 if (cliCmd == "IMPORT") {
@@ -557,7 +558,7 @@ int main(int argc, char** argv)
                     if (importSymbol.empty() || boxName.empty())
                         printSpreadSheets(path, boxName, 1, numberInFilename);
                     else
-                        importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename);
+                        importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename, &u);
                     continue;
                 }
                 int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);

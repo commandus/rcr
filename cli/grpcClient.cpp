@@ -170,13 +170,15 @@ int32_t RcrClient::cardQuery(
 int RcrClient::saveSpreadsheet(
     uint64_t box,
     const std::string componentSymbol,  ///< "D"- IC
-    const std::vector<SheetRow> &rows
+    const std::vector<SheetRow> &rows,
+    const rcr::User *user
 ) {
     rcr::OperationResponse response;
     grpc::ClientContext context2;
     std::unique_ptr<grpc::ClientWriter<rcr::CardRequest> > writer(stub->cardPush(&context2, &response));
     for (auto item = rows.begin(); item != rows.end(); item++) {
         rcr::CardRequest card;
+        *card.mutable_user() = *user;
         item->toCardRequest("+", componentSymbol, box, card);
         if (!writer->Write(card)) {
             // Broken stream
@@ -256,12 +258,13 @@ std::string RcrClient::getDictionariesJson() {
 
 void RcrClient::printUser(
     std::ostream &strm,
-    rcr::User *user
+    const rcr::User *user
 ) {
     grpc::ClientContext context;
     rcr::UserRequest request;
     request.mutable_user()->set_name(user->name());
     request.mutable_user()->set_password(user->password());
+    strm << _("Current user: ") << request.user().name() << std::endl;
     auto reader = stub->lsUser(&context, request);
     rcr::User u;
     while (reader->Read(&u)) {
@@ -293,7 +296,7 @@ void RcrClient::printSymbols(
 }
 
 void RcrClient::printProperty(
-        std::ostream &strm
+    std::ostream &strm
 ) {
     grpc::ClientContext context;
     rcr::DictionariesResponse response;
@@ -314,16 +317,14 @@ void RcrClient::printBoxes(
     std::ostream &strm,
     size_t offset,
     size_t size,
-    const std::string &user,
-    const std::string &password
+    const rcr::User *user
 ) {
     grpc::ClientContext context;
     rcr::BoxResponse response;
     rcr::BoxRequest request;
     request.mutable_list()->set_offset(offset);
     request.mutable_list()->set_size(size);
-    request.mutable_user()->set_name(user);
-    request.mutable_user()->set_name(password);
+    *request.mutable_user() = *user;
 
     grpc::Status status = stub->getBox(&context, request, &response);
     if (!status.ok()) {
@@ -341,8 +342,7 @@ void RcrClient::printBoxes(
 
 void RcrClient::changeProperty(
     const std::string &clause,
-    std::string &user,
-    std::string &password
+    const rcr::User *user
 ) {
     grpc::ClientContext context;
     rcr::OperationResponse response;
@@ -358,8 +358,7 @@ void RcrClient::changeProperty(
     request.mutable_value()->set_key(clauses[1]);
     if (clauses.size() >= 3)
         request.mutable_value()->set_description(clauses[2]);
-    request.mutable_user()->set_name(user);
-    request.mutable_user()->set_name(password);
+    *request.mutable_user() = *user;
 
     grpc::Status status = stub->chPropertyType(&context, request, &response);
     if (!status.ok()) {
@@ -377,8 +376,7 @@ void RcrClient::chBox(
     uint64_t sourceBox,
     uint64_t destBox,
     const std::string &name,
-    const std::string &user,
-    const std::string &password
+    const rcr::User *user
 ) {
     grpc::ClientContext context;
     rcr::OperationResponse response;
@@ -405,8 +403,7 @@ void RcrClient::chBox(
             break;
     }
 
-    request.mutable_user()->set_name(user);
-    request.mutable_user()->set_name(password);
+    *request.mutable_user() = *user;
 
     grpc::Status status = stub->chBox(&context, request, &response);
     if (!status.ok()) {
