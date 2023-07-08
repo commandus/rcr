@@ -14,7 +14,7 @@
 
 #ifdef _MSC_VER
 std::string getDefaultConfigFileName(
-    char *programPath,
+    const char *programPath,
     const std::string &filename
 )
 {

@@ -385,7 +385,7 @@ int MeasureUnit::parse(
     if (hasNominal) {
         try {
             nominal = std::stoull(value.substr(start, finish - start));
-        } catch (std::exception & e) {
+        } catch (std::exception &) {
 
         }
         start = finish;

@@ -6,7 +6,7 @@
 
 #include "SSLValidator.h"
 
-SSLValidator::SSLValidator(struct ServiceConfig *config)
+SSLValidator::SSLValidator(ServiceConfig *config)
 {
 	mConfig = config;
 }

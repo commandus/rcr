@@ -87,7 +87,7 @@ int SpreadSheetHelper::loadFile(
             if (row[0].has_value()) {
                 if (row[0].data_type() != xlnt::cell_type::number)
                     continue;
-                boxId = std::strtoull(row[0].to_string().c_str(), nullptr, 10);
+                boxId = std::strtol(row[0].to_string().c_str(), nullptr, 10);
                 sr.id = boxId;
             }
             // name and properties or nominal and voltage
@@ -110,7 +110,7 @@ int SpreadSheetHelper::loadFile(
             // qty
             if ((!row[2].has_value()) || (row[2].data_type() != xlnt::cell_type::number))
                 continue;
-            sr.qty = std::strtoull(row[2].to_string().c_str(), nullptr, 10);
+            sr.qty = std::strtol(row[2].to_string().c_str(), nullptr, 10);
             if (sr.qty <= 0)
                 continue;
             // property: case
@@ -150,7 +150,7 @@ int SpreadSheetHelper::loadString(
             if (row[0].has_value()) {
                 if (row[0].data_type() != xlnt::cell_type::number)
                     continue;
-                boxId = std::strtoull(row[0].to_string().c_str(), nullptr, 10);
+                boxId = std::strtol(row[0].to_string().c_str(), nullptr, 10);
                 sr.id = boxId;
             }
             // name and properties
@@ -173,7 +173,7 @@ int SpreadSheetHelper::loadString(
             // qty
             if ((!row[2].has_value()) || (row[2].data_type() != xlnt::cell_type::number))
                 continue;
-            sr.qty = std::strtoull(row[2].to_string().c_str(), nullptr, 10);
+            sr.qty = std::strtol(row[2].to_string().c_str(), nullptr, 10);
             if (sr.qty <= 0)
                 continue;
             // property: case
@@ -228,7 +228,7 @@ bool SpreadSheetHelper::parseC(
     } else {
         std::string volts = vc.substr(0, v);
         volts = trim(volts);
-        retVal.property_v = std::strtoull(volts.c_str(), nullptr, 10);
+        retVal.property_v = std::strtol(volts.c_str(), nullptr, 10);
     }
     if (v >= vc.size())
         return false;

@@ -108,7 +108,6 @@ static bool sqliteFillOutDatabase(
 {
     bool r;
     try {
-        MeasureUnit unit;
         for (COMPONENT v = COMPONENT_A; v <= COMPONENT_Z;) {
             rcr::Symbol symbol;
             symbol.set_sym(MeasureUnit::sym(v));

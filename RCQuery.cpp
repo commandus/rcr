@@ -28,7 +28,6 @@ RCQuery::RCQuery(
 
     // operation
     code = value.code;
-    int boxBlocks;
     boxes = value.boxes;
     count = value.count;
     destinationBox = value.destinationBox;

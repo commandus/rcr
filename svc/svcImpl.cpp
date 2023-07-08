@@ -51,7 +51,7 @@ typedef uint64_t NOTIFICATION_TYPE;
 static google::protobuf::util::JsonPrintOptions printJSONOptions;
 
 static odb::database *odbconnect(
-    struct ServiceConfig *config
+    ServiceConfig *config
 )
 {
 #ifdef ENABLE_PG
@@ -175,9 +175,9 @@ const grpc::Status& RcrImpl::STATUS_NOT_IMPLEMENTED = grpc::Status(StatusCode::U
 
 uint64_t VERSION_MAJOR = 0x010000;
 
-RcrImpl::RcrImpl(struct ServiceConfig *config)
+RcrImpl::RcrImpl(ServiceConfig *config)
 {
-    srand(time(nullptr));    //
+    srand((unsigned ) time(nullptr));    //
 	mConfig = config;
 	mDb = odbconnect(config);
 
@@ -191,7 +191,7 @@ RcrImpl::~RcrImpl()
     delete mDb;
 }
 
-struct ServiceConfig *RcrImpl::getConfig()
+ServiceConfig *RcrImpl::getConfig()
 {
 	return mConfig;
 }
@@ -374,11 +374,11 @@ grpc::Status RcrImpl::chCard(
                 }
                 break;
             case '-':
-                if (request->package_id())
+                if (request->package_id()) {
                     // remove only package not a card
                     if (removePackage(mDb, t, request))
                         removeCard(mDb, t, request);
-                else
+                } else
                     removeCard(mDb, t, request);
                 response->set_code(0);
                 break;
@@ -962,7 +962,6 @@ int RcrImpl::changePackageBox(
     uint64_t oldBox,
     uint64_t newBox
 ) {
-    int depth;
     int r = 0;
     try {
         odb::result<rcr::Package> qs(mDb->query<rcr::Package>(

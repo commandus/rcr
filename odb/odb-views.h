@@ -2,7 +2,7 @@
   *	ODB native views used in search queries
   */
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 #include <odb/core.hxx>
 #include "gen/rcr.pb.h"
 

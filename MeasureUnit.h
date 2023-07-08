@@ -46,7 +46,7 @@ typedef enum {
 } COMPONENT;
 
 #define FLAG_COMPONENT(X)   (1 << (int) X)
-#define FLAG_ALL_COMPONENTS (1 << (((int) COMPONENT_Z) + 1) - 1)
+#define FLAG_ALL_COMPONENTS ((1 << (((int) COMPONENT_Z) + 1)) - 1)
 
 /**
  * Flags is an component set

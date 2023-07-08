@@ -19,7 +19,7 @@
 class SSLValidator : public RcrValidator
 {
 private:
-	struct ServiceConfig *mConfig;			///< service configuration
+	ServiceConfig *mConfig;			///< service configuration
 protected:
 	/// check user credentials
 	bool checkCredentials(
@@ -30,7 +30,7 @@ protected:
 	);
 public:
 	SSLValidator(
-		struct ServiceConfig *config
+		ServiceConfig *config
 	);
 	virtual ~SSLValidator();
 	virtual bool onCheckPassword(

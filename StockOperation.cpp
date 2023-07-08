@@ -148,7 +148,7 @@ int StockOperation::parseString(
         }
     }
 
-    bool hasFirstPart = (finish > start);
+    // bool hasFirstPart = (finish > start);
 
     size_t startSecond = finish;
     size_t finishSecond = eolp;
@@ -237,7 +237,7 @@ int StockOperation::parseBoxes(
             uint64_t b = std::stoull(value.substr(s, f - s));
             retBoxes |= (b & 0xffff) << ((3 - block) * 16);
             blocks++;
-        } catch (std::exception &e) {
+        } catch (std::exception &) {
 
         }
         s = f;
@@ -328,7 +328,7 @@ STOCK_OPERATION_CODE StockOperation::parseCommand(
                 if (blocks == 0)
                     r = SO_NONE;    // invalid command
             }
-        } catch (std::exception &e) {
+        } catch (std::exception&) {
             retCount = 0;
             r = SO_NONE;    // invalid command
         }

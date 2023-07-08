@@ -202,7 +202,7 @@ void signalHandler(int signal)
 int parseCmd(
 	int argc,
 	char* argv[],
-	struct ServiceConfig *value
+	ServiceConfig *value
 )
 {
 	struct arg_str *a_interface = arg_str0("i", "ip4", _("<address>"), _("service IPv4 network interface address. Default 0.0.0.0 (all)"));

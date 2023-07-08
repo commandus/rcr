@@ -44,7 +44,7 @@ public:
  */
 class RcrImpl : public rcr::Rcr::Service {
 private:
-	struct ServiceConfig *mConfig;
+	ServiceConfig *mConfig;
     int loadDictionaries(
         rcr::DictionariesResponse *pResponse,
         MEASURE_LOCALE locale
@@ -138,11 +138,11 @@ protected:
 public:
 	/// ODB database
 	odb::database *mDb;
-	explicit RcrImpl(struct ServiceConfig *config);
+	explicit RcrImpl(ServiceConfig *config);
 	virtual ~RcrImpl();
 
 	/// Return service configuration
-	struct ServiceConfig *getConfig();
+	ServiceConfig *getConfig();
 
     // ------------------ front office ------------------
 
