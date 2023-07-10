@@ -56,6 +56,17 @@ typedef enum {
 COMPONENT firstComponentInFlags(uint32_t flags);
 
 class MeasureUnit {
+private:
+    static bool parseNominal(
+        MEASURE_LOCALE locale,
+        const std::string &value,
+        size_t &position,
+        uint64_t &nominal,
+        COMPONENT &measure,
+        std::string &retname,
+        COMPONENT param
+    );
+
 public:
     static std::string sym(
         COMPONENT measure
@@ -80,7 +91,7 @@ public:
         COMPONENT measure,
         uint64_t value
     );
-    static int parse(
+    static void parse(
         MEASURE_LOCALE locale,
         const std::string &value,
         size_t &position,

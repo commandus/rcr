@@ -52,3 +52,72 @@ std::string pb2JsonString(
     google::protobuf::util::MessageToJsonString(message, &r, formattingOptions);
     return r;
 }
+
+std::string nextWord(
+    const std::string &line,
+    size_t &start
+) {
+    size_t eolp = line.size();
+    size_t finish = eolp;
+    // skip spaces
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(line[p])) {
+            start = p;
+            break;
+        }
+    }
+    // try read word
+    for (auto p = start; p < eolp; p++) {
+        if (std::isspace(line[p])) {
+            finish = p;
+            break;
+        }
+    }
+    std::string r = line.substr(start, finish - start);
+    start = finish;
+    return r;
+}
+
+std::string nextNumber(
+    const std::string &line,
+    size_t &start
+) {
+    size_t eolp = line.size();
+    size_t finish = eolp;
+    // skip spaces
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(line[p])) {
+            start = p;
+            break;
+        }
+    }
+    // try read digits
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isdigit(line[p])) {
+            finish = p;
+            break;
+        }
+    }
+    std::string r = line.substr(start, finish - start);
+    start = finish;
+    return r;
+}
+
+std::string remainText(
+    const std::string &line,
+    size_t &start
+) {
+    size_t eolp = line.size();
+    size_t finish = eolp;
+    // skip spaces
+    for (auto p = start; p < eolp; p++) {
+        if (!std::isspace(line[p])) {
+            start = p;
+            break;
+        }
+    }
+    // try read to the end
+    std::string r = line.substr(start, eolp - start);
+    start = finish;
+    return r;
+}

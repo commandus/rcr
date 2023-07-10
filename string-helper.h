@@ -22,4 +22,19 @@ std::string pb2JsonString(
     const google::protobuf::Message &message
 );
 
+std::string nextWord(
+    const std::string &line,
+    size_t &start
+);
+
+std::string nextNumber(
+    const std::string &line,
+    size_t &start
+);
+
+std::string remainText(
+    const std::string &line,
+    size_t &start
+);
+
 #endif //RCR_STRING_HELPER_H

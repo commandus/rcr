@@ -10,6 +10,28 @@
 #include "BoxName.h"
 #include "string-helper.h"
 
+TEST(RCQuery, ParseNameNNominal) {
+    size_t position;
+
+    position = 0;
+    RCQuery q;
+    q.parse(ML_RU, "* 100мкф key:value", position, COMPONENT_C);
+    ASSERT_EQ(q.measure, COMPONENT_C);
+    ASSERT_EQ(q.componentName, "*");
+    ASSERT_EQ(q.nominal, 100000000);
+    ASSERT_EQ(q.code, SO_LIST_NO_BOX);
+    ASSERT_EQ(q.properties["key"], "value");
+
+    position = 0;
+    q.parse(ML_RU, "* 100мкф key:value 255", position, COMPONENT_C);
+    ASSERT_EQ(q.measure, COMPONENT_C);
+    ASSERT_EQ(q.componentName, "*");
+    ASSERT_EQ(q.nominal, 100000000);
+    ASSERT_EQ(q.code, SO_LIST);
+    ASSERT_EQ(q.properties["key"], "value");
+    ASSERT_EQ(q.boxes, 0x00ff000000000000);
+}
+
 TEST(RCQuery, ParseDigits) {
     size_t position;
 

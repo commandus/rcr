@@ -345,14 +345,33 @@ double MeasureUnit::val(COMPONENT measure, uint64_t value)
         return 1.0 * value * pow10table[p];
 }
 
-int MeasureUnit::parse(
-        MEASURE_LOCALE locale,
-        const std::string &value,
-        size_t &position,
-        uint64_t &nominal,
-        COMPONENT &measure,
-        std::string &retname,
-        COMPONENT defaultMeasure
+void MeasureUnit::parse(
+    MEASURE_LOCALE locale,
+    const std::string &value,
+    size_t &position,
+    uint64_t &nominal,
+    COMPONENT &measure,
+    std::string &retname,
+    COMPONENT defaultMeasure
+) {
+    size_t savePosition = position;
+    if (!parseNominal(locale, value, position, nominal, measure, retname, defaultMeasure)) {
+        if (!parseNominal(locale, value, position, nominal, measure, retname, defaultMeasure)) {
+            // rollback
+            position = savePosition;
+            parseNominal(locale, value, position, nominal, measure, retname, defaultMeasure);
+        };
+    }
+}
+
+bool MeasureUnit::parseNominal(
+    MEASURE_LOCALE locale,
+    const std::string &value,
+    size_t &position,
+    uint64_t &nominal,
+    COMPONENT &measure,
+    std::string &retname,
+    COMPONENT defaultMeasure
 )
 {
     size_t start = position;
@@ -378,8 +397,6 @@ int MeasureUnit::parse(
     }
 
     nominal = 0;
-    retname = "";
-
     bool hasNominal = finish > start;
 
     if (hasNominal) {
@@ -456,7 +473,7 @@ int MeasureUnit::parse(
         if (hasMeasureUnit) {
             measure = (COMPONENT) idx;
             position = finish;
-            return 0;
+            return true;
         }
     }
     // by default IC
@@ -484,7 +501,7 @@ int MeasureUnit::parse(
     if (start < finish)
         retname = value.substr(start, finish - start);
     position = finish;
-    return 0;
+    return hasNominal;
 }
 
 bool MeasureUnit::hasNominal(COMPONENT value) {

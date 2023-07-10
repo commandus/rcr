@@ -40,10 +40,8 @@ int RCQuery::parse(
     COMPONENT defaultComponent
 )
 {
-    int r = MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName, defaultComponent);
-    if (r)
-        return r;
-    r = QueryProperties::parse(value, position, properties);
+    MeasureUnit::parse(aLocale, value, position, nominal, measure, componentName, defaultComponent);
+    int r = QueryProperties::parse(value, position, properties);
     if (r)
         return r;
     r = StockOperation::parse(value, position, code, boxBlocks, boxes, count, destinationBox);
@@ -72,9 +70,12 @@ RCQuery::RCQuery(
 std::string RCQuery::toString()
 {
     std::stringstream ss;
-    if (!componentName.empty())
+    if (!componentName.empty()) {
         ss << componentName;
-    else
+        if (measure)
+            ss << " ";
+    }
+    if (nominal)
         ss << MeasureUnit::value(ML_RU, measure, nominal);
 
     for (auto p(properties.begin()); p != properties.end(); p++) {
