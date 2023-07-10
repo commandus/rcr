@@ -403,7 +403,7 @@ bool MeasureUnit::parseNominal(
         try {
             nominal = std::stoull(value.substr(start, finish - start));
         } catch (std::exception &) {
-
+            hasNominal = false;
         }
         start = finish;
         // skip spaces if exists
@@ -469,6 +469,7 @@ bool MeasureUnit::parseNominal(
                 break;
             }
         }
+        hasNominal = idx >= 0;
         bool hasMeasureUnit = finish > start;
         if (hasMeasureUnit) {
             measure = (COMPONENT) idx;

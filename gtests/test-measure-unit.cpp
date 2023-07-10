@@ -13,8 +13,17 @@
 TEST(RCQuery, ParseNameNNominal) {
     size_t position;
 
-    position = 0;
     RCQuery q;
+
+    position = 0;
+    q.parse(ML_RU, "* 255", position, COMPONENT_Z);
+    ASSERT_EQ(q.measure, COMPONENT_Z);
+    ASSERT_EQ(q.componentName, "*");
+    ASSERT_EQ(q.nominal, 0);
+    ASSERT_EQ(q.code, SO_LIST);
+    ASSERT_EQ(q.boxes, 0x00ff000000000000);
+
+    position = 0;
     q.parse(ML_RU, "* 100мкф key:value", position, COMPONENT_C);
     ASSERT_EQ(q.measure, COMPONENT_C);
     ASSERT_EQ(q.componentName, "*");
