@@ -996,3 +996,61 @@ sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 ```
 
 Скрипт tools/l10n создает начальный файл. Файл уже существует в проекте, скрипт вызывать не надо.
+
+### Зависимости
+
+/mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./mkdb)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./mkdb)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by ./mkdb)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libprotobuf.so.23)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libprotobuf.so.23)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libodb-2.4.so)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.26' not found (required by libodb-sqlite-2.4.so)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libodb-sqlite-2.4.so)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by libgrpc++.so.1)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libgrpc++.so.1)
+./mkdb: /lib64/libm.so.6: version `GLIBC_2.29' not found (required by libicuuc.so.70)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by libicuuc.so.70)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libicuuc.so.70)
+./mkdb: /lib64/libm.so.6: version `GLIBC_2.29' not found (required by libgrpc.so.10)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libgrpc.so.10)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by libgrpc.so.10)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libgrpc.so.10)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by libgrpc.so.10)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libgpr.so.10)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.33' not found (required by libcrypto.so.3)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libcrypto.so.3)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libabsl_str_format_internal.so.20210324)
+./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by libabsl_time_zone.so.20210324)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by libabsl_base.so.20210324)
+./mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by libabsl_base.so.20210324)
+
+
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/var/www/clients/client2/web48/home/nocmicroadmin/src
+```
+
+```
+scp mkdb rcr-cli rcr-svc nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libprotobuf.so.23 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libodb-2.4.so nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libodb-sqlite-2.4.so nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libgrpc++.so.1 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libicuuc.so.70 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_strings.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libgrpc.so.10 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libgpr.so.10 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libicudata.so.70 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_strings_internal.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_int128.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_throw_delegate.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_raw_logging_internal.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libssl.so.3 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libcrypto.so.3 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_time.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_bad_optional_access.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_str_format_internal.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_time_zone.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_base.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+scp /usr/lib/x86_64-linux-gnu/libabsl_spinlock_wait.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
+```
