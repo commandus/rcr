@@ -999,6 +999,10 @@ sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 
 ### Зависимости
 
+uname -a
+Linux web-hosting 4.18.0-497.el8.x86_64 #1 SMP Sat Jun 10 12:24:53 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+
+
 /mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./mkdb)
 ./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./mkdb)
 ./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by ./mkdb)
