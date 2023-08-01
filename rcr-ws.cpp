@@ -403,8 +403,16 @@ static bool fetchJson(
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
+        case RT_LSUSER:
+        {
+            rcr::UserRequest request;
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
+            rcr::UserResponse response;
+            config->svc->lsUser(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
+            break;
         default:
-            // case RT_LSUSER:
             return false;
     }
 	return true;

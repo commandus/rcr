@@ -265,12 +265,13 @@ void RcrClient::printUser(
     request.mutable_user()->set_name(user->name());
     request.mutable_user()->set_password(user->password());
     strm << _("Current user: ") << request.user().name() << std::endl;
-    auto reader = stub->lsUser(&context, request);
-    rcr::User u;
-    while (reader->Read(&u)) {
-        strm << u.name() << "\t" << (u.rights() & 1 ? _("Admin") : "");
-        if (!u.password().empty())
-            strm << "\t" << u.password();
+    
+    rcr::UserResponse response;
+    auto reader = stub->lsUser(&context, request, &response);
+    for (int i = 0; i < response.user_size(); i++) {
+        strm << response.user(i).name() << "\t" << (response.user(i).rights() & 1 ? _("Admin") : "");
+        if (!response.user(i).password().empty())
+            strm << "\t" << response.user(i).password();
         strm << std::endl;
     }
 }

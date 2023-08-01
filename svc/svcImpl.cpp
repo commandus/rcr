@@ -760,7 +760,8 @@ uint64_t RcrImpl::generateNewToken() {
 grpc::Status RcrImpl::lsUser(
     grpc::ServerContext* context,
     const rcr::UserRequest* request,
-    grpc::ServerWriter< rcr::User>* writer)
+    rcr::UserResponse* response
+)
 {
     int r = 0;
     BEGIN_GRPC_METHOD("lsUser", request, t)
@@ -777,7 +778,8 @@ grpc::Status RcrImpl::lsUser(
                 u.set_token(0);
                 u.set_password("");
             }
-            writer->Write(u);
+            rcr::User *ru = response->add_user();
+            *ru = u;
         }
     } catch (const odb::exception &e) {
         r = 1;

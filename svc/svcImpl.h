@@ -157,7 +157,7 @@ public:
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, rcr::BoxResponse* response) override;
     grpc::Status importExcel(grpc::ServerContext* context, const rcr::ImportExcelRequest* request, rcr::OperationResponse* response);
     // ------------------ back office ------------------
-    grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, grpc::ServerWriter< rcr::User>* writer) override;
+    grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::UserResponse* response) override;
 };
 
 #endif

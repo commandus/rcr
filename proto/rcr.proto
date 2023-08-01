@@ -300,6 +300,13 @@ message UserRequest
     User user = 1;
     string operationSymbol = 2; // +, -, =
     User value = 3;
+    List list = 4;
+}
+
+
+message UserResponse
+{
+    repeated User user = 1;
 }
 
 message GroupRequest
@@ -339,7 +346,7 @@ service Rcr
     rpc cardPush(stream CardRequest) returns (OperationResponse) {}
     rpc getBox(BoxRequest) returns (BoxResponse) {}
     //
-    rpc lsUser(UserRequest) returns (stream User) {}
+    rpc lsUser(UserRequest) returns (UserResponse) {}
     rpc chUser(UserRequest) returns (OperationResponse) {}
     //
     rpc chGroup(GroupRequest) returns (OperationResponse) {}
