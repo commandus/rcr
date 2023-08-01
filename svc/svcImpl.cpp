@@ -772,7 +772,20 @@ grpc::Status RcrImpl::lsUser(
         odb::result<rcr::User> qs(mDb->query<rcr::User>(
             odb::query<rcr::User>::id != 0
         ));
+        size_t c = 0;
+        size_t sz = 0;
+        size_t size = request->list().size();
+        if (size == 0 || size > 10000) {
+            size = DEF_LIST_SIZE;
+        }
         for (odb::result<rcr::User>::iterator it(qs.begin()); it != qs.end(); it++) {
+            if (c < request->list().offset()) {
+                c++;
+                continue;
+            }
+            if (sz >= size)
+                break;
+            sz++;
             u = *it;
             if (rights != 1) {
                 u.set_token(0);
