@@ -677,6 +677,17 @@ ls /usr/local/lib/libxlnt.so.1.5.0
 ls /usr/local/include/xlnt/xlnt.hpp
 ```
 
+### libicu
+
+Если в репозитории нет версии 61 и выше, собрать из исходников:
+```
+git clone https://github.com/unicode-org/icu.git
+cd icu/icu4c/source
+./configure
+make
+sudo make install
+```
+
 ### Установка зависимостей в Windows
 
 ```
@@ -997,10 +1008,89 @@ sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 
 Скрипт tools/l10n создает начальный файл. Файл уже существует в проекте, скрипт вызывать не надо.
 
-### Зависимости
+### Сборка в Centos 8 в докере
 
+- пакет libicu-devel версия 60, нужна 61.
+- grpc нет в репозитории
+- нет заголовка /usr/include/xlocale.h
+
+Создать докер
+
+```
+tools/mkdocker.sh
+```
+
+Запустить докер
+```
+docker run -itv /home/andrei/src:/home/andrei/src micro:centos bash
+
+ln -s /usr/include/locale.h /usr/include/xlocale.h
+
+# монтируем папку с исходниками
+docker run -itv /home/andrei/src:/home/andrei/src micro:centos bash
+# направить репозиторий на зеркало
+cd /etc/yum.repos.d/
+sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+sudo yum -y update
+yum install git wget yum which cmake mc gcc clang sqlite-devel install libmicrohttpd gettext-devel
+
+
+wget https://codesynthesis.com/download/odb/2.4/odb-2.4.0-1.x86_64.rpm
+rpm -i odb-2.4.0-1.x86_64.rpm
+
+wget https://codesynthesis.com/download/odb/2.4/libodb-2.4.0.tar.gz
+tar xvf libodb-2.4.0.tar.gz
+cd libodb-2.4.0
+./configure 
+make
+make install
+cd ..
+
+wget https://codesynthesis.com/download/odb/2.4/libodb-sqlite-2.4.0.tar.gz
+tar xvfz libodb-sqlite-2.4.0.tar.gz 
+cd libodb-sqlite-2.4.0
+./configure 
+make
+make install
+
+# https://grpc.io/docs/languages/cpp/quickstart/
+git clone --recurse-submodules -b v1.56.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
+cd grpc
+mkdir -p cmake/build
+pushd cmake/build
+cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF ../..
+make -j 4
+make install
+popd
+
+# Соберите Xlnt, как написано в разделе Xlnt
+# Соберите libicu
+```
+
+#### закоммитить образ 
+
+```
+docker ps -a
+docker commit stoic_ramanujan
+docker images
+docker tag c30cb68a6443 micro:centos
+# удалить закрытье контейнеры
+docker rm $(docker ps -qa --no-trunc --filter "status=exited")
+
+```
+
+
+### Копируем файлы в Centos 8
+
+```
+ssh nocmicroadmin@micro.ikfia.ysn.ru
 uname -a
 Linux web-hosting 4.18.0-497.el8.x86_64 #1 SMP Sat Jun 10 12:24:53 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+```
+
+### Зависимости
+
 
 
 /mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./mkdb)
