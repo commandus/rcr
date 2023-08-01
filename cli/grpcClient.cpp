@@ -267,7 +267,7 @@ void RcrClient::printUser(
     strm << _("Current user: ") << request.user().name() << std::endl;
     
     rcr::UserResponse response;
-    auto reader = stub->lsUser(&context, request, &response);
+    stub->lsUser(&context, request, &response);
     for (int i = 0; i < response.user_size(); i++) {
         strm << response.user(i).name() << "\t" << (response.user(i).rights() & 1 ? _("Admin") : "");
         if (!response.user(i).password().empty())
