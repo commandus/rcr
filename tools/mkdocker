@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# mkdocker
+#   Build Docker container with tools, dev libraries and source to build rcr from sources
+#
+# After:
+#   docker ps
+#   docker rename ... rcr
+#
+OS=centos
+IMG=$OS:8
+echo $OS
+
+docker build -t $IMG -f tools/Dockerfile .
+CONTAINER_ID=$(docker create $IMG)
+echo Container $CONTAINER_ID created
+echo 
+echo docker ps -a
+echo docker rename ... micro
+echo docker images
+echo docker tag image-id micro:centos
+echo docker run -itv /home/andrei/src:/home/andrei/src micro:centos bash
+echo docker run -p :4200:4200 --rm --add-host db:10.0.2.15 -w "/root" -t centos:8 /usr/local/bin/RUN.sh
+echo docker ps -a
+echo docker exec -ti ... bash
