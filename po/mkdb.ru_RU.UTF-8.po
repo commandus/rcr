@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-10 10:42+0900\n"
+"POT-Creation-Date: 2023-08-04 11:04+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -46,43 +46,43 @@ msgstr "Применение: "
 msgid "make database utility"
 msgstr "утилита создания базы данных"
 
-#: cli/mkdb.cpp:137
+#: cli/mkdb.cpp:136
 msgid "housing"
 msgstr "корпус"
 
-#: cli/mkdb.cpp:141
+#: cli/mkdb.cpp:140
 msgid "voltage"
 msgstr "напряжение"
 
-#: cli/mkdb.cpp:145
+#: cli/mkdb.cpp:144
 msgid "current"
 msgstr "ток"
 
-#: cli/mkdb.cpp:149
+#: cli/mkdb.cpp:148
 msgid "power"
 msgstr "мощность"
 
-#: cli/mkdb.cpp:153
+#: cli/mkdb.cpp:152
 msgid "precision"
 msgstr "точность"
 
-#: cli/mkdb.cpp:176
+#: cli/mkdb.cpp:175
 msgid "Error filling schema :"
 msgstr "Ошибка заполнения схемы: "
 
-#: cli/mkdb.cpp:179
+#: cli/mkdb.cpp:178
 msgid "Unknown error filling schema"
 msgstr "Неизвестная ошибка заполнения схемы"
 
-#: cli/mkdb.cpp:201
+#: cli/mkdb.cpp:200
 msgid "Error create schema: "
 msgstr "Ошибка создания схемы: "
 
-#: cli/mkdb.cpp:203
+#: cli/mkdb.cpp:202
 msgid "Unknown error create schema"
 msgstr "Неизвестная  ошибка создания схемы"
 
-#: cli/mkdb.cpp:232
+#: cli/mkdb.cpp:231
 msgid "Admin user SYSDBA created with password \"masterkey\""
 msgstr ""
 "Пользователь SYSDBA с правами администратора создан с паролем \"masterkey\""

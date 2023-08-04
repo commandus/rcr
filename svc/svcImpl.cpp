@@ -257,9 +257,11 @@ grpc::Status RcrImpl::chUser(
                 case '+':
                     if (it != qs.end()) {
                         response->set_code(-3);
-                        response->set_description(_("Property already exists"));
+                        response->set_description(_("User already exists"));
                     } else {
                         rcr::User user = request->value();
+                        user.set_token(generateNewToken());
+                        // user.set_rights(0);
                         response->set_id(mDb->persist(user));
                         response->set_code(0);
                     }
@@ -278,9 +280,9 @@ grpc::Status RcrImpl::chUser(
                     response->set_description(_("Invalid operation"));
             }
         } catch (const odb::exception &e) {
-            LOG(ERROR) << _("change property error: ") << e.what();
+            LOG(ERROR) << _("change user error: ") << e.what();
         } catch (...) {
-            LOG(ERROR) << _("change property unknown error");
+            LOG(ERROR) << _("change user unknown error");
         }
 
     END_GRPC_METHOD("chUser", request, response, t)

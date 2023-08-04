@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-06 10:47+0900\n"
+"POT-Creation-Date: 2023-08-04 11:04+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -85,124 +85,124 @@ msgstr " наименований, "
 msgid " items"
 msgstr " шт."
 
-#: cli/rcr-cli.cpp:182
+#: cli/rcr-cli.cpp:183
 msgid "<service host name>"
 msgstr "<адрес>"
 
-#: cli/rcr-cli.cpp:182
+#: cli/rcr-cli.cpp:183
 msgid "service host name or IP address."
 msgstr "имя или IP адрес хоста сервиса."
 
-#: cli/rcr-cli.cpp:183
+#: cli/rcr-cli.cpp:184
 msgid "service port. Default 50051"
 msgstr "номер порта сервиса. По умолчанию 50051"
 
-#: cli/rcr-cli.cpp:185
+#: cli/rcr-cli.cpp:186
 msgid "SSL on"
 msgstr "вкл SSL"
 
-#: cli/rcr-cli.cpp:188
+#: cli/rcr-cli.cpp:189
 msgid "<command>"
 msgstr "<команда>"
 
-#: cli/rcr-cli.cpp:190
+#: cli/rcr-cli.cpp:191
 msgid "<params>"
 msgstr "<запрос>"
 
-#: cli/rcr-cli.cpp:190
+#: cli/rcr-cli.cpp:191
 msgid "command parameter(params)"
 msgstr "параметр(запрос)"
 
-#: cli/rcr-cli.cpp:191
+#: cli/rcr-cli.cpp:192
 msgid "<user-name>"
 msgstr "<пользователь>"
 
-#: cli/rcr-cli.cpp:191
+#: cli/rcr-cli.cpp:192
 msgid "User login"
 msgstr "Логин"
 
-#: cli/rcr-cli.cpp:192
+#: cli/rcr-cli.cpp:193
 msgid "<password>"
 msgstr "<пароль>"
 
-#: cli/rcr-cli.cpp:192
+#: cli/rcr-cli.cpp:193
 msgid "User password"
 msgstr "Пароль пользователя"
 
-#: cli/rcr-cli.cpp:193
+#: cli/rcr-cli.cpp:194
 msgid "<box>"
 msgstr "<коробка>"
 
-#: cli/rcr-cli.cpp:193
+#: cli/rcr-cli.cpp:194
 msgid "box prefix e.g. 221-2"
 msgstr "префикс коробки, например, 119-2"
 
-#: cli/rcr-cli.cpp:194 cli/rcr-cli.cpp:195
+#: cli/rcr-cli.cpp:195 cli/rcr-cli.cpp:196
 msgid "<number>"
 msgstr "<число>"
 
-#: cli/rcr-cli.cpp:194
+#: cli/rcr-cli.cpp:195
 msgid "List offset 0.. Default 0"
 msgstr "смещение в списке (0..) По умолчанию 0"
 
-#: cli/rcr-cli.cpp:195
+#: cli/rcr-cli.cpp:196
 msgid "List size. Default 10000"
 msgstr "Размер списка. По умолчанию 10000"
 
-#: cli/rcr-cli.cpp:197
+#: cli/rcr-cli.cpp:198
 msgid "do not read box from Excel file name"
 msgstr "не искать номер коробки из имени файла Excel"
 
-#: cli/rcr-cli.cpp:198
+#: cli/rcr-cli.cpp:199
 msgid "<locale>"
 msgstr "<локаль>"
 
-#: cli/rcr-cli.cpp:198
+#: cli/rcr-cli.cpp:199
 msgid "Locale: intl, ru"
 msgstr "Локаль: intl, ru"
 
-#: cli/rcr-cli.cpp:200
+#: cli/rcr-cli.cpp:201
 msgid "Verbose level"
 msgstr "Уровень подробностей журнала"
 
-#: cli/rcr-cli.cpp:202
+#: cli/rcr-cli.cpp:203
 msgid "Show this help"
 msgstr "Показать этот экран справки"
 
-#: cli/rcr-cli.cpp:226
+#: cli/rcr-cli.cpp:227
 msgid "Usage: "
 msgstr "Использование: "
 
-#: cli/rcr-cli.cpp:228
+#: cli/rcr-cli.cpp:229
 msgid "rcr CLI client"
 msgstr "rcr клиент"
 
-#: cli/rcr-cli.cpp:412
+#: cli/rcr-cli.cpp:369
 msgid "success"
 msgstr "успешно"
 
-#: cli/rcr-cli.cpp:412
+#: cli/rcr-cli.cpp:369
 msgid "fail"
 msgstr "сбой"
 
-#: cli/rcr-cli.cpp:448
+#: cli/rcr-cli.cpp:405
 msgid "Enter help to see command list"
 msgstr "Введите help, чтобы посмотреть список доступных команд"
 
 #: cli/grpcClient.cpp:83 cli/grpcClient.cpp:89 cli/grpcClient.cpp:116
-#: cli/grpcClient.cpp:123 cli/grpcClient.cpp:189 cli/grpcClient.cpp:212
-#: cli/grpcClient.cpp:237 cli/grpcClient.cpp:251 cli/grpcClient.cpp:288
-#: cli/grpcClient.cpp:306 cli/grpcClient.cpp:331 cli/grpcClient.cpp:354
-#: cli/grpcClient.cpp:367 cli/grpcClient.cpp:371 cli/grpcClient.cpp:414
-#: cli/grpcClient.cpp:418
+#: cli/grpcClient.cpp:123 cli/grpcClient.cpp:191 cli/grpcClient.cpp:214
+#: cli/grpcClient.cpp:239 cli/grpcClient.cpp:253 cli/grpcClient.cpp:291
+#: cli/grpcClient.cpp:309 cli/grpcClient.cpp:332 cli/grpcClient.cpp:354
+#: cli/grpcClient.cpp:366 cli/grpcClient.cpp:370 cli/grpcClient.cpp:411
+#: cli/grpcClient.cpp:415
 msgid "Error: "
 msgstr "Ошибка: "
 
-#: cli/grpcClient.cpp:265
+#: cli/grpcClient.cpp:267
 msgid "Current user: "
 msgstr "Текущий пользователь: "
 
-#: cli/grpcClient.cpp:269
+#: cli/grpcClient.cpp:272
 msgid "Admin"
 msgstr "Администратор"
 
