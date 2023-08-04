@@ -214,7 +214,80 @@ ServiceConfig *RcrImpl::getConfig()
     return grpc::Status::OK;
 }
 
-::grpc::Status RcrImpl::chPropertyType(
+grpc::Status RcrImpl::chUser(
+    grpc::ServerContext* context,
+    const rcr::UserRequest* request,
+    rcr::OperationResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    BEGIN_GRPC_METHOD("chUser", request, t)
+        CHECK_PERMISSION(mDb, request->user(), 1)
+        char op;
+        if (request->operationsymbol().empty())
+            op = 'l';   // '=' ?!!
+        else
+            op = request->operationsymbol()[0];
+
+        try {
+            odb::result<rcr::User> qs;
+            if (request->value().id())
+                qs = mDb->query<rcr::User>(odb::query<rcr::User>::id == request->value().id());
+            else
+                qs = mDb->query<rcr::User>(odb::query<rcr::User>::name == request->value().name());
+
+            odb::result<rcr::User>::iterator it(qs.begin());
+            switch (op) {
+                case '=':
+                    if (it == qs.end()) {
+                        rcr::User user = request->value();
+                        response->set_id(mDb->persist(user));
+                    } else {
+                        it->set_password(request->value().password());
+                        it->set_name(request->value().name());
+                        it->set_token(request->value().token());
+                        it->set_rights(request->value().rights());
+                        mDb->update(*it);
+                    }
+                    response->set_code(0);
+                    break;
+                case '+':
+                    if (it != qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("Property already exists"));
+                    } else {
+                        rcr::User user = request->value();
+                        response->set_id(mDb->persist(user));
+                        response->set_code(0);
+                    }
+                    break;
+                case '-':
+                    if (it == qs.end()) {
+                        response->set_code(-3);
+                        response->set_description(_("User does not exists"));
+                    } else {
+                        mDb->erase(*it);
+                        response->set_code(0);
+                    }
+                    break;
+                default:
+                    response->set_code(-2);
+                    response->set_description(_("Invalid operation"));
+            }
+        } catch (const odb::exception &e) {
+            LOG(ERROR) << _("change property error: ") << e.what();
+        } catch (...) {
+            LOG(ERROR) << _("change property unknown error");
+        }
+
+    END_GRPC_METHOD("chUser", request, response, t)
+    return true ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+grpc::Status RcrImpl::chPropertyType(
     ::grpc::ServerContext* context,
     const ::rcr::ChPropertyTypeRequest* request,
     ::rcr::OperationResponse* response

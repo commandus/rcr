@@ -158,6 +158,7 @@ public:
     grpc::Status importExcel(grpc::ServerContext* context, const rcr::ImportExcelRequest* request, rcr::OperationResponse* response);
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::UserResponse* response) override;
+    grpc::Status chUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::OperationResponse* response) override;
 };
 
 #endif
