@@ -1,0 +1,27 @@
+{
+  "name" : "rcr",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "80ecf32496c3806c5bb79bb80f029f83d058930e",
+  "dependencies" : [ {
+    "name" : "libuv",
+    "version>=" : "1.45.0"
+  }, {
+    "name" : "libmicrohttpd",
+    "version>=" : "0.9.77"
+  }, {
+    "name" : "gettext",
+    "version>=" : "0.21.1"
+  }, {
+    "name" : "gettext-libintl",
+    "version>=" : "0.21.1"
+  }, {
+    "name" : "c-ares",
+    "version>=" : "1.19.0"
+  }, {
+    "name" : "grpc",
+    "version>=" : "1.51.1"
+  }, {
+    "name" : "icu",
+    "version>=" : "72.1"
+  } ]
+}
