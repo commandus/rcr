@@ -111,20 +111,30 @@ message CardNPropetiesPackages
 }
 
 // Operation log
-message JournalEntry
+message Journal
 {
     uint64 id = 1;                              ///< identifier
     uint64 dt = 2;                              ///< modification date & time
-    string user = 3;                            ///< user name
-    Package package = 4;                        ///< user name
-    Operation operation = 5;                    ///< user name
+    uint64 user_id = 3;                         ///< user name
+    uint64 package_id = 4;                      ///< package
+    string operation_symbol = 5;                ///< operation symbol
+    int64 value = 6;                            ///< amount
+}
+
+message Log
+{
+    uint64 id = 1;                              ///< identifier
+    uint64 dt = 2;                              ///< modification date & time
+    User user = 3;                              ///< user
+    Package package = 4;                        ///< package
+    Operation operation = 5;                    ///< operation
     int64 value = 6;                            ///< amount
 }
 
 // Operation log
-message Journal 
+message JournalResponse
 {
-    repeated JournalEntry entries = 1;          ///< record
+    repeated Log log = 1;          ///< record
 }
 
 message SearchCriteria
@@ -303,7 +313,6 @@ message UserRequest
     List list = 4;
 }
 
-
 message UserResponse
 {
     repeated User user = 1;
@@ -328,6 +337,13 @@ message GetItemRequest
     User user = 1;
     uint64 id = 2;
 }
+
+message JournalRequest
+{
+    User user = 1;
+    List list = 2;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -354,4 +370,6 @@ service Rcr
     rpc chGroupUser(GroupUserRequest) returns (OperationResponse) {}
     //
     rpc importExcel(ImportExcelRequest) returns (OperationResponse) {}
+    //
+    rpc lsJournal(JournalRequest) returns (JournalResponse) {}
 }

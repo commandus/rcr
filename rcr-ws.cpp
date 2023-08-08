@@ -34,7 +34,7 @@
 
 static LogIntf *logCB = nullptr;
 
-#define PATH_COUNT 15
+#define PATH_COUNT 16
 
 typedef enum {
     RT_LOGIN = 0,
@@ -53,6 +53,7 @@ typedef enum {
     RT_CHGROUP = 12,
     RT_CHGROUPUSER = 13,
     RT_IMPORTEXCEL = 14,
+    RT_LJJOURNAL = 15,
     RT_UNKNOWN = 100	//< FILE params
 } RequestType;
 
@@ -78,7 +79,8 @@ static const char *paths[PATH_COUNT] = {
     "/chUser",
     "/chGroup",
     "/chGroupUser",
-    "/importExcel"
+    "/importExcel",
+    "/lsJournal"
 };
 
 const static char *CE_GZIP = "gzip";
@@ -409,6 +411,15 @@ static bool fetchJson(
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::UserResponse response;
             config->svc->lsUser(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
+            break;
+        case RT_LJJOURNAL:
+        {
+            rcr::JournalRequest request;
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
+            rcr::JournalResponse response;
+            config->svc->lsJournal(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;

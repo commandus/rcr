@@ -221,8 +221,7 @@ static int compareFile
  * @return count files
  * FreeBSD fts.h fts_*()
  */
-size_t util::filesInPath
-(
+size_t util::filesInPath(
 	const std::string &path,
 	const std::string &suffix,
 	int flags,
@@ -248,22 +247,13 @@ size_t util::filesInPath
     	return 0;
     size_t count = 0;
     if (file_system->fts_cur->fts_link->fts_info == FTS_F) {
-        std::string s(file_system->fts_cur->fts_link->fts_name);
-        if (s.find(suffix) != std::string::npos)
+        if (path.find(suffix) != std::string::npos)
             count++;
-            if (retval) {
-                if (flags & 2) {
-                    // extract parent path
-                    std::string p(&file_system->fts_cur->fts_link->fts_path[parent_len]);
-                    retval->push_back(p + s);
-                }
-                else
-                    retval->push_back(std::string(file_system->fts_cur->fts_link->fts_path) + s);
-            }
+            if (retval)
+                retval->push_back(path);
     }
     FTSENT* parent;
-	while((parent = fts_read(file_system)))
-	{
+	while((parent = fts_read(file_system)))	{
 		FTSENT* child = fts_children(file_system, 0);
 		if (errno != 0) {
 			// ignore, perhaps permission error
