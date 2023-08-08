@@ -24,7 +24,14 @@ set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 # see https://stackoverflow.com/questions/10521635/using-intltool-with-cmake
 #
 find_package(Gettext REQUIRED)
-find_package (Intl REQUIRED)
+find_package(Intl REQUIRED)
+
+if (CMAKE_VERSION VERSION_GREATER "3.20.0")
+set(LIBINTL Intl::Intl)
+else()
+set(LIBINTL Intl::Intl)
+endif()
+
 include_directories(${Intl_INCLUDE_DIRS})
 link_directories(${Intl_LIBRARY_DIRS})
 find_program(GETTEXT_MSGFMT_EXECUTABLE msgfmt)
@@ -170,7 +177,7 @@ set(RCR_LIB_SRC
 )
 add_library(rcr STATIC ${RCR_LIB_SRC})
 target_link_libraries(rcr PRIVATE ${OS_SPECIFIC_LIBS} gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
-	${SSL_LIBS} ${Intl_LIBRARY}
+	${SSL_LIBS} ${LIBINTL}
 )
 target_compile_definitions(rcr PRIVATE ${DEFS})
 target_include_directories(rcr PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} )
@@ -194,7 +201,7 @@ target_include_directories(mkdb PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIR
 # box
 #
 add_executable(box cli/box.cpp	${ARGTABLE}	StockOperation.cpp)
-target_link_libraries(box PRIVATE ${ICU_LIBS} ${Intl_LIBRARY})
+target_link_libraries(box PRIVATE ${ICU_LIBS} ${LIBINTL})
 
 #
 # rcr-svc
@@ -219,7 +226,7 @@ set(RCR_CLI_SRC
 )
 add_executable(rcr-cli ${RCR_CLI_SRC})
 target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} rcr gRPC::grpc++ ${Protobuf_LIBRARIES} ${ICU_LIBS} ${XLSX_LIBS}
-	${SSL_LIBS} ${Intl_LIBRARY}
+	${SSL_LIBS} ${LIBINTL}
 )
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})
 target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} rcr )
