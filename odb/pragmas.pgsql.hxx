@@ -154,4 +154,11 @@ namespace rcr {
 		ODB_NUMBER(BoxGroup, group_id, uint64_t)
 		ODB_NUMBER(BoxGroup, box_id, uint64_t)
 
+    ODB_TABLE(Journal)
+        ODB_NUMBER(Journal, dt, uint64_t)
+        ODB_NUMBER(Journal, user_id, uint64_t)
+        ODB_NUMBER(Journal, package_id, uint64_t)
+        ODB_STRING(Journal, operation_symbol)
+        ODB_NUMBER(Journal, value, int64_t)
+
 }

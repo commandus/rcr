@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-04 11:05+0900\n"
+"POT-Creation-Date: 2023-08-07 15:47+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -200,7 +200,7 @@ msgid "User does not exists"
 msgstr ""
 
 #: svc/svcImpl.cpp:280 svc/svcImpl.cpp:352 svc/svcImpl.cpp:514
-#: svc/svcImpl.cpp:1005
+#: svc/svcImpl.cpp:1021
 msgid "Invalid operation"
 msgstr ""
 
@@ -268,66 +268,74 @@ msgstr ""
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:714 svc/svcImpl.cpp:1041
+#: svc/svcImpl.cpp:714 svc/svcImpl.cpp:1057
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:717 svc/svcImpl.cpp:1044
+#: svc/svcImpl.cpp:717 svc/svcImpl.cpp:1060
 msgid "list box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:797
+#: svc/svcImpl.cpp:798
 msgid "Check credentials error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:799
+#: svc/svcImpl.cpp:800
 msgid "Check credentials unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:824
+#: svc/svcImpl.cpp:840
 msgid "Check credentials & set token error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:826
+#: svc/svcImpl.cpp:842
 msgid "Check credentials & set token unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:874
+#: svc/svcImpl.cpp:890
 msgid "list user error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:877
+#: svc/svcImpl.cpp:893
 msgid "list user unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:895
+#: svc/svcImpl.cpp:911
 msgid "remove property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:897
+#: svc/svcImpl.cpp:913
 msgid "remove property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:981
+#: svc/svcImpl.cpp:997
 msgid "Box already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:994
+#: svc/svcImpl.cpp:1010
 msgid "Box does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:1008
+#: svc/svcImpl.cpp:1024
 msgid "change box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1010
+#: svc/svcImpl.cpp:1026
 msgid "change box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:1070
+#: svc/svcImpl.cpp:1086
 msgid "change package box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1073
+#: svc/svcImpl.cpp:1089
 msgid "change package box unknown error"
+msgstr ""
+
+#: svc/svcImpl.cpp:1305
+msgid "list journal error: "
+msgstr ""
+
+#: svc/svcImpl.cpp:1308
+msgid "list journal unknown error"
 msgstr ""

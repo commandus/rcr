@@ -50,12 +50,14 @@ private:
         MEASURE_LOCALE locale
     );
     /**
-     *
+     * Set user id if user found and password is correct
+     * @param retUserId return user id if not null
      * @param db
      * @param user
      * @return -1 if user not found or password is incorrect
      */
     int checkUserRights(
+        uint64_t *retUserId,
         odb::database *db,
         const rcr::User &user
     );
@@ -76,6 +78,7 @@ protected:
     size_t importExcelFile(
         odb::transaction &t,
         odb::database *db,
+        uint64_t userId,
         const std::string &symbol,
         const rcr::ExcelFile &file,
         uint64_t prefixBox,
@@ -103,6 +106,19 @@ protected:
         const rcr::ChCardRequest *request,
         uint64_t packageId
     );
+
+    bool loadUser(
+        rcr::User *retVal,
+        odb::database *db,
+        uint64_t id
+    );
+
+    bool loadPackage(
+        rcr::Package *retval,
+        odb::database *db,
+        uint64_t id
+    );
+
     /**
      * Move packages from one box to another
      * @param db database
@@ -159,6 +175,7 @@ public:
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::UserResponse* response) override;
     grpc::Status chUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::OperationResponse* response) override;
+    grpc::Status lsJournal(grpc::ServerContext* context, const rcr::JournalRequest* request, rcr::JournalResponse* response) override;
 };
 
 #endif

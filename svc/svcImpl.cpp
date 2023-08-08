@@ -118,9 +118,9 @@ std::string logString (
 }
 
 #define CHECK_PERMISSION(db, user, lvl) \
-	int rights = checkUserRights(db, user); \
-	if (rights < lvl) \
-		return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
+    int rights = checkUserRights(nullptr, db, user); \
+    if (rights < lvl) \
+        return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
 
 #define BEGIN_GRPC_METHOD(signature, requestMessage, transact) \
 		odb::transaction transact; \
@@ -225,7 +225,7 @@ grpc::Status RcrImpl::chUser(
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     BEGIN_GRPC_METHOD("chUser", request, t)
-        CHECK_PERMISSION(mDb, request->user(), 1)
+    CHECK_PERMISSION(mDb, request->user(), 1)
         char op;
         if (request->operationsymbol().empty())
             op = 'l';   // '=' ?!!
@@ -535,7 +535,8 @@ grpc::Status RcrImpl::cardQuery(
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     int r = 0;
     BEGIN_GRPC_METHOD("cardQuery", request, t)
-    int rights = checkUserRights(mDb, request->user());
+    uint64_t userId;
+    int rights = checkUserRights(&userId, mDb, request->user());
     rcr::DictionariesResponse dictionaries;
     r = loadDictionaries(&dictionaries, ML_INTL);
     if (!r) {
@@ -557,10 +558,10 @@ grpc::Status RcrImpl::cardQuery(
             rcr::CardQueryResponse qr;
             uint64_t cnt = 0;
             uint64_t sum = 0;
-            p.exec(mDb, &t, rights, &dictionaries, request->list(),
-                   response->mutable_rslt(), response->mutable_cards(),
-                   componentFlags,
-                   cnt, sum);
+            p.exec(mDb, &t, userId, rights, &dictionaries, request->list(),
+               response->mutable_rslt(), response->mutable_cards(),
+               componentFlags,
+               cnt, sum);
             response->mutable_rslt()->set_count(cnt);
             response->mutable_rslt()->set_sum(sum);
         } else {
@@ -604,11 +605,12 @@ grpc::Status RcrImpl::cardPush(
     r = loadDictionaries(&dictionaries, ML_INTL);
     rcr::CardRequest cardRequest;
     while (reader->Read(&cardRequest)) {
-        int rights = checkUserRights(mDb, cardRequest.user());
+        uint64_t userId;
+        int rights = checkUserRights(&userId, mDb, cardRequest.user());
 	    if (rights < 0)
             break;
         RCQueryProcessor p;
-        r = p.saveCard(mDb, &t, cardRequest, &dictionaries);
+        r = p.saveCard(mDb, &t, userId, cardRequest, &dictionaries);
         if (r)
             break;
     }
@@ -740,7 +742,7 @@ grpc::Status RcrImpl::importExcel(
     size_t cnt = 0;
     size_t r = 0;
     for (auto f = request->file().begin(); f != request->file().end(); f++) {
-        r += importExcelFile(t, mDb, request->symbol(), *f, request->prefix_box(),
+        r += importExcelFile(t, mDb, request->user().id(), request->symbol(), *f, request->prefix_box(),
             request->number_in_filename(), dictionaries);
         cnt++;
     }
@@ -753,6 +755,7 @@ grpc::Status RcrImpl::importExcel(
 size_t RcrImpl::importExcelFile(
     odb::transaction &t,
     odb::database *db,
+    uint64_t userId,
     const std::string &symbol,
     const rcr::ExcelFile &file,
     uint64_t prefixBox,
@@ -774,12 +777,13 @@ size_t RcrImpl::importExcelFile(
         rcr::CardRequest cardRequest;
         item->toCardRequest("+", symbol, box, cardRequest);
         RCQueryProcessor p;
-        p.saveCard(mDb, &t, cardRequest, &dictionaries);
+        p.saveCard(mDb, &t, userId, cardRequest, &dictionaries);
     }
     return spreadSheet.total;   // total count of items
 }
 
 int RcrImpl::checkUserRights(
+    uint64_t *retUserId,
     odb::database *db,
     const rcr::User &user
 ) {
@@ -791,6 +795,8 @@ int RcrImpl::checkUserRights(
         ));
         odb::result<rcr::User>::iterator it(qs.begin());
         if (it != qs.end()) {
+            if (retUserId)
+                *retUserId = it->id();
             return it->rights();
         }
     } catch (const odb::exception &e) {
@@ -799,6 +805,21 @@ int RcrImpl::checkUserRights(
         LOG(ERROR) << _("Check credentials unknown error");
     }
     return -1;
+}
+
+bool RcrImpl::loadUser(
+    rcr::User *retVal,
+    odb::database *db,
+    uint64_t id
+) {
+    odb::result<rcr::User> qu(mDb->query<rcr::User>(odb::query<rcr::User>::id == id));
+    odb::result<rcr::User>::iterator itu(qu.begin());
+    if (itu != qu.end()) {
+        if (retVal)
+            *retVal = *itu;
+        return true;
+    } else
+        return false;
 }
 
 bool RcrImpl::checkCredentialsNSetToken(
@@ -842,7 +863,7 @@ grpc::Status RcrImpl::lsUser(
     BEGIN_GRPC_METHOD("lsUser", request, t)
     // std::cerr << pb2JsonString(params->user()) << std::endl;
     rcr::User u;
-    int rights = checkUserRights(mDb, request->user());
+    int rights = checkUserRights(nullptr, mDb, request->user());
     try {
         odb::result<rcr::User> qs(mDb->query<rcr::User>(
             odb::query<rcr::User>::id != 0
@@ -1165,6 +1186,22 @@ void RcrImpl::updateCardPackage(
     uint64_t pid = mDb->persist(p);
 }
 
+bool RcrImpl::loadPackage(
+    rcr::Package *retval,
+    odb::database *db,
+    uint64_t id
+)
+{
+    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == id));
+    odb::result<rcr::Package>::iterator itp(qp.begin());
+    if (itp != qp.end()) {
+        if (retval)
+            *retval = *itp;
+        return true;
+    } else
+        return false;
+}
+
 bool RcrImpl::removeCard(
     odb::database *db,
     odb::transaction &t,
@@ -1209,8 +1246,73 @@ bool RcrImpl::removePackage(
     }
     // check does card has any packages
     odb::result<rcr::Package> qExists(mDb->query<rcr::Package>(
-            odb::query<rcr::Package>::card_id == request->value().id()
+        odb::query<rcr::Package>::card_id == request->value().id()
     ));
     odb::result<rcr::Package>::iterator itExists(qExists.begin());
     return (itExists == qExists.end());
+}
+
+grpc::Status RcrImpl::lsJournal(
+    grpc::ServerContext* context,
+    const rcr::JournalRequest* request,
+    rcr::JournalResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    bool r;
+    BEGIN_GRPC_METHOD("lsUser", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
+    rcr::DictionariesResponse dictionaries;
+    loadDictionaries(&dictionaries, ML_INTL);
+    try {
+        odb::result<rcr::Journal> qs(mDb->query<rcr::Journal>(
+                odb::query<rcr::Journal>::id != 0
+        ));
+        size_t c = 0;
+        size_t sz = 0;
+        size_t size = request->list().size();
+        if (size == 0 || size > 10000) {
+            size = DEF_LIST_SIZE;
+        }
+        for (odb::result<rcr::Journal>::iterator it(qs.begin()); it != qs.end(); it++) {
+            if (c < request->list().offset()) {
+                c++;
+                continue;
+            }
+            if (sz >= size)
+                break;
+            sz++;
+            rcr::Log *l = response->add_log();
+            l->set_id(it->id());
+            l->set_dt(it->dt());
+
+            // load user
+            if (!loadUser(l->mutable_user(), mDb, it->user_id()))
+                l->mutable_user()->set_id(it->user_id());
+
+            // load package
+            if (!loadPackage(l->mutable_package(), mDb, it->package_id()))
+                l->mutable_package()->set_id(it->package_id());
+
+            // load operation
+            auto p = RCQueryProcessor::findOperation(&dictionaries, it->operation_symbol());
+            if (p) {
+                *l->mutable_operation() = *p;
+            } else
+                l->mutable_operation()->set_symbol(it->operation_symbol());
+        }
+        r = true;
+    } catch (const odb::exception &e) {
+        r = false;
+        LOG(ERROR) << _("list journal error: ") << e.what();
+    } catch (...) {
+        r = false;
+        LOG(ERROR) << _("list journal unknown error");
+    }
+
+    END_GRPC_METHOD("lsJournal", request, response, t)
+    return r ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
 }

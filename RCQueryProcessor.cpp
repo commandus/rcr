@@ -40,6 +40,7 @@ RCQueryProcessor::RCQueryProcessor(
 void RCQueryProcessor::exec(
     odb::database *db,
     odb::transaction *t,
+    uint64_t userId,
     int rights,
     const rcr::DictionariesResponse *dictionaries,
     const rcr::List &list,
@@ -86,13 +87,13 @@ void RCQueryProcessor::exec(
         case SO_SUB:
         case SO_MOV:
             if (rights > 0)
-                count = setCards(db, t, dictionaries, query, componentFlags, &sum);
+                count = setCards(db, t, userId, dictionaries, query, componentFlags, &sum);
             else
                 count = 0;
             break;
         case SO_COUNT:
         case SO_SUM:
-            count = setCards(db, t, dictionaries, query, componentFlags, &sum);
+            count = setCards(db, t, userId, dictionaries, query, componentFlags, &sum);
             break;
     }
 }
@@ -248,6 +249,7 @@ size_t RCQueryProcessor::loadCards(
 int RCQueryProcessor::saveCard(
     odb::database *db,
     odb::transaction *t,
+    uint64_t userId,
     const rcr::CardRequest &cardRequest,
     const rcr::DictionariesResponse *dictionaries
 )
@@ -273,15 +275,16 @@ int RCQueryProcessor::saveCard(
                 db->update(card);
             } else {
                 // add a new card
-                uint64_t cid = db->persist(card);
+                card.set_id(db->persist(card));
                 // set properties
-                setProperties(db, t, cardRequest, cid, dictionaries);
+                setProperties(db, t, cardRequest, card.id(), dictionaries);
             }
             // increment qty in specified box
             uint64_t packageId;
             uint64_t qPrevious = getQuantity(db, t, packageId, card.id(), cardRequest.box());
-            setQuantity(db, t, packageId, card.id(), cardRequest.box(), qPrevious + cardRequest.qty());
+            packageId = setQuantity(db, t, packageId, card.id(), cardRequest.box(), qPrevious + cardRequest.qty());
             updateBoxOnInsert(db, t, cardRequest.box(), "");
+            add2log(db, oper->symbol(), userId, packageId, cardRequest.qty());
         }
     }
     return 0;
@@ -437,6 +440,21 @@ const rcr::Operation* RCQueryProcessor::findOperation(
     return nullptr;
 }
 
+// return nullptr if not found
+const rcr::Operation* RCQueryProcessor::findOperationById(
+    const rcr::DictionariesResponse *dictionaries,
+    const uint64_t &id
+)
+{
+    if (!dictionaries)
+        return nullptr;
+    for (auto it = dictionaries->operation().begin(); it != dictionaries->operation().end(); it++) {
+        if (it->id() == id)
+            return &*it;
+    }
+    return nullptr;
+}
+
 void RCQueryProcessor::copyKnownProperties(
     google::protobuf::RepeatedPtrField<rcr::Property> *retVal,
     const google::protobuf::RepeatedPtrField<::rcr::PropertyRequest> &from,
@@ -522,6 +540,16 @@ uint64_t RCQueryProcessor::getQuantity(
     return r;
 }
 
+/**
+ * Return package id
+ * @param db
+ * @param transaction
+ * @param packageId
+ * @param cardId
+ * @param box
+ * @param qty
+ * @return package id
+ */
 uint64_t RCQueryProcessor::setQuantity(
     odb::database *db,
     odb::transaction *transaction,
@@ -751,6 +779,7 @@ void RCQueryProcessor::loadPropertiesWithName(
 size_t RCQueryProcessor::setCards(
     odb::database *db,
     odb::transaction *t,
+    uint64_t userId,
     const rcr::DictionariesResponse *dictionaries,
     const RCQuery *query,
     uint32_t componentFlags,
@@ -779,29 +808,37 @@ size_t RCQueryProcessor::setCards(
 
             switch(query->code) {
                 case SO_SET:
-                    setQuantity(db, t, packageId, itCard->id, query->boxes, query->count);
+                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
+                    add2log(db, "=", userId, packageId, q);
                     break;
                 case SO_ADD:
-                    setQuantity(db, t, packageId, itCard->id, query->boxes, q + query->count);
+                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, q + query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
+                    add2log(db, "+", userId, packageId, q);
                     break;
                 case SO_SUB:
-                    setQuantity(db, t, packageId, itCard->id, query->boxes,
+                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes,
                     q > query->count ? q - query->count : 0);
                     updateBoxOnRemove(db, t, query->boxes);
+                    add2log(db, "-", userId, packageId, q);
                     break;
                 case SO_MOV: {
                     // remove from the source box
-                    setQuantity(db, t, packageId, itCard->id, query->boxes,
-                        q > query->count ? q - query->count : 0);
-                    updateBoxOnRemove(db, t, query->boxes);
+                    {
+                        uint64_t mc = q > query->count ? q - query->count : 0;
+                        packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, mc);
+                        updateBoxOnRemove(db, t, query->boxes);
+                        const rcr::Operation *op = findOperation(dictionaries, "-");
+                        add2log(db, "-", userId, packageId, mc);
+                    }
                     // put to destination box
                     uint64_t destCardId = itCard->id; // same card
                     // get destination packageId, if not, ret 0
                     uint64_t qDest = getQuantity(db, t, packageId, destCardId, query->destinationBox);
-                    setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);
+                    packageId = setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);
                     updateBoxOnInsert(db, t, query->destinationBox, "");
+                    add2log(db, "", userId, packageId, query->count);
                 }
                     break;
                 default:
@@ -844,4 +881,26 @@ size_t RCQueryProcessor::setCards(
         LOG(ERROR) << "setCards unknown error";
     }
     return cnt;
+}
+
+void RCQueryProcessor::add2log(
+    odb::database *db,
+    const std::string &operationSymbol,
+    uint64_t userId,
+    uint64_t packageId,
+    int64_t qty
+) {
+    try {
+        rcr::Journal entry;
+        entry.set_dt(time(nullptr));
+        entry.set_operation_symbol(operationSymbol);
+        entry.set_package_id(packageId);
+        entry.set_user_id(userId);
+        entry.set_value(qty);
+        db->persist(entry);
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "log error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "log unknown error";
+    }
 }

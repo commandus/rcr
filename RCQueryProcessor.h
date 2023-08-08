@@ -17,6 +17,7 @@ public:
     void exec(
         odb::database *db,
         odb::transaction *t,
+        uint64_t userId,
         int rights,
         const rcr::DictionariesResponse *dictionaries,
         const rcr::List &list,
@@ -53,6 +54,7 @@ public:
     int saveCard(
         odb::database *db,
         odb::transaction *t,
+        uint64_t userId,
         const rcr::CardRequest &card,
         const rcr::DictionariesResponse *dictionaries
     );
@@ -99,6 +101,12 @@ public:
     static const rcr::Operation* findOperation(
         const rcr::DictionariesResponse *dictionaries,
         const std::string &symbol
+    );
+
+    // return nullptr if not found
+    static const rcr::Operation* findOperationById(
+        const rcr::DictionariesResponse *dictionaries,
+        const uint64_t &id
     );
 
     void copyKnownProperties(
@@ -186,10 +194,19 @@ public:
     size_t setCards(
         odb::database *db,
         odb::transaction *t,
+        uint64_t userId,
         const rcr::DictionariesResponse *dictionaries,
         const RCQuery *query,
         uint32_t componentFlags,
         size_t *sum
+    );
+
+    void add2log(
+        odb::database *db,
+        const std::string &operationSymbol,
+        uint64_t userId,
+        uint64_t packageId,
+        int64_t qty
     );
 };
 
