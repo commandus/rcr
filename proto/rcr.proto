@@ -134,7 +134,8 @@ message Log
 // Operation log
 message JournalResponse
 {
-    repeated Log log = 1;          ///< record
+    OperationResponse rslt = 1;                 ///< count
+    repeated Log log = 2;                       ///< records
 }
 
 message SearchCriteria

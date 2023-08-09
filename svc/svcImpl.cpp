@@ -19,6 +19,7 @@
 
 #include <odb/database.hxx>
 #include <odb/transaction.hxx>
+
 #ifdef ENABLE_SQLITE
 #include <odb/sqlite/database.hxx>
 #endif
@@ -26,6 +27,7 @@
 #include <odb/pgsql/database.hxx>
 #endif
 #include "gen/rcr.pb-odb.hxx"
+#include "gen/odb-views-odb.hxx"
 #include "SpreadSheetHelper.h"
 #include "BoxName.h"
 #include "string-helper.h"
@@ -1192,7 +1194,7 @@ bool RcrImpl::loadPackage(
     uint64_t id
 )
 {
-    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == id));
+    odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::id == id));
     odb::result<rcr::Package>::iterator itp(qp.begin());
     if (itp != qp.end()) {
         if (retval)
@@ -1263,21 +1265,27 @@ grpc::Status RcrImpl::lsJournal(
     if (response == nullptr)
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     bool r;
-    BEGIN_GRPC_METHOD("lsUser", request, t)
+    BEGIN_GRPC_METHOD("lsJournal", request, t)
     CHECK_PERMISSION(mDb, request->user(), 1)
     rcr::DictionariesResponse dictionaries;
     loadDictionaries(&dictionaries, ML_INTL);
     try {
-        odb::result<rcr::Journal> qs(mDb->query<rcr::Journal>(
-                odb::query<rcr::Journal>::id != 0
-        ));
+        odb::result<rcr::JournalCount> qc(mDb->query<rcr::JournalCount>(true));
+        odb::result<rcr::JournalCount>::iterator itc(qc.begin());
+        size_t cnt = 0;
+        if (itc != qc.end())
+            cnt = itc->count;
+
+        response->mutable_rslt()->set_count(cnt);
+
+        odb::result<rcr::JournalQuery> qs(mDb->query<rcr::JournalQuery>(true));
         size_t c = 0;
         size_t sz = 0;
         size_t size = request->list().size();
         if (size == 0 || size > 10000) {
             size = DEF_LIST_SIZE;
         }
-        for (odb::result<rcr::Journal>::iterator it(qs.begin()); it != qs.end(); it++) {
+        for (odb::result<rcr::JournalQuery>::iterator it(qs.begin()); it != qs.end(); it++) {
             if (c < request->list().offset()) {
                 c++;
                 continue;
@@ -1285,24 +1293,26 @@ grpc::Status RcrImpl::lsJournal(
             if (sz >= size)
                 break;
             sz++;
-            rcr::Log *l = response->add_log();
-            l->set_id(it->id());
-            l->set_dt(it->dt());
+            rcr::Log *l = response->add_log() ;
+            l->set_id(it->id);
+            l->set_dt(it->dt);
 
             // load user
-            if (!loadUser(l->mutable_user(), mDb, it->user_id()))
-                l->mutable_user()->set_id(it->user_id());
+            if (loadUser(l->mutable_user(), mDb, it->user_id)) {
+                l->mutable_user()->clear_password();
+                l->mutable_user()->clear_rights();
+                l->mutable_user()->clear_token();
+            } else
+                l->mutable_user()->set_id(it->user_id);
 
             // load package
-            if (!loadPackage(l->mutable_package(), mDb, it->package_id()))
-                l->mutable_package()->set_id(it->package_id());
-
-            // load operation
-            auto p = RCQueryProcessor::findOperation(&dictionaries, it->operation_symbol());
-            if (p) {
-                *l->mutable_operation() = *p;
+            if (loadPackage(l->mutable_package(), mDb, it->package_id)) {
+                l->mutable_package()->clear_box_name();
             } else
-                l->mutable_operation()->set_symbol(it->operation_symbol());
+                l->mutable_package()->set_id(it->package_id);
+
+            // set operation
+            l->mutable_operation()->set_symbol(it->operation_symbol);
         }
         r = true;
     } catch (const odb::exception &e) {

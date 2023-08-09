@@ -1,24 +1,22 @@
-//
-// Created by andrei on 17.03.23.
-//
-
-#include <algorithm>
 #include "RCQueryProcessor.h"
-#include "svc/svcImpl.h"
+
+#include <sstream>
+#include <algorithm>
 
 // ODB ORM
 #include "gen/rcr.pb-odb.hxx"
-#include "string-helper.h"
 #include "gen/odb-views-odb.hxx"
 
 #ifdef ENABLE_SQLITE
 #include <odb/sqlite/database.hxx>
-#include <sstream>
-
 #endif
+
 #ifdef ENABLE_PG
 #include <odb/pgsql/database.hxx>
 #endif
+
+#include "svc/svcImpl.h"
+#include "string-helper.h"
 
 #define LOG(x) std::cerr
 
