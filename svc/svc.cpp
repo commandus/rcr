@@ -254,6 +254,7 @@ int parseCmd(
         a_http_json_dirroot,
 #endif
         a_ssl,
+        a_daemonize,
         a_verbosity,
         a_help, a_end
     };
