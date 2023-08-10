@@ -20,6 +20,7 @@
 
 #include "svcconfig.h"
 #include "daemonize.h"
+#include "log.h"
 #include "svcImpl.h"
 #include "SSLValidator.h"
 
@@ -35,6 +36,16 @@
 // i18n
 #include <libintl.h>
 #define _(String) gettext (String)
+
+#include "log.h"
+
+#ifdef _MSC_VER
+#include <direct.h>
+#define PATH_MAX MAX_PATH
+#define getcwd _getcwd
+#else
+#include <unistd.h>
+#endif
 
 const char* progname = "rcr-svc";
 const char* DEF_DB_SQLITE = "rcr.db";
@@ -150,8 +161,14 @@ static void runGrpc()
 }
 
 #ifdef ENABLE_HTTP
-static void runHttpJson(uint16_t port)
+static void runHttpJson(
+    uint16_t port,
+    bool asDaemon
+)
 {
+    if (asDaemon)
+        SYSLOG(LOG_ALERT, "Start HTTP service")
+
     wsConfig.descriptor = nullptr;
     wsConfig.flags = 0;
     wsConfig.lasterr = 0;
@@ -159,9 +176,19 @@ static void runHttpJson(uint16_t port)
     wsConfig.port = port;
     wsConfig.svc = service;
     if (!startWS(wsConfig)) {
-        std::cerr << "Can not start web service errno "
-                  << errno << ": " << strerror(errno) << std::endl;
-        std::cerr << "libmicrohttpd version " << std::hex << MHD_VERSION << std::endl;
+        std::stringstream ss;
+        ss << "Can not start web service errno "
+            << errno << ": " << strerror(errno)
+            << ". libmicrohttpd version " << std::hex << MHD_VERSION;
+        if (asDaemon)
+            SYSLOG(LOG_ALERT, ss.str().c_str())
+        else {
+            std::cerr << ss.str() << std::endl;
+        }
+    } else {
+        if (asDaemon)
+            SYSLOG(LOG_ALERT, "HTTP service successfully started")
+
     }
 }
 #endif
@@ -170,7 +197,7 @@ static void run() {
     service = new RcrImpl(&config);
 #ifdef ENABLE_HTTP
     if (config.httpJsonOn)
-        runHttpJson(config.httpJsonPort);
+        runHttpJson(config.httpJsonPort, config.daemonize);
 #endif
     if (config.sslOn)
         runGrpcSSL();
@@ -387,9 +414,13 @@ int main(int argc, char* argv[])
 	if (parseCmd(argc, argv, &config))
 		exit(CODE_WRONG_OPTIONS);
 	if (config.daemonize) {
+        char wd[PATH_MAX];
+        std::string currentPath = getcwd(wd, PATH_MAX);
 		if (config.verbosity)
 			std::cerr << _("Start as daemon, use syslog") << std::endl;
-		Daemonize daemonize(progname, config.path, run, stopNWait, done);
+        OPEN_SYSLOG(progname)
+        SYSLOG(LOG_ALERT, _("Start as daemon"))
+        Daemonize daemonize(progname, currentPath, run, stopNWait, done);
 	}
 	else {
         run();

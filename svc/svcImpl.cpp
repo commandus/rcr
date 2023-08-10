@@ -1296,6 +1296,7 @@ grpc::Status RcrImpl::lsJournal(
             rcr::Log *l = response->add_log() ;
             l->set_id(it->id);
             l->set_dt(it->dt);
+            l->set_value(it->value);
 
             // load user
             if (loadUser(l->mutable_user(), mDb, it->user_id)) {

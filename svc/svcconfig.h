@@ -41,7 +41,6 @@ public:
     /// HTTP JSON embedded service
     bool httpJsonOn;
     uint16_t httpJsonPort;
-
 	std::string path;
 };
 
