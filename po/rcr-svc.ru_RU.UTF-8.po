@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-07 15:46+0900\n"
+"POT-Creation-Date: 2023-08-16 16:22+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -18,139 +18,155 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: svc/svc.cpp:104
+#: svc/svc.cpp:115
 msgid "SSL on"
 msgstr "SSL вкл"
 
-#: svc/svc.cpp:122 svc/svc.cpp:141
+#: svc/svc.cpp:133 svc/svc.cpp:152
 msgid "Server listening on "
 msgstr "Сервис слушает "
 
-#: svc/svc.cpp:126 svc/svc.cpp:149
+#: svc/svc.cpp:137 svc/svc.cpp:160
 msgid "Can not start server"
 msgstr "Сервис не смог запуститься"
 
-#: svc/svc.cpp:144
+#: svc/svc.cpp:155
 msgid "HTTP JSON port "
 msgstr "HTTP JSON порт "
 
-#: svc/svc.cpp:186
+#: svc/svc.cpp:213
 msgid "Interrupted.."
 msgstr "Прервано.."
 
-#: svc/svc.cpp:189
+#: svc/svc.cpp:216
 msgid "exit"
 msgstr "завершение работы"
 
-#: svc/svc.cpp:192
+#: svc/svc.cpp:219
 msgid "Signal "
 msgstr "Сигнал "
 
-#: svc/svc.cpp:208
+#: svc/svc.cpp:235
 msgid "<address>"
 msgstr "<адрес>"
 
-#: svc/svc.cpp:208
+#: svc/svc.cpp:235
 msgid "service IPv4 network interface address. Default 0.0.0.0 (all)"
 msgstr "IPv4 адрес сервиса. По умолчанию 0.0.0.0 (все доступные интерфейсы)"
 
-#: svc/svc.cpp:209
+#: svc/svc.cpp:236
 msgid "<port>"
 msgstr "<порт>"
 
-#: svc/svc.cpp:209
+#: svc/svc.cpp:236
 msgid "service port. Default 50051"
 msgstr "номер порта. По умолчанию 50051"
 
-#: svc/svc.cpp:211
+#: svc/svc.cpp:238
 msgid "<SQLite# database>"
 msgstr "<база данных SQLite>"
 
-#: svc/svc.cpp:211
+#: svc/svc.cpp:238
 msgid "database, default \"rcr.db\""
 msgstr "база данных, по умолчанию \"rcr.db\""
 
-#: svc/svc.cpp:212
+#: svc/svc.cpp:239
 msgid "<path>"
 msgstr ""
 
-#: svc/svc.cpp:212
+#: svc/svc.cpp:239
 msgid "web root path. Default './html'"
 msgstr "корневой путь папки www. По умолчанию './html'"
 
-#: svc/svc.cpp:216
+#: svc/svc.cpp:243
 msgid "database connection"
 msgstr "соединение с СУБД"
 
-#: svc/svc.cpp:217
+#: svc/svc.cpp:244
 msgid "database login"
 msgstr "логин СУБД"
 
-#: svc/svc.cpp:218
+#: svc/svc.cpp:245
 msgid "database scheme"
 msgstr "схема СУБД"
 
-#: svc/svc.cpp:219
+#: svc/svc.cpp:246
 msgid "database user password"
 msgstr "пароль пользователя СУБД"
 
-#: svc/svc.cpp:220
+#: svc/svc.cpp:247
 msgid "database host. Default localhost"
 msgstr "имя хоста СУБД. По умолчанию localhost"
 
-#: svc/svc.cpp:221
+#: svc/svc.cpp:248
 msgid "database port. Default 5432"
 msgstr "порт СУБД. По умолчанию 5432"
 
-#: svc/svc.cpp:222
+#: svc/svc.cpp:249
 msgid "database options file"
 msgstr "файл опций СУБД"
 
-#: svc/svc.cpp:223
+#: svc/svc.cpp:250
 msgid "database socket. Default none."
 msgstr "сокет СУБД. По умолчанию нет."
 
-#: svc/svc.cpp:224
+#: svc/svc.cpp:251
 msgid "database client charset. Default utf8."
 msgstr "кодовая страница клиента СУБД. По умолчанию utf8."
 
-#: svc/svc.cpp:225
+#: svc/svc.cpp:252
 msgid "database client flags. Default 0."
 msgstr "флаги клиента СУБД. По умолчанию 0."
 
-#: svc/svc.cpp:227
+#: svc/svc.cpp:254
 msgid "enable SSL"
 msgstr "вкл SSL"
 
-#: svc/svc.cpp:228
+#: svc/svc.cpp:255
 msgid "start as daemon/service"
 msgstr "запустить процесс как демон"
 
-#: svc/svc.cpp:230
+#: svc/svc.cpp:257
 msgid "run JSON HTTP service"
 msgstr ""
 
-#: svc/svc.cpp:231
+#: svc/svc.cpp:258
 msgid "HTTP service port number. Default 8050"
 msgstr "HTTP JSON номер порта. По умолчанию 8050"
 
-#: svc/svc.cpp:240
+#: svc/svc.cpp:267
+msgid "<directory>"
+msgstr ""
+
+#: svc/svc.cpp:267
+msgid "plugins directory, default ./plugins"
+msgstr ""
+
+#: svc/svc.cpp:268
+msgid "<string>"
+msgstr ""
+
+#: svc/svc.cpp:268
+msgid "plugins options, default none"
+msgstr ""
+
+#: svc/svc.cpp:269
 msgid "-v- verbose"
 msgstr ""
 
-#: svc/svc.cpp:241
+#: svc/svc.cpp:270
 msgid "Show this help"
 msgstr "Показать это окно справки"
 
-#: svc/svc.cpp:275
+#: svc/svc.cpp:306
 msgid "Usage: "
 msgstr "Применение: "
 
-#: svc/svc.cpp:277
+#: svc/svc.cpp:308
 msgid "rcr GRPC service"
 msgstr "GRPC сервис rcr"
 
-#: svc/svc.cpp:337
+#: svc/svc.cpp:368
 msgid ""
 "database connection error.\n"
 "Usage: "
@@ -158,187 +174,207 @@ msgstr ""
 "ошибка соединения с СУБД\n"
 "Применение: "
 
-#: svc/svc.cpp:390
+#: svc/svc.cpp:430
 msgid "Start as daemon, use syslog"
 msgstr "Запущено как демон, сообщения в syslog"
 
-#: svc/svcImpl.cpp:41
+#: svc/svc.cpp:432
+msgid "Start as daemon"
+msgstr "Запустить процесс как демон"
+
+#: svc/svcImpl.cpp:43
 msgid "Invalid arguments"
 msgstr "Неверные аргументы"
 
-#: svc/svcImpl.cpp:42
+#: svc/svcImpl.cpp:44
 msgid "Permission denied"
 msgstr "Доступ запрещен"
 
-#: svc/svcImpl.cpp:82
+#: svc/svcImpl.cpp:84
 msgid "Loading object error, id: "
 msgstr "Ошибка загрузки объекта, идентификатор: "
 
-#: svc/svcImpl.cpp:108
+#: svc/svcImpl.cpp:110
 msgid " cause("
 msgstr "причина("
 
-#: svc/svcImpl.cpp:110
+#: svc/svcImpl.cpp:112
 msgid " what("
 msgstr " что("
 
-#: svc/svcImpl.cpp:115
+#: svc/svcImpl.cpp:117
 msgid " message: "
 msgstr " сообщение: "
 
-#: svc/svcImpl.cpp:170
+#: svc/svcImpl.cpp:172
 msgid "No grants to call"
 msgstr "Нет прав на выполнение"
 
-#: svc/svcImpl.cpp:171
+#: svc/svcImpl.cpp:173
 msgid "Not implemented"
 msgstr "Не реализовано"
 
-#: svc/svcImpl.cpp:260
+#: svc/svcImpl.cpp:191
+msgid "login plugins loaded: "
+msgstr ""
+
+#: svc/svcImpl.cpp:191
+msgid " from directory "
+msgstr ""
+
+#: svc/svcImpl.cpp:277
 msgid "User already exists"
 msgstr "Пользователь уже существует"
 
-#: svc/svcImpl.cpp:272
+#: svc/svcImpl.cpp:289
 msgid "User does not exists"
 msgstr "Пользователь не существует"
 
-#: svc/svcImpl.cpp:280 svc/svcImpl.cpp:352 svc/svcImpl.cpp:514
-#: svc/svcImpl.cpp:1021
+#: svc/svcImpl.cpp:297 svc/svcImpl.cpp:369 svc/svcImpl.cpp:531
+#: svc/svcImpl.cpp:1071
 msgid "Invalid operation"
 msgstr "Неверная операция"
 
-#: svc/svcImpl.cpp:283
+#: svc/svcImpl.cpp:300
 msgid "change user error: "
 msgstr "ошибка изменения пользователя: "
 
-#: svc/svcImpl.cpp:285
+#: svc/svcImpl.cpp:302
 msgid "change user unknown error"
 msgstr "неизвестная ошибка изменения пользователя"
 
-#: svc/svcImpl.cpp:333
+#: svc/svcImpl.cpp:350
 msgid "Property already exists"
 msgstr "Свойство уже существует"
 
-#: svc/svcImpl.cpp:343
+#: svc/svcImpl.cpp:360
 msgid "Property does not exists"
 msgstr "Свойство не существует"
 
-#: svc/svcImpl.cpp:355
+#: svc/svcImpl.cpp:372
 msgid "change property error: "
 msgstr "ошибка изменения свойства: "
 
-#: svc/svcImpl.cpp:357
+#: svc/svcImpl.cpp:374
 msgid "change property unknown error"
 msgstr "неизвестная ошибка изменения свойства"
 
-#: svc/svcImpl.cpp:404
+#: svc/svcImpl.cpp:421
 msgid "get card error: "
 msgstr "ошибка получения карточки: "
 
-#: svc/svcImpl.cpp:406
+#: svc/svcImpl.cpp:423
 msgid "get card unknown error"
 msgstr "неизвестная ошибка получения карточки"
 
-#: svc/svcImpl.cpp:518
+#: svc/svcImpl.cpp:535
 msgid "chCard error: "
 msgstr "ошибка изменения карточки: "
 
-#: svc/svcImpl.cpp:520
+#: svc/svcImpl.cpp:537
 msgid "chCard unknown error"
 msgstr "неизвестная ошибка изменения карточки"
 
-#: svc/svcImpl.cpp:633
+#: svc/svcImpl.cpp:652
 msgid "list operations error: "
 msgstr "ошибка списка операций: "
 
-#: svc/svcImpl.cpp:635
+#: svc/svcImpl.cpp:654
 msgid "list operations unknown error"
 msgstr "неизвестная ошибка списка операций"
 
-#: svc/svcImpl.cpp:645
+#: svc/svcImpl.cpp:664
 msgid "list symbols error: "
 msgstr "ошибка списка типов компонент: "
 
-#: svc/svcImpl.cpp:647
+#: svc/svcImpl.cpp:666
 msgid "list symbols unknown error"
 msgstr "неизвестная ошибка списка типов компонент"
 
-#: svc/svcImpl.cpp:657
+#: svc/svcImpl.cpp:676
 msgid "list property error: "
 msgstr "ошибка списка свойств: "
 
-#: svc/svcImpl.cpp:659
+#: svc/svcImpl.cpp:678
 msgid "list property unknown error"
 msgstr "неизвестная ошибка списка свойств"
 
-#: svc/svcImpl.cpp:714 svc/svcImpl.cpp:1057
+#: svc/svcImpl.cpp:733 svc/svcImpl.cpp:1107
 msgid "list box error: "
 msgstr "ошибка списка коробок: "
 
-#: svc/svcImpl.cpp:717 svc/svcImpl.cpp:1060
+#: svc/svcImpl.cpp:736 svc/svcImpl.cpp:1110
 msgid "list box unknown error"
 msgstr "неизвестная ошибка списка коробок"
 
-#: svc/svcImpl.cpp:798
+#: svc/svcImpl.cpp:820
 msgid "Check credentials error: "
 msgstr "ошибка проверки прав"
 
-#: svc/svcImpl.cpp:800
+#: svc/svcImpl.cpp:822
 msgid "Check credentials unknown error"
 msgstr "неизвестная ошибка проверки прав"
 
-#: svc/svcImpl.cpp:840
+#: svc/svcImpl.cpp:854
+msgid "Set credentials error: "
+msgstr "ошибка установки прав"
+
+#: svc/svcImpl.cpp:856
+msgid "Set credentials unknown error"
+msgstr "неизвестная ошибка установки прав"
+
+#: svc/svcImpl.cpp:881
 msgid "Check credentials & set token error: "
 msgstr "ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:842
+#: svc/svcImpl.cpp:883
 msgid "Check credentials & set token unknown error"
 msgstr "неизвестная ошибка проверки прав и установки токена безопасности"
 
-#: svc/svcImpl.cpp:890
+#: svc/svcImpl.cpp:940
 msgid "list user error: "
 msgstr "ошибка списка пользователей: "
 
-#: svc/svcImpl.cpp:893
+#: svc/svcImpl.cpp:943
 msgid "list user unknown error"
 msgstr "неизвестная ошибка списка пользователей"
 
-#: svc/svcImpl.cpp:911
+#: svc/svcImpl.cpp:961
 msgid "remove property error: "
 msgstr "ошибка удаления свойства: "
 
-#: svc/svcImpl.cpp:913
+#: svc/svcImpl.cpp:963
 msgid "remove property unknown error"
 msgstr "неизвестная ошибка удаления свойства"
 
-#: svc/svcImpl.cpp:997
+#: svc/svcImpl.cpp:1047
 msgid "Box already exists"
 msgstr "Коробка уже существует"
 
-#: svc/svcImpl.cpp:1010
+#: svc/svcImpl.cpp:1060
 msgid "Box does not exists"
 msgstr "Коробка не существует"
 
-#: svc/svcImpl.cpp:1024
+#: svc/svcImpl.cpp:1074
 msgid "change box error: "
 msgstr "ошибка изменения коробки: "
 
-#: svc/svcImpl.cpp:1026
+#: svc/svcImpl.cpp:1076
 msgid "change box unknown error"
 msgstr "неизвестная ошибка изменения коробки"
 
-#: svc/svcImpl.cpp:1086
+#: svc/svcImpl.cpp:1136
 msgid "change package box error: "
 msgstr "ошибка изменения номера коробки: "
 
-#: svc/svcImpl.cpp:1089
+#: svc/svcImpl.cpp:1139
 msgid "change package box unknown error"
 msgstr "неизвестная ошибка изменения номера коробки"
 
-#: svc/svcImpl.cpp:1305
+#: svc/svcImpl.cpp:1386
 msgid "list journal error: "
 msgstr "ошибка записи в журнал: "
 
-#: svc/svcImpl.cpp:1308
+#: svc/svcImpl.cpp:1389
 msgid "list journal unknown error"
 msgstr "неизвестная ошибка записи в журнал"
