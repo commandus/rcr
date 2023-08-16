@@ -15,8 +15,8 @@ class ServiceConfig
 {
 public:
 	// start up options
-	bool	daemonize;				///< start as daemon
-	int		verbosity;				///< verbose level: 0- error only, 1- warning, 2- info, 3- debug
+	bool daemonize;				    ///< start as daemon
+	int verbosity;	                ///< verbose level: 0- error only, 1- warning, 2- info, 3- debug
 	const char *address;			///< HTTP/2 service interface address
 	int port;						///< HTTP/2 service interface port
 #ifdef ENABLE_SQLITE
@@ -42,6 +42,8 @@ public:
     bool httpJsonOn;
     uint16_t httpJsonPort;
 	std::string path;
+    std::string pluginDirPath;
+    std::string pluginOptions;
 };
 
 #ifdef ENABLE_PG

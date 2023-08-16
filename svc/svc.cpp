@@ -264,6 +264,8 @@ int parseCmd(
     wsConfig.threadCount = NUMBER_OF_THREADS;
     wsConfig.connectionLimit = 1024;
 #endif
+    struct arg_str *a_pluginDirPath = arg_str0("u", "plugin", _("<directory>"), _("plugins directory, default ./plugins"));
+    struct arg_str *a_pluginOptions = arg_str0("U", "plugin-options", _("<string>"), _("plugins options, default none"));
     struct arg_lit *a_verbosity = arg_litn("v", "verbosity", 0, 1, _("-v- verbose"));
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
@@ -281,6 +283,7 @@ int parseCmd(
         a_http_json_dirroot,
 #endif
         a_ssl,
+        a_pluginDirPath, a_pluginOptions,
         a_daemonize,
         a_verbosity,
         a_help, a_end
@@ -384,7 +387,14 @@ int parseCmd(
 	char wd[PATH_MAX];
 	value->path = getcwd(wd, PATH_MAX);
 #endif
-	return 0;
+    if (a_pluginDirPath->count)
+        value->pluginDirPath = *a_pluginDirPath->sval;
+    if (a_pluginOptions->count)
+        value->pluginOptions = *a_pluginOptions->sval;
+    if (value->pluginDirPath.empty()) {
+        value->pluginDirPath = value->path + "/plugins";
+    }
+    return 0;
 }
 
 void setSignalHandler(

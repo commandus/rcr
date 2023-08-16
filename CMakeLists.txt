@@ -5,6 +5,7 @@
 # -DENABLE_SQLITE=on   	enable Sqlite3
 # -DENABLE_PG=on 		enable PostgreSQL
 # -DENABLE_HTTP=on 		enable embedded HTTP server
+# -DENABLE_PLUGINS=off	enable plugin example
 #
 
 set(VCPKG_INC "/git/vcpkg/installed/x64-windows/include")
@@ -98,6 +99,7 @@ set(CMAKE_CXX_STANDARD 14)
 option(ENABLE_SQLITE "Build with Sqlite3" ON)
 option(ENABLE_PG "Build with PostgreSQL}" OFF)
 option(ENABLE_HTTP "Build with HTTP JSON server" ON)
+option(ENABLE_PLUGINS "Build plugins" OFF)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -206,8 +208,10 @@ target_link_libraries(box PRIVATE ${ICU_LIBS} ${LIBINTL})
 #
 # rcr-svc
 #
-add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp svc/svc.cpp svc/svcImpl.cpp
-	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
+add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp
+		svc/svc.cpp svc/svcImpl.cpp
+		svc/login-plugin.cpp
+		${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
 )
 target_link_libraries(rcr-svc PRIVATE
 	rcr ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}
@@ -230,6 +234,21 @@ target_link_libraries(rcr-cli PRIVATE ${OS_SPECIFIC_LIBS} rcr gRPC::grpc++ ${Pro
 )
 target_compile_definitions(rcr-cli PRIVATE ${DEFS})
 target_include_directories(rcr-cli PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS} ${ODB_LIBODB_INCLUDE_DIRS} rcr )
+
+#
+# Plugins
+#
+if(ENABLE_PLUGINS)
+	find_library(libldap NAMES libldap)
+	set (SRC_PLUGIN_LOGIN_AD
+		example-plugins/login-ad.cpp
+	)
+	if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+		set (OS_SPECIFIC_LIBS wsock32 ws2_32 Userenv)
+	endif ()
+	add_library(login-ad SHARED ${SRC_PLUGIN_LOGIN_AD})
+	target_link_libraries(login-ad ldap ${OS_SPECIFIC_LIBS})
+endif()
 
 #if(WIN32)
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

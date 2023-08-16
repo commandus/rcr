@@ -19,6 +19,7 @@
 
 #include "MeasureUnit.h"
 #include "svcconfig.h"
+#include "login-plugin.h"
 
 using grpc::ClientContext;
 using grpc::Server;
@@ -45,6 +46,7 @@ public:
 class RcrImpl : public rcr::Rcr::Service {
 private:
 	ServiceConfig *mConfig;
+    LoginPlugins loginPlugins;
     int loadDictionaries(
         rcr::DictionariesResponse *pResponse,
         MEASURE_LOCALE locale
@@ -63,6 +65,11 @@ private:
     );
 
     bool checkCredentialsNSetToken(
+        odb::transaction &t,
+        odb::database *db,
+        rcr::User *retVal
+    );
+    bool setCredentialsNSetToken(
         odb::transaction &t,
         odb::database *db,
         rcr::User *retVal
@@ -115,6 +122,12 @@ protected:
 
     bool loadPackage(
         rcr::Package *retval,
+        odb::database *db,
+        uint64_t id
+    );
+
+    bool loadCard(
+        rcr::Card *retval,
         odb::database *db,
         uint64_t id
     );

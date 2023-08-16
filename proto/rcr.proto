@@ -127,8 +127,9 @@ message Log
     uint64 dt = 2;                              ///< modification date & time
     User user = 3;                              ///< user
     Package package = 4;                        ///< package
-    Operation operation = 5;                    ///< operation
-    int64 value = 6;                            ///< amount
+    Card card = 5;                              ///< card
+    Operation operation = 6;                    ///< operation
+    int64 value = 7;                            ///< amount
 }
 
 // Operation log

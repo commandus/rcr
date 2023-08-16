@@ -1,9 +1,9 @@
 #ifndef PLUGINS_H
 #define PLUGINS_H
 
-
 /**
  * Optional initialize function
+ * Name: pluginInit
  * @return env
  */
 typedef void *(*pluginInitFunc)(
@@ -13,6 +13,7 @@ typedef void *(*pluginInitFunc)(
 
 /**
  * Optional destroy function
+ * Name: pluginDone
  * @return env
  */
 typedef void(*pluginDoneFunc)(
@@ -20,7 +21,8 @@ typedef void(*pluginDoneFunc)(
 );
 
 /**
- * Optional destroy function
+ * Mandatory login function
+ * Name: pluginLogin
  * @return env
  */
 typedef bool(*pluginLoginFunc)(

@@ -186,6 +186,10 @@ RcrImpl::RcrImpl(ServiceConfig *config)
     printJSONOptions.add_whitespace = true;
     printJSONOptions.always_print_primitive_fields = true;
     printJSONOptions.preserve_proto_field_names = true;
+
+    int cnt = loginPlugins.load(config->pluginDirPath, &config->pluginOptions);
+    LOG(INFO) << _("login plugins loaded: ") << cnt << _(" from directory ") << config->pluginDirPath << std::endl;
+
 }
 
 RcrImpl::~RcrImpl()
@@ -209,7 +213,18 @@ ServiceConfig *RcrImpl::getConfig()
         return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
     }
     *response->mutable_user() = request->user();
-    response->set_success(checkCredentialsNSetToken(t, mDb, response->mutable_user()));
+    bool logged = checkCredentialsNSetToken(t, mDb, response->mutable_user());
+    if (!logged) {
+        if (loginPlugins.login(response->user().name(), response->user().password())) {
+            setCredentialsNSetToken(t, mDb, response->mutable_user());
+            logged = true;
+        }
+    }
+    if (response->user().token() == 0) {
+        // user account is created but user is banned!
+        logged = false;
+    }
+    response->set_success(logged);
     response->set_version(VERSION_MAJOR);
     response->set_version_name(getRandomName());
     END_GRPC_METHOD("login", request, response, t)
@@ -824,6 +839,25 @@ bool RcrImpl::loadUser(
         return false;
 }
 
+bool RcrImpl::setCredentialsNSetToken(
+    odb::transaction &t,
+    odb::database *db,
+    rcr::User *retVal
+) {
+    if (!retVal)
+        return false;
+    try {
+        retVal->set_token(generateNewToken());
+        db->persist(*retVal);   // save token
+        return true;
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("Set credentials error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("Set credentials unknown error");
+    }
+    return false;
+}
+
 bool RcrImpl::checkCredentialsNSetToken(
     odb::transaction &t,
     odb::database *db,
@@ -851,8 +885,17 @@ bool RcrImpl::checkCredentialsNSetToken(
     return false;
 }
 
+/**
+ * token is not 0.
+ * If token = 0- it ius banned user
+ * @return
+ */
 uint64_t RcrImpl::generateNewToken() {
-    return rand();
+    uint64_t r = 0;
+    while (r == 0) {
+        r = rand();
+    }
+    return r;
 }
 
 grpc::Status RcrImpl::lsUser(
@@ -1204,6 +1247,22 @@ bool RcrImpl::loadPackage(
         return false;
 }
 
+bool RcrImpl::loadCard(
+    rcr::Card *retval,
+    odb::database *db,
+    uint64_t id
+)
+{
+    odb::result<rcr::Card> qp(mDb->query<rcr::Card>(odb::query<rcr::Card>::id == id));
+    odb::result<rcr::Card>::iterator itp(qp.begin());
+    if (itp != qp.end()) {
+        if (retval)
+            *retval = *itp;
+        return true;
+    } else
+        return false;
+}
+
 bool RcrImpl::removeCard(
     odb::database *db,
     odb::transaction &t,
@@ -1311,6 +1370,12 @@ grpc::Status RcrImpl::lsJournal(
                 l->mutable_package()->clear_box_name();
             } else
                 l->mutable_package()->set_id(it->package_id);
+
+            // load card
+            if (loadCard(l->mutable_card(), mDb, l->mutable_package()->card_id())) {
+                l->mutable_card()->clear_uname();
+            } else
+                l->mutable_card()->set_id(l->mutable_package()->card_id());
 
             // set operation
             l->mutable_operation()->set_symbol(it->operation_symbol);
