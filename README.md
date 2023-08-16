@@ -1148,3 +1148,26 @@ scp /usr/lib/x86_64-linux-gnu/libabsl_time_zone.so.20210324 nocmicroadmin@micro.
 scp /usr/lib/x86_64-linux-gnu/libabsl_base.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
 scp /usr/lib/x86_64-linux-gnu/libabsl_spinlock_wait.so.20210324 nocmicroadmin@micro.ikfia.ysn.ru:/var/www/clients/client2/web48/home/nocmicroadmin/src
 ```
+
+## Бан пользователей
+
+В таблице User поставьте в записи пользователя значение поля token равным 0.
+
+### Запуск на kb-srv.ikfia.ru
+
+Скопировать бинарные файлы, файл базы данных и плагин(ы)
+```
+scp rcr-cli rcr-svc mkdb box rcr.db user@kb-srv.ysn.ru:~/rcr
+scp liblogin-ad.so user@kb-srv.ysn.ru:~/rcr/plugins
+```
+
+Скопировать веб-страницу
+```
+scp /home/andrei/src/rct-web/dist/rcr/* user@kb-srv.ysn.ru:/var/www/html
+```
+Запустить с указанием URL сервера домена (Active Directory)
+```
+ssh user@kb-srv.ysn.ru
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
+./rcr-svc -jvd -u plugins -U "ldap://ad.ysn.ru"
+```
