@@ -282,7 +282,8 @@ message ImportExcelRequest
 
 message BoxResponse
 {
-    repeated Box box = 1;
+    OperationResponse rslt = 1;                 ///< count
+    repeated Box box = 2;
 }
 
 message ServiceSettings

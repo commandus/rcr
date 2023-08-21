@@ -713,6 +713,13 @@ grpc::Status RcrImpl::getBox(
     size_t sz = 0;
 
     try {
+        odb::result<rcr::BoxCount> qc(mDb->query<rcr::BoxCount>(true));
+        odb::result<rcr::BoxCount>::iterator itc(qc.begin());
+        size_t cnt = 0;
+        if (itc != qc.end())
+            cnt = itc->count;
+        response->mutable_rslt()->set_count(cnt);
+
         odb::result<rcr::Box> qs(mDb->query<rcr::Box>(
             odb::query<rcr::Box>::box_id >= startBox
             &&

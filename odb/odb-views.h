@@ -39,4 +39,8 @@ struct JournalQuery {
         std::size_t count;
     };
 
+#pragma db view query("SELECT count(id) FROM \"Box\" WHERE (?)")
+    struct BoxCount {
+        std::size_t count;
+    };
 }

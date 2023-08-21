@@ -72,7 +72,7 @@ msgstr "база данных, по умолчанию \"rcr.db\""
 
 #: svc/svc.cpp:239
 msgid "<path>"
-msgstr ""
+msgstr "<путь>"
 
 #: svc/svc.cpp:239
 msgid "web root path. Default './html'"
@@ -128,7 +128,7 @@ msgstr "запустить процесс как демон"
 
 #: svc/svc.cpp:257
 msgid "run JSON HTTP service"
-msgstr ""
+msgstr "запущен JSON HTTP сервис"
 
 #: svc/svc.cpp:258
 msgid "HTTP service port number. Default 8050"
@@ -136,23 +136,23 @@ msgstr "HTTP JSON номер порта. По умолчанию 8050"
 
 #: svc/svc.cpp:267
 msgid "<directory>"
-msgstr ""
+msgstr "<директория>"
 
 #: svc/svc.cpp:267
 msgid "plugins directory, default ./plugins"
-msgstr ""
+msgstr "директория плагинов, по умолчанию ./plugins"
 
 #: svc/svc.cpp:268
 msgid "<string>"
-msgstr ""
+msgstr "<строка>"
 
 #: svc/svc.cpp:268
 msgid "plugins options, default none"
-msgstr ""
+msgstr "опции плагина, по умолчанию нет"
 
 #: svc/svc.cpp:269
 msgid "-v- verbose"
-msgstr ""
+msgstr "-v- подробный вывод"
 
 #: svc/svc.cpp:270
 msgid "Show this help"
@@ -216,11 +216,11 @@ msgstr "Не реализовано"
 
 #: svc/svcImpl.cpp:191
 msgid "login plugins loaded: "
-msgstr ""
+msgstr "загружено login-плагинов: "
 
 #: svc/svcImpl.cpp:191
 msgid " from directory "
-msgstr ""
+msgstr " из директории "
 
 #: svc/svcImpl.cpp:277
 msgid "User already exists"
