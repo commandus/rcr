@@ -54,6 +54,7 @@ import <path>      Preview spreadsheets in the path\n\
 import <path> R 42 Import resistors (symbol R) from spreadsheets in the path to box 42\n\
 .. no-num       Do not read box number from Excel file name\n\
         D*                 Search by name starting with 'D'\n\
+sheet <path> R 42  Show spreadsheet \n\
 100 kOhm           Search resistors by nominal\n\
 1 mF 119           Search capacitor by nominal in boxes 119-..\n\
 * 119              Search all in boxes 119-..\n\
@@ -102,6 +103,47 @@ size_t findFiles(
     const std::string &path
 ) {
     return util::filesInPath(path, ".xlsx", 0, &retVal);
+}
+
+void viewSpreadSheets(
+    const std::string &path,
+    const std::string &importSymbol,
+    const std::string &boxName,
+    bool numberInFilename
+)
+{
+    std::vector<std::string> spreadSheets;
+    findFiles(spreadSheets, path);
+    std::cout << spreadSheets.size() << _(" *.xlsx files found in '") << path << "'" << std::endl;
+    for (auto it = spreadSheets.begin(); it != spreadSheets.end(); it++) {
+        uint64_t box;
+        if (numberInFilename)
+            box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
+        else
+            box = BoxName::extractFromFileName(boxName);
+        SpreadSheetHelper spreadSheet(*it);
+        std::cout << *it << ": " << spreadSheet.items.size() << _(" names, ") << spreadSheet.total << _(" items") << std::endl;
+        for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
+            if (bx->second) {
+                std::cout << StockOperation::boxes2string(StockOperation::boxAppendBox(box, bx->first)) << ": "
+                          << bx->second << "\t";
+            }
+        }
+        std::cout << std::endl;
+        // print data itself
+        for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
+            std::cout
+                    << StockOperation::boxes2string(StockOperation::boxAppendBox(box, item->id))
+                    << "\t" << (item->symbol != 0 ? item->symbol : '-') << "\t";
+            if (item->nominal)
+                std::cout << item->nominal;
+            else
+                std::cout << "";
+            std::cout
+                    << "\t" << item->name << "\t" << item->qty << "\t" << item->remarks << "\t"
+                    << std::endl;
+        }
+    }
 }
 
 void printSpreadSheets(
@@ -187,7 +229,7 @@ int parseCmd
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, _("<command>"),
-            "card|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-add-u");
+            "card|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-sheet|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<params>"), _("command parameter(params)"));
     struct arg_str *a_user_name = arg_str0("u", "user", _("<user-name>"), _("User login"));
     struct arg_str *a_user_password = arg_str0("p", "password", _("<password>"), _("User password"));
@@ -381,17 +423,21 @@ int main(int argc, char** argv)
     }
 
     if (config.command.find("xlsx") == 0) {
-        printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
-                          config.numberInFileName);
-        if (config.command.find("xlsx-add") == 0) {
-            std::string cs;
-            if (config.command.size() > 9)
-                cs = config.command.substr(9);
-            if (cs.empty())
-                cs = config.componentSymbol;
-            cs = toUpperCase(cs);
-            // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-            importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName, &u);
+        if (config.command.find("xlsx-sheet") == 0) {
+            viewSpreadSheets(config.request, "D", "", true);
+        } else {
+            printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
+                config.numberInFileName);
+            if (config.command.find("xlsx-add") == 0) {
+                std::string cs;
+                if (config.command.size() > 9)
+                    cs = config.command.substr(9);
+                if (cs.empty())
+                    cs = config.componentSymbol;
+                cs = toUpperCase(cs);
+                // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+                importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName, &u);
+            }
         }
     }
 
@@ -500,7 +546,7 @@ int main(int argc, char** argv)
                     std::string importSymbol = nextWord(line, start);
                     std::string boxName = nextWord(line, start);
                     std::string sNumberInFilename = nextWord(line, start);
-                    bool numberInFilename;
+                    bool numberInFilename = true;
                     if (!sNumberInFilename.empty()) {
                         switch(sNumberInFilename[0]) {
                             case 'F':
@@ -517,6 +563,27 @@ int main(int argc, char** argv)
                         importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename, &u);
                     continue;
                 }
+
+                if (cliCmd == "SHEET") {
+                    std::string path = nextWord(line, start);
+                    std::string importSymbol = nextWord(line, start);
+                    std::string boxName = nextWord(line, start);
+                    std::string sNumberInFilename = nextWord(line, start);
+                    bool numberInFilename = true;
+                    if (!sNumberInFilename.empty()) {
+                        switch(sNumberInFilename[0]) {
+                            case 'F':
+                            case 'f':
+                            case 'N':
+                            case 'n':
+                                numberInFilename = false;
+                                break;
+                        }
+                    }
+                    viewSpreadSheets(path, importSymbol, boxName, numberInFilename);
+                    continue;
+                }
+
                 int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);
                 std::cout << std::endl;
                 if (r)
