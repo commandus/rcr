@@ -45,6 +45,12 @@ void SheetRow::toCardRequest(
     }
 }
 
+SpreadSheetHelper::SpreadSheetHelper()
+    : total(0)
+{
+
+}
+
 SpreadSheetHelper::SpreadSheetHelper(
     const std::string &aFileName
 )
@@ -191,15 +197,71 @@ int SpreadSheetHelper::loadString(
     return 0;
 }
 
+int SpreadSheetHelper::loadCards(
+    xlnt::workbook &book,
+    const rcr::CardResponse &cards
+)
+{
+    xlnt::worksheet wsheets[26];
+    int lastRow[26];
+
+    // create component sheets
+    for (int i = 0; i < 26; i++) {
+        wsheets[i] = book.create_sheet();
+        wsheets[i].title(std::string('A' + i, 1));
+        lastRow[i] = 2;
+        wsheets[i].cell("A1").value("Коробка");
+        wsheets[i].cell("B1").value("Наименование");
+        wsheets[i].cell("C1").value("Количество");
+        wsheets[i].cell("D1").value("Марка");
+        wsheets[i].cell("E1").value(" Описание");
+    }
+
+    for (int i = 0; i < cards.cards_size(); i++) {
+        rcr::CardNPropetiesPackages c = cards.cards(i);
+        xlnt::worksheet &w = wsheets[c.card().symbol_id()];
+        for (int p = 0; p < c.packages_size(); p++) {
+            auto pack = c.packages(p);
+            BoxArray a;
+            StockOperation::box2Array(a, pack.box());
+            w.cell("A" + std::to_string(lastRow[i])).value(a.a[0]);
+            w.cell("B" + std::to_string(lastRow[i])).value(c.card().name());
+            w.cell("C" + std::to_string(lastRow[i])).value(std::to_string(pack.qty()));
+            std::stringstream ss;
+            for (int pr = 0; pr < c.properties_size(); pr++) {
+                ss << c.properties(pr).property_type() << ": " << c.properties(pr).value() << " ";
+            }
+            w.cell("D" + std::to_string(lastRow[i])).value(ss.str());
+            w.cell("E" + std::to_string(lastRow[i])).value("");
+        }
+        lastRow[i] = lastRow[i] + 1;
+    }
+    return 0;
+}
+
+std::string SpreadSheetHelper::toString(
+    xlnt::workbook &book
+)
+{
+    std::stringstream strm;
+    book.save(strm);
+    return strm.str();
+}
+
 char SpreadSheetHelper::getSymbolFromSheetName(
     const xlnt::worksheet &wsheet
 ) {
     std::string uSheetName = toUpperCase(wsheet.title());
     char r = 0;
+    if (uSheetName.length() == 0)
+        return r;
+    char c = uSheetName[0];
+    if (c >= 'A' && c <= 'Z')
+        return c - 'A';
     if (uSheetName.find("КОНД") == 0)
         r = 'C';
     else
-        if (uSheetName.find("РЕЗИ") == 0)
+        if (uSheetName.find("РЕЗИ"))
             r = 'R';
     return r;
 }

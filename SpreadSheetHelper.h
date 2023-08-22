@@ -48,6 +48,7 @@ private:
         const std::string &value
     );
 public:
+    explicit SpreadSheetHelper();
     explicit SpreadSheetHelper(
         const std::string &fileName
     );
@@ -61,7 +62,13 @@ public:
     int loadString(
         const std::string &content
     );
-
+    static int loadCards(
+        xlnt::workbook &book,
+        const rcr::CardResponse &cards
+    );
+    static std::string toString(
+        xlnt::workbook &book
+    );
     // result
     std::vector <SheetRow> items;
     // statistics

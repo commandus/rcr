@@ -121,3 +121,12 @@ std::string remainText(
     start = finish;
     return r;
 }
+
+std::string dateStamp(
+    time_t value
+) {
+    char buffer[80];
+    struct tm *lt = localtime(&value);
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S ", lt);
+    return std::string(buffer);
+}

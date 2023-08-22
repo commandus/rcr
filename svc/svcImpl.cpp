@@ -32,6 +32,8 @@
 #include "BoxName.h"
 #include "string-helper.h"
 
+#include <xlnt/workbook/workbook.hpp>
+
 // i18n
 #include <libintl.h>
 #define _(String) gettext (String)
@@ -42,6 +44,7 @@ using odb::query;
 const int DEF_LIST_SIZE = 1000;
 const std::string ERR_SVC_INVALID_ARGS = _("Invalid arguments");
 const std::string ERR_SVC_PERMISSION_DENIED = _("Permission denied");
+#define ERR_CODE_SVC_INVALID_ARGS -505
 
 // default list size
 #define DEF_LABEL_LIST_SIZE		100
@@ -638,6 +641,12 @@ grpc::Status RcrImpl::cardPush(
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "Save card error " + std::to_string(r));
 }
 
+/**
+ * Load dictionaries. Return 0- success
+ * @param retVal
+ * @param locale
+ * @return 0- success
+ */
 int RcrImpl::loadDictionaries(
     rcr::DictionariesResponse *retVal,
     MEASURE_LOCALE locale
@@ -774,6 +783,30 @@ grpc::Status RcrImpl::importExcel(
     response->set_count(cnt);   // files
     response->set_sum(r);     // entries
     END_GRPC_METHOD("importExcel", response, response, t)
+    return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+grpc::Status RcrImpl::exportExcel(
+    grpc::ServerContext* context,
+    const rcr::ExportExcelRequest* request,
+    rcr::ExportExcelResponse* response
+)
+{
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r = 0;
+    BEGIN_GRPC_METHOD("exportExcel", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
+    rcr::DictionariesResponse dictionaries;
+    r = loadDictionaries(&dictionaries, ML_INTL);
+    if (!r) {
+        time_t сt = time(nullptr);
+        auto sn = request->symbol_name();
+        r = exportExcelFile(response, t, mDb, request->query(), sn, сt, &dictionaries);
+    }
+    END_GRPC_METHOD("exportExcel", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
 }
 
@@ -1399,4 +1432,63 @@ grpc::Status RcrImpl::lsJournal(
 
     END_GRPC_METHOD("lsJournal", request, response, t)
     return r ? grpc::Status::OK : grpc::Status(StatusCode::NOT_FOUND, "");
+}
+
+int RcrImpl::exportExcelFile(
+    rcr::ExportExcelResponse *retVal,
+    odb::transaction &t,
+    odb::database *db,
+    const std::string &query,
+    const std::string &symbolName,
+    time_t timeStamp,
+    rcr::DictionariesResponse *dictionaries
+) {
+    const rcr::Symbol *measureSym = RCQueryProcessor::findSymbol(dictionaries, symbolName);
+    uint32_t componentFlags;
+    if (measureSym)
+        componentFlags = FLAG_COMPONENT(measureSym->id() - 1);
+    else
+        componentFlags = FLAG_ALL_COMPONENTS;
+
+    size_t position = 0;
+    RCQuery q;
+    COMPONENT c = firstComponentInFlags(componentFlags);
+    int r = q.parse(ML_RU, query, position, c);
+    if (r)
+        return ERR_CODE_SVC_INVALID_ARGS;
+    RCQueryProcessor p(q);
+    rcr::List list;
+    list.set_size(32768);
+
+    std::string name = dateStamp(timeStamp);
+
+    if (componentFlags == FLAG_ALL_COMPONENTS)
+        name += " A-Z";
+    else
+        name += " " + MeasureUnit::sym(c);
+
+    size_t ofs = 0;
+    int fileCount = 1;
+    while(true) {
+        auto f = retVal->add_file();
+        f->set_name(name + " " + std::to_string(fileCount) + ".xlsx");
+        rcr::List list;
+        list.set_offset(ofs);
+        rcr::OperationResponse operationResponse;
+        rcr::CardResponse cards;
+        uint64_t cnt = 0;
+        uint64_t sum = 0;
+        p.exec(mDb, &t, 0, 0, dictionaries, list, &operationResponse, &cards, componentFlags, cnt, sum);
+        if (cnt == 0)
+            break;
+        SpreadSheetHelper spreadSheetHelper;
+        xlnt::workbook book;
+        spreadSheetHelper.loadCards(book, cards);
+        f->set_content(spreadSheetHelper.toString(book));
+
+        ofs += 32768;
+        fileCount++;
+    }
+
+    return 0;
 }

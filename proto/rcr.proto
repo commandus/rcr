@@ -280,6 +280,18 @@ message ImportExcelRequest
     repeated ExcelFile file = 5;
 }
 
+message ExportExcelRequest
+{
+    User user = 1;
+    string query = 2;
+    string symbol_name = 3;
+}
+
+message ExportExcelResponse
+{
+    repeated ExcelFile file = 1;
+}
+
 message BoxResponse
 {
     OperationResponse rslt = 1;                 ///< count
@@ -373,6 +385,8 @@ service Rcr
     rpc chGroupUser(GroupUserRequest) returns (OperationResponse) {}
     //
     rpc importExcel(ImportExcelRequest) returns (OperationResponse) {}
+    //
+    rpc exportExcel(ExportExcelRequest) returns (ExportExcelResponse) {}
     //
     rpc lsJournal(JournalRequest) returns (JournalResponse) {}
 }

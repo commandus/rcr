@@ -34,7 +34,7 @@
 
 static LogIntf *logCB = nullptr;
 
-#define PATH_COUNT 16
+#define PATH_COUNT 17
 
 typedef enum {
     RT_LOGIN = 0,
@@ -53,7 +53,8 @@ typedef enum {
     RT_CHGROUP = 12,
     RT_CHGROUPUSER = 13,
     RT_IMPORTEXCEL = 14,
-    RT_LJJOURNAL = 15,
+    RT_EXPORTEXCEL = 15,
+    RT_LJJOURNAL = 16,
     RT_UNKNOWN = 100	//< FILE params
 } RequestType;
 
@@ -80,6 +81,7 @@ static const char *paths[PATH_COUNT] = {
     "/chGroup",
     "/chGroupUser",
     "/importExcel",
+    "/exportExcel",
     "/lsJournal"
 };
 
@@ -402,6 +404,15 @@ static bool fetchJson(
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
             config->svc->importExcel(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
+            break;
+        case RT_EXPORTEXCEL:
+        {
+            rcr::ExportExcelRequest request;
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
+            rcr::ExportExcelResponse response;
+            config->svc->exportExcel(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;

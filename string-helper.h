@@ -37,4 +37,6 @@ std::string remainText(
     size_t &start
 );
 
+std::string dateStamp(time_t value);
+
 #endif //RCR_STRING_HELPER_H

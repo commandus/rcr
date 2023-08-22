@@ -164,6 +164,16 @@ protected:
         odb::transaction &t,
         const rcr::ChCardRequest *request
     );
+    int exportExcelFile(
+        rcr::ExportExcelResponse *retVal,
+        odb::transaction &t,
+        odb::database *db,
+        const std::string &query,
+        const std::string &symbolName,
+        time_t timestamp,
+        rcr::DictionariesResponse *dictionaries
+    );
+
 public:
 	/// ODB database
 	odb::database *mDb;
@@ -185,6 +195,7 @@ public:
     grpc::Status getDictionaries(::grpc::ServerContext* context, const rcr::DictionariesRequest* request, rcr::DictionariesResponse* response) override;
     grpc::Status getBox(::grpc::ServerContext* context, const ::rcr::BoxRequest* request, rcr::BoxResponse* response) override;
     grpc::Status importExcel(grpc::ServerContext* context, const rcr::ImportExcelRequest* request, rcr::OperationResponse* response);
+    grpc::Status exportExcel(grpc::ServerContext* context, const rcr::ExportExcelRequest* request, rcr::ExportExcelResponse* response);
     // ------------------ back office ------------------
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::UserResponse* response) override;
     grpc::Status chUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::OperationResponse* response) override;
