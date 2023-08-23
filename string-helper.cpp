@@ -127,6 +127,6 @@ std::string dateStamp(
 ) {
     char buffer[80];
     struct tm *lt = localtime(&value);
-    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S ", lt);
+    strftime(buffer, sizeof(buffer), "%Y%m%d%H%M%S", lt);
     return std::string(buffer);
 }

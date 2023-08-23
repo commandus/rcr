@@ -18,7 +18,7 @@ public:
     int id;                                 // column A
     std::string name;                       // B
     uint64_t nominal;
-    std::vector <std::string> properties;   // B after ','
+    std::map <std::string, std::string> properties;   // B after ','
     int qty;                                // C
     std::string property_dip;               // D
     int property_v;                         // B
@@ -47,6 +47,11 @@ private:
         SheetRow &retVal,
         const std::string &value
     );
+    static bool parseL(
+        SheetRow &retVal,
+        const std::string &value
+    );
+
 public:
     explicit SpreadSheetHelper();
     explicit SpreadSheetHelper(

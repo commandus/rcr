@@ -18,6 +18,8 @@
 #include <libintl.h>
 #define _(String) gettext (String)
 
+#include <xlnt/workbook/workbook.hpp>
+
 static std::string message2Json(
     const google::protobuf::Message& message
 )
@@ -193,6 +195,40 @@ int RcrClient::saveSpreadsheet(
     }
     return 0;
 }
+
+int RcrClient::loadSpreadsheet(
+    std::vector<std::string> &retVal,
+    const rcr::User *user,
+    const std::string &path,
+    const std::string &query,
+    const std::string &componentSymbol  ///< "C"- condensers
+)
+{
+    grpc::ClientContext context;
+    rcr::ExportExcelResponse response;
+    rcr::ExportExcelRequest request;
+    *request.mutable_user() = *user;
+    request.set_query(query);
+    request.set_symbol_name(componentSymbol);
+    grpc::Status status = stub->exportExcel(&context, request, &response);
+    if (!status.ok()) {
+        std::cerr << _("Error: ") << status.error_code() << " " << status.error_message() << std::endl;
+        return status.error_code();
+    }
+    for (int f = 0; f < response.file_size(); f++) {
+        xlnt::workbook wb;
+        std::stringstream ss(response.file(f).content());
+        try {
+            wb.load(ss);
+            wb.save(path + "/" + response.file(f).name());
+            retVal.emplace_back(response.file(f).name());
+        } catch (...) {
+            std::cerr << _("Error save spreadsheets") << std::endl;
+        }
+    }
+    return 0;
+}
+
 
 void RcrClient::printBox(
     std::ostream &ostream,

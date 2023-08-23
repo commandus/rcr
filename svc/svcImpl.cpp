@@ -799,15 +799,26 @@ grpc::Status RcrImpl::exportExcel(
     int r = 0;
     BEGIN_GRPC_METHOD("exportExcel", request, t)
     CHECK_PERMISSION(mDb, request->user(), 1)
-    rcr::DictionariesResponse dictionaries;
-    r = loadDictionaries(&dictionaries, ML_INTL);
-    if (!r) {
-        time_t сt = time(nullptr);
-        auto sn = request->symbol_name();
-        r = exportExcelFile(response, t, mDb, request->query(), sn, сt, &dictionaries);
-    }
+    exportExcelFiles(response, t, mDb, request->symbol_name(), request->query());
     END_GRPC_METHOD("exportExcel", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
+}
+
+int RcrImpl::exportExcelFiles(
+    rcr::ExportExcelResponse *retVal,
+    odb::transaction &t,
+    odb::database *db,
+    const std::string &symbolName,
+    const std::string &query
+)
+{
+    rcr::DictionariesResponse dictionaries;
+    int r = loadDictionaries(&dictionaries, ML_INTL);
+    if (!r) {
+        time_t сt = time(nullptr);
+        r = exportExcelFile(retVal, t, mDb, query, symbolName, сt, &dictionaries);
+    }
+    return r;
 }
 
 size_t RcrImpl::importExcelFile(
@@ -1458,31 +1469,32 @@ int RcrImpl::exportExcelFile(
         return ERR_CODE_SVC_INVALID_ARGS;
     RCQueryProcessor p(q);
     rcr::List list;
-    list.set_size(32768);
-
     std::string name = dateStamp(timeStamp);
 
     if (componentFlags == FLAG_ALL_COMPONENTS)
-        name += " A-Z";
+        name += "A_Z";
     else
-        name += " " + MeasureUnit::sym(c);
+        name += MeasureUnit::sym(c);
 
     size_t ofs = 0;
     int fileCount = 1;
     while(true) {
         auto f = retVal->add_file();
-        f->set_name(name + " " + std::to_string(fileCount) + ".xlsx");
+        auto pname = name + "_" + std::to_string(fileCount);
+        f->set_name(pname + ".xlsx");
         rcr::List list;
         list.set_offset(ofs);
+        list.set_size(32768);
         rcr::OperationResponse operationResponse;
         rcr::CardResponse cards;
         uint64_t cnt = 0;
         uint64_t sum = 0;
         p.exec(mDb, &t, 0, 0, dictionaries, list, &operationResponse, &cards, componentFlags, cnt, sum);
-        if (cnt == 0)
+        if (cnt < list.size())
             break;
         SpreadSheetHelper spreadSheetHelper;
         xlnt::workbook book;
+        book.title(pname);
         spreadSheetHelper.loadCards(book, cards);
         f->set_content(spreadSheetHelper.toString(book));
 

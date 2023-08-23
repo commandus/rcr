@@ -58,7 +58,9 @@ sheet <path> R 42  Show spreadsheet \n\
 100 kOhm           Search resistors by nominal\n\
 1 mF 119           Search capacitor by nominal in boxes 119-..\n\
 * 119              Search all in boxes 119-..\n\
-* 119-1 K:DIP      Search all in box 119-1 DIP\n")
+* 119-1 K:DIP      Search all in box 119-1 DIP\n\
+export <path> R    Export to Excel last query result, only resistors ('R' optional)\n\
+")
 
 class ClientConfig {
 public:
@@ -206,6 +208,24 @@ void importSpreadSheets(
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items, user);
         if (r)
             break;
+    }
+}
+
+void exportSpreadSheets(
+    RcrClient &rpc,
+    const std::string &path,
+    const std::string &query,
+    const std::string &symbol,
+    const rcr::User *user
+) {
+    std::vector<std::string> fileNames;
+    int r = rpc.loadSpreadsheet(fileNames, user, path, query, symbol);
+    if (r) {
+        std::cerr << _("Error save spreadsheets") << std::endl;
+        return;
+    }
+    for (auto f = fileNames.begin(); f != fileNames.end(); f++) {
+        std::cout << path << "/" << *f << "\n";
     }
 }
 
@@ -450,6 +470,7 @@ int main(int argc, char** argv)
             std::string symbol;
             std::cerr << _("Enter help to see command list") << std::endl;
 
+            std::string lastQuery;
             while (std::getline(std::cin, line)) {
                 // nothing to do
                 if (line.empty())
@@ -564,6 +585,13 @@ int main(int argc, char** argv)
                     continue;
                 }
 
+                if (cliCmd == "EXPORT") {
+                    std::string path = nextWord(line, start);
+                    std::string importSymbol = nextWord(line, start);
+                    exportSpreadSheets(rpc, path, lastQuery, importSymbol, &u);
+                    continue;
+                }
+
                 if (cliCmd == "SHEET") {
                     std::string path = nextWord(line, start);
                     std::string importSymbol = nextWord(line, start);
@@ -588,6 +616,7 @@ int main(int argc, char** argv)
                 std::cout << std::endl;
                 if (r)
                     exit(r);
+                lastQuery = line;
             }
         }
     }

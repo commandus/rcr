@@ -173,6 +173,13 @@ protected:
         time_t timestamp,
         rcr::DictionariesResponse *dictionaries
     );
+    int exportExcelFiles(
+        rcr::ExportExcelResponse *retVal,
+        odb::transaction &t,
+        odb::database *db,
+        const std::string &symbolName,
+        const std::string &query
+    );
 
 public:
 	/// ODB database

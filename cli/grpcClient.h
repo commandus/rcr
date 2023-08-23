@@ -44,9 +44,17 @@ public:
 
     int saveSpreadsheet(
         uint64_t box,
-        const std::string componentSymbol,  ///< "U"- IC
+        const std::string componentSymbol,  ///< "V"- transistors
         const std::vector<SheetRow> &rows,
         const rcr::User *user
+    );
+
+    int loadSpreadsheet(
+        std::vector<std::string> &retVal,
+        const rcr::User *user,
+        const std::string &path,
+        const std::string &query,
+        const std::string &componentSymbol  ///< "C"- condensers
     );
 
     std::string getDictionariesJson();

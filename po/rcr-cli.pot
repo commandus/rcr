@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-21 13:55+0900\n"
+"POT-Creation-Date: 2023-08-23 14:30+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -179,199 +179,223 @@ msgstr ""
 msgid "Start as daemon"
 msgstr ""
 
-#: svc/svcImpl.cpp:43
+#: svc/svcImpl.cpp:45
 msgid "Invalid arguments"
 msgstr ""
 
-#: svc/svcImpl.cpp:44
+#: svc/svcImpl.cpp:46
 msgid "Permission denied"
 msgstr ""
 
-#: svc/svcImpl.cpp:84
+#: svc/svcImpl.cpp:87
 msgid "Loading object error, id: "
 msgstr ""
 
-#: svc/svcImpl.cpp:110
+#: svc/svcImpl.cpp:113
 msgid " cause("
 msgstr ""
 
-#: svc/svcImpl.cpp:112
+#: svc/svcImpl.cpp:115
 msgid " what("
 msgstr ""
 
-#: svc/svcImpl.cpp:117
+#: svc/svcImpl.cpp:120
 msgid " message: "
 msgstr ""
 
-#: svc/svcImpl.cpp:172
+#: svc/svcImpl.cpp:175
 msgid "No grants to call"
 msgstr ""
 
-#: svc/svcImpl.cpp:173
+#: svc/svcImpl.cpp:176
 msgid "Not implemented"
 msgstr ""
 
-#: svc/svcImpl.cpp:191
+#: svc/svcImpl.cpp:194
 msgid "login plugins loaded: "
 msgstr ""
 
-#: svc/svcImpl.cpp:191
+#: svc/svcImpl.cpp:194
 msgid " from directory "
 msgstr ""
 
-#: svc/svcImpl.cpp:277
+#: svc/svcImpl.cpp:280
 msgid "User already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:289
+#: svc/svcImpl.cpp:292
 msgid "User does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:297 svc/svcImpl.cpp:369 svc/svcImpl.cpp:531
-#: svc/svcImpl.cpp:1079
+#: svc/svcImpl.cpp:300 svc/svcImpl.cpp:372 svc/svcImpl.cpp:534
+#: svc/svcImpl.cpp:1123
 msgid "Invalid operation"
 msgstr ""
 
-#: svc/svcImpl.cpp:300
+#: svc/svcImpl.cpp:303
 msgid "change user error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:302
+#: svc/svcImpl.cpp:305
 msgid "change user unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:350
+#: svc/svcImpl.cpp:353
 msgid "Property already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:360
+#: svc/svcImpl.cpp:363
 msgid "Property does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:372
+#: svc/svcImpl.cpp:375
 msgid "change property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:374
+#: svc/svcImpl.cpp:377
 msgid "change property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:421
+#: svc/svcImpl.cpp:424
 msgid "get card error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:423
+#: svc/svcImpl.cpp:426
 msgid "get card unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:535
+#: svc/svcImpl.cpp:538
 msgid "chCard error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:537
+#: svc/svcImpl.cpp:540
 msgid "chCard unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:652
+#: svc/svcImpl.cpp:661
 msgid "list operations error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:654
+#: svc/svcImpl.cpp:663
 msgid "list operations unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:664
+#: svc/svcImpl.cpp:673
 msgid "list symbols error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:666
+#: svc/svcImpl.cpp:675
 msgid "list symbols unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:676
+#: svc/svcImpl.cpp:685
 msgid "list property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:678
+#: svc/svcImpl.cpp:687
 msgid "list property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:741 svc/svcImpl.cpp:1115
+#: svc/svcImpl.cpp:750 svc/svcImpl.cpp:1159
 msgid "list box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:744 svc/svcImpl.cpp:1118
+#: svc/svcImpl.cpp:753 svc/svcImpl.cpp:1162
 msgid "list box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:828
+#: svc/svcImpl.cpp:872
 msgid "Check credentials error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:830
+#: svc/svcImpl.cpp:874
 msgid "Check credentials unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:862
+#: svc/svcImpl.cpp:906
 msgid "Set credentials error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:864
+#: svc/svcImpl.cpp:908
 msgid "Set credentials unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:889
+#: svc/svcImpl.cpp:933
 msgid "Check credentials & set token error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:891
+#: svc/svcImpl.cpp:935
 msgid "Check credentials & set token unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:948
+#: svc/svcImpl.cpp:992
 msgid "list user error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:951
+#: svc/svcImpl.cpp:995
 msgid "list user unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:969
+#: svc/svcImpl.cpp:1013
 msgid "remove property error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:971
+#: svc/svcImpl.cpp:1015
 msgid "remove property unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:1055
+#: svc/svcImpl.cpp:1099
 msgid "Box already exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:1068
+#: svc/svcImpl.cpp:1112
 msgid "Box does not exists"
 msgstr ""
 
-#: svc/svcImpl.cpp:1082
+#: svc/svcImpl.cpp:1126
 msgid "change box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1084
+#: svc/svcImpl.cpp:1128
 msgid "change box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:1144
+#: svc/svcImpl.cpp:1188
 msgid "change package box error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1147
+#: svc/svcImpl.cpp:1191
 msgid "change package box unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:1394
+#: svc/svcImpl.cpp:1438
 msgid "list journal error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1397
+#: svc/svcImpl.cpp:1441
 msgid "list journal unknown error"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:239
+msgid "Box"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:240
+msgid "Name"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:241
+msgid "Quantity"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:242
+msgid "Label"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:243
+msgid "Card #"
+msgstr ""
+
+#: SpreadSheetHelper.cpp:244
+msgid "Package #"
 msgstr ""

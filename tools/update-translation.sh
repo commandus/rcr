@@ -10,8 +10,8 @@ for f in $(ls po/*.po) ; do
     case $fn in
       'box') FM='cli/box.cpp';;
       'mkdb') FM='cli/mkdb.cpp';;
-      'rcr-cli') FM='cli/rcr-cli.cpp cli/grpcClient.cpp';;
-      'rcr-svc') FM='svc/*';;
+      'rcr-cli') FM='cli/rcr-cli.cpp cli/grpcClient.cpp SpreadSheetHelper.cpp';;
+      'rcr-svc') FM='svc/* SpreadSheetHelper.cpp';;
       *) FM='cli/grpcClient.cpp';;
     esac
 

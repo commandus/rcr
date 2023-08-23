@@ -5,10 +5,14 @@
 #include "SpreadSheetHelper.h"
 
 #include <xlnt/xlnt.hpp>
+// i18n
+#include <libintl.h>
+#define _(String) gettext (String)
 
 #include "utilstring.h"
 #include "string-helper.h"
 #include "StockOperation.h"
+#include "QueryProperties.h"
 
 void SheetRow::toCardRequest(
     const std::string &operation,
@@ -38,10 +42,10 @@ void SheetRow::toCardRequest(
         prop->set_value(std::to_string(property_v));
     }
 
-    for (std::vector <std::string>::const_iterator it = properties.begin(); it != properties.end(); it++) {
+    for (std::map <std::string, std::string>::const_iterator it = properties.begin(); it != properties.end(); it++) {
         rcr::PropertyRequest *prop = retval.mutable_properties()->Add();
-        prop->set_property_type_name("K");
-        prop->set_value(*it);
+        prop->set_property_type_name(it->first);
+        prop->set_value(it->second);
     }
 }
 
@@ -104,6 +108,10 @@ int SpreadSheetHelper::loadFile(
                     if (!parseC(sr, row[1].to_string()))
                         continue;
                     break;
+                case 'L':
+                    if (!parseL(sr, row[1].to_string()))
+                        continue;
+                    break;
                 case 'R':
                     if (!parseR(sr, row[1].to_string()))
                         continue;
@@ -149,14 +157,23 @@ int SpreadSheetHelper::loadString(
         xlnt::worksheet wsheet = book.sheet_by_index(i);
         char symb = getSymbolFromSheetName(wsheet);
         for (auto row : wsheet.rows()) {
+            bool isNewFormat = false;
             SheetRow sr;
             sr.symbol = symb;
+            // use previous box if not specified
             sr.id = boxId;
-            // id
             if (row[0].has_value()) {
-                if (row[0].data_type() != xlnt::cell_type::number)
-                    continue;
-                boxId = std::strtol(row[0].to_string().c_str(), nullptr, 10);
+                std::string v = row[0].to_string();
+                if (v.find('-') != std::string::npos) {
+                    // new format contain full box path
+                    boxId = StockOperation::parseBoxes(v);
+                    isNewFormat = true;
+                } else {
+                    // old format has last box number
+                    if (row[0].data_type() != xlnt::cell_type::number)
+                        continue;
+                    boxId = std::strtol(v.c_str(), nullptr, 10);
+                }
                 sr.id = boxId;
             }
             // name and properties
@@ -182,12 +199,21 @@ int SpreadSheetHelper::loadString(
             sr.qty = std::strtol(row[2].to_string().c_str(), nullptr, 10);
             if (sr.qty <= 0)
                 continue;
-            // property: case
-            sr.property_dip = row[3].to_string();
-            sr.property_dip = trim(sr.property_dip);
-            // remarks
-            sr.remarks = row[4].to_string();
-            sr.remarks = trim(sr.remarks);
+
+            if (isNewFormat) {
+                size_t ofs = 0;
+                QueryProperties::parse(row[4].to_string(), ofs, sr.properties);
+                sr.property_dip = "";
+                sr.remarks = "";
+            } else {
+                // property: case
+                sr.property_dip = row[3].to_string();
+                sr.property_dip = trim(sr.property_dip);
+                // remarks
+                sr.remarks = row[4].to_string();
+                sr.remarks = trim(sr.remarks);
+            }
+
             items.push_back(sr);
             // update statistic counters
             total += sr.qty;
@@ -208,13 +234,15 @@ int SpreadSheetHelper::loadCards(
     // create component sheets
     for (int i = 0; i < 26; i++) {
         wsheets[i] = book.create_sheet();
-        wsheets[i].title(std::string('A' + i, 1));
+        char t = 'A' + i;
+        wsheets[i].title(std::string(&t, 1));
         lastRow[i] = 2;
-        wsheets[i].cell("A1").value("Коробка");
-        wsheets[i].cell("B1").value("Наименование");
-        wsheets[i].cell("C1").value("Количество");
-        wsheets[i].cell("D1").value("Марка");
-        wsheets[i].cell("E1").value(" Описание");
+        wsheets[i].cell("A1").value(_("Box"));
+        wsheets[i].cell("B1").value(_("Name"));
+        wsheets[i].cell("C1").value(_("Quantity"));
+        wsheets[i].cell("D1").value(_("Label"));
+        wsheets[i].cell("E1").value(_("Card #"));
+        wsheets[i].cell("F1").value(_("Package #"));
     }
 
     for (int i = 0; i < cards.cards_size(); i++) {
@@ -222,9 +250,7 @@ int SpreadSheetHelper::loadCards(
         xlnt::worksheet &w = wsheets[c.card().symbol_id()];
         for (int p = 0; p < c.packages_size(); p++) {
             auto pack = c.packages(p);
-            BoxArray a;
-            StockOperation::box2Array(a, pack.box());
-            w.cell("A" + std::to_string(lastRow[i])).value(a.a[0]);
+            w.cell("A" + std::to_string(lastRow[i])).value(StockOperation::boxes2string(pack.box())); // box
             w.cell("B" + std::to_string(lastRow[i])).value(c.card().name());
             w.cell("C" + std::to_string(lastRow[i])).value(std::to_string(pack.qty()));
             std::stringstream ss;
@@ -232,7 +258,8 @@ int SpreadSheetHelper::loadCards(
                 ss << c.properties(pr).property_type() << ": " << c.properties(pr).value() << " ";
             }
             w.cell("D" + std::to_string(lastRow[i])).value(ss.str());
-            w.cell("E" + std::to_string(lastRow[i])).value("");
+            w.cell("E" + std::to_string(lastRow[i])).value(std::to_string(c.card().id()));
+            w.cell("F" + std::to_string(lastRow[i])).value(std::to_string(pack.id()));
         }
         lastRow[i] = lastRow[i] + 1;
     }
@@ -310,6 +337,51 @@ bool SpreadSheetHelper::parseC(
     retVal.nominal = std::strtoull(farads.c_str(), nullptr, 10);
     //
     retVal.nominal *= 1000000; // MF, MKF -> pF
+    return true;
+}
+
+/**
+ * 35v  330mkG -> 330мкГн V:35
+ * 400v10mg -> 10мкГн V:400
+ * 50v3,3mg -> 3.3мкГн V:50
+ * Sheet name индуктивности
+
+ * @param retVal
+ * @param value
+ * @return
+ */
+bool SpreadSheetHelper::parseL(
+    SheetRow &retVal,
+    const std::string &value
+) {
+    std::string vc;
+    vc = toUpperCase(value);
+    vc = trim(vc);
+    size_t v = vc.find('V');
+    if (v == std::string::npos) {
+        v = 0;
+        retVal.property_v = 0;
+    } else {
+        std::string volts = vc.substr(0, v);
+        volts = trim(volts);
+        retVal.property_v = std::strtol(volts.c_str(), nullptr, 10);
+    }
+    if (v >= vc.size())
+        return false;
+    v++;
+    vc = vc.substr(v);
+    vc = trim(vc);
+    size_t ef = vc.size();
+    for (size_t p = 0; p < vc.size(); p++) {
+        if (!isdigit(vc[p])) {
+            ef = p;
+            break;
+        }
+    }
+    std::string gnr = vc.substr(0, ef);
+    gnr = trim(gnr);
+    retVal.nominal = std::strtoull(gnr.c_str(), nullptr, 10);
+    retVal.nominal *= 1000000; // MF, MKF -> pG
     return true;
 }
 
