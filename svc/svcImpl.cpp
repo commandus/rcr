@@ -1490,14 +1490,15 @@ int RcrImpl::exportExcelFile(
         uint64_t cnt = 0;
         uint64_t sum = 0;
         p.exec(mDb, &t, 0, 0, dictionaries, list, &operationResponse, &cards, componentFlags, cnt, sum);
-        if (cnt < list.size())
-            break;
+
         SpreadSheetHelper spreadSheetHelper;
         xlnt::workbook book;
         book.title(pname);
         spreadSheetHelper.loadCards(book, cards);
         f->set_content(spreadSheetHelper.toString(book));
 
+        if (cnt < list.size())
+            break;
         ofs += 32768;
         fileCount++;
     }

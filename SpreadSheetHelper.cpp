@@ -235,7 +235,9 @@ int SpreadSheetHelper::loadCards(
     for (int i = 0; i < 26; i++) {
         wsheets[i] = book.create_sheet();
         char t = 'A' + i;
-        wsheets[i].title(std::string(&t, 1));
+        std::string dsc = std::string(&t, 1) + " - " + MeasureUnit::description(ML_RU, (COMPONENT) i);
+        wsheets[i].title(dsc);
+
         lastRow[i] = 2;
         wsheets[i].cell("A1").value(_("Box"));
         wsheets[i].cell("B1").value(_("Name"));
@@ -244,25 +246,48 @@ int SpreadSheetHelper::loadCards(
         wsheets[i].cell("E1").value(_("Card #"));
         wsheets[i].cell("F1").value(_("Package #"));
     }
+    // delete first sheet
+    book.remove_sheet(book.active_sheet());
 
-    for (int i = 0; i < cards.cards_size(); i++) {
-        rcr::CardNPropetiesPackages c = cards.cards(i);
-        xlnt::worksheet &w = wsheets[c.card().symbol_id()];
+    for (int cardNo = 0; cardNo < cards.cards_size(); cardNo++) {
+        rcr::CardNPropetiesPackages c = cards.cards(cardNo);
+        auto componentIdx = c.card().symbol_id();
+        if (componentIdx > 0)
+            componentIdx--;
+        xlnt::worksheet &w = wsheets[componentIdx];
+        auto lr = lastRow[componentIdx];
         for (int p = 0; p < c.packages_size(); p++) {
             auto pack = c.packages(p);
-            w.cell("A" + std::to_string(lastRow[i])).value(StockOperation::boxes2string(pack.box())); // box
-            w.cell("B" + std::to_string(lastRow[i])).value(c.card().name());
-            w.cell("C" + std::to_string(lastRow[i])).value(std::to_string(pack.qty()));
+            w.cell(xlnt::cell_reference(1, lr)).value(StockOperation::boxes2string(pack.box())); // A box
+            w.cell(xlnt::cell_reference(2, lr)).value(c.card().name());    // B
+            w.cell(xlnt::cell_reference(3, lr)).value(std::to_string(pack.qty())); // C
             std::stringstream ss;
             for (int pr = 0; pr < c.properties_size(); pr++) {
                 ss << c.properties(pr).property_type() << ": " << c.properties(pr).value() << " ";
             }
-            w.cell("D" + std::to_string(lastRow[i])).value(ss.str());
-            w.cell("E" + std::to_string(lastRow[i])).value(std::to_string(c.card().id()));
-            w.cell("F" + std::to_string(lastRow[i])).value(std::to_string(pack.id()));
+            w.cell(xlnt::cell_reference(4, lr)).value(ss.str()); // D
+            w.cell(xlnt::cell_reference(5, lr)).value(std::to_string(c.card().id()));   // E
+            w.cell(xlnt::cell_reference(6, lr)).value(std::to_string(pack.id())); // F
         }
-        lastRow[i] = lastRow[i] + 1;
+        lastRow[componentIdx] = lr + 1;
     }
+
+    // freeze top row and left column
+    for (int i = 0; i < 26; i++) {
+        wsheets[i].freeze_panes("B2");
+    }
+
+    // find out first filled worksheet
+    int firstSheet = 0;
+    for (int i = 0; i < 26; i++) {
+        if (lastRow[i] > 2) {
+            firstSheet = i;
+            break;
+        }
+    }
+    // set it active
+    book.active_sheet(firstSheet);
+
     return 0;
 }
 
