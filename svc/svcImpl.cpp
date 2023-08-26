@@ -815,8 +815,8 @@ int RcrImpl::exportExcelFiles(
     rcr::DictionariesResponse dictionaries;
     int r = loadDictionaries(&dictionaries, ML_INTL);
     if (!r) {
-        time_t сt = time(nullptr);
-        r = exportExcelFile(retVal, t, mDb, query, symbolName, сt, &dictionaries);
+        time_t ct = time(nullptr);
+        r = exportExcelFile(retVal, t, mDb, query, symbolName, ct, &dictionaries);
     }
     return r;
 }

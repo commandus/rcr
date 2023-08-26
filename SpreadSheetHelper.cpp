@@ -286,8 +286,9 @@ int SpreadSheetHelper::loadCards(
         }
     }
     // set it active
+#ifndef _WINDOWS
     book.active_sheet(firstSheet);
-
+#endif
     return 0;
 }
 

@@ -1,5 +1,5 @@
 #ifdef _MSC_VER
-#define	SYSLOG(msg)
+#define	SYSLOG(level, msg)
 #define OPEN_SYSLOG(NAME)
 #define CLOSE_SYSLOG()
 #else
