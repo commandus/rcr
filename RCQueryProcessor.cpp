@@ -288,11 +288,11 @@ int RCQueryProcessor::saveCard(
                 if (foundCardId) {
                     // decrement qty in specified box
                     uint64_t packageId;
-                    uint64_t qPrevious = getQuantity(db, t, packageId, card.id(), cardRequest.box());
+                    uint64_t qPrevious = getQuantity(db, t, packageId, foundCardId, cardRequest.box());
                     auto q = qPrevious - cardRequest.qty();
                     if (q < 0)
                         q = 0;
-                    packageId = setQuantity(db, t, packageId, card.id(), cardRequest.box(), q);
+                    packageId = setQuantity(db, t, packageId, foundCardId, cardRequest.box(), q);
                     updateBoxOnInsert(db, t, cardRequest.box(), "");
                     add2log(db, oper->symbol(), userId, packageId, cardRequest.qty());
                 }
