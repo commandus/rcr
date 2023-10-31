@@ -283,6 +283,35 @@ int RCQueryProcessor::saveCard(
             packageId = setQuantity(db, t, packageId, card.id(), cardRequest.box(), qPrevious + cardRequest.qty());
             updateBoxOnInsert(db, t, cardRequest.box(), "");
             add2log(db, oper->symbol(), userId, packageId, cardRequest.qty());
+        } else {
+            if (oper->symbol() == "-") {
+                if (foundCardId) {
+                    // decrement qty in specified box
+                    uint64_t packageId;
+                    uint64_t qPrevious = getQuantity(db, t, packageId, card.id(), cardRequest.box());
+                    auto q = qPrevious - cardRequest.qty();
+                    if (q < 0)
+                        q = 0;
+                    packageId = setQuantity(db, t, packageId, card.id(), cardRequest.box(), q);
+                    updateBoxOnInsert(db, t, cardRequest.box(), "");
+                    add2log(db, oper->symbol(), userId, packageId, cardRequest.qty());
+                }
+            } else {
+                if (oper->symbol() == "=") {
+                    if (foundCardId) {
+                        card.set_id(foundCardId);
+                        db->update(card);
+                    } else {
+                        // add a new card
+                        card.set_id(db->persist(card));
+                        // set properties
+                        setProperties(db, t, cardRequest, card.id(), dictionaries);
+                    }
+                    uint64_t packageId = setQuantity(db, t, packageId, card.id(), cardRequest.box(), cardRequest.qty());
+                    updateBoxOnInsert(db, t, cardRequest.box(), "");
+                    add2log(db, oper->symbol(), userId, packageId, cardRequest.qty());
+                }
+            }
         }
     }
     return 0;

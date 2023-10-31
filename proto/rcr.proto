@@ -277,7 +277,8 @@ message ImportExcelRequest
     string symbol = 2;
     uint64 prefix_box = 3; // first box, e.g. 219
     bool number_in_filename = 4;
-    repeated ExcelFile file = 5;
+    string operation = 5;
+    repeated ExcelFile file = 6;
 }
 
 message ExportExcelRequest

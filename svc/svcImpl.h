@@ -90,6 +90,7 @@ protected:
         const rcr::ExcelFile &file,
         uint64_t prefixBox,
         bool numberInFilename,
+        const std::string &operationSymbol,
         rcr::DictionariesResponse &dictionaries
     );
     void removePropertyFromCards(

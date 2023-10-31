@@ -777,7 +777,7 @@ grpc::Status RcrImpl::importExcel(
     size_t r = 0;
     for (auto f = request->file().begin(); f != request->file().end(); f++) {
         r += importExcelFile(t, mDb, request->user().id(), request->symbol(), *f, request->prefix_box(),
-            request->number_in_filename(), dictionaries);
+            request->number_in_filename(), request->operation(), dictionaries);
         cnt++;
     }
     response->set_count(cnt);   // files
@@ -829,6 +829,7 @@ size_t RcrImpl::importExcelFile(
     const rcr::ExcelFile &file,
     uint64_t prefixBox,
     bool numberInFilename,
+    const std::string &operationSymbol,
     rcr::DictionariesResponse &dictionaries
 ) {
     std::string pb;
@@ -844,7 +845,7 @@ size_t RcrImpl::importExcelFile(
 
     for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
         rcr::CardRequest cardRequest;
-        item->toCardRequest("+", symbol, box, cardRequest);
+        item->toCardRequest(operationSymbol, symbol, box, cardRequest);
         RCQueryProcessor p;
         p.saveCard(mDb, &t, userId, cardRequest, &dictionaries);
     }

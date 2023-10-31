@@ -313,7 +313,7 @@ char SpreadSheetHelper::getSymbolFromSheetName(
     if (uSheetName.find("КОНД") == 0)
         r = 'C';
     else
-        if (uSheetName.find("РЕЗИ"))
+        if (uSheetName.find("РЕЗИ") == 0)
             r = 'R';
     return r;
 }
