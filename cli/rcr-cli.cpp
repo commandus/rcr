@@ -123,7 +123,7 @@ void viewSpreadSheets(
             box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
         else
             box = BoxName::extractFromFileName(boxName);
-        SpreadSheetHelper spreadSheet(*it);
+        SpreadSheetHelper spreadSheet(*it, importSymbol);
         std::cout << *it << ": " << spreadSheet.items.size() << _(" names, ") << spreadSheet.total << _(" items") << std::endl;
         for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
             if (bx->second) {
@@ -152,7 +152,8 @@ void printSpreadSheets(
     const std::string &path,
     const std::string &boxName,
     int verbosity,
-    bool numberInFilename
+    bool numberInFilename,
+    const std::string &componentSymbol
 ) {
     std::vector<std::string> spreadSheets;
     findFiles(spreadSheets, path);
@@ -163,7 +164,7 @@ void printSpreadSheets(
             box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
         else
             box = BoxName::extractFromFileName(boxName);
-        SpreadSheetHelper spreadSheet(*it);
+        SpreadSheetHelper spreadSheet(*it, componentSymbol);
         if (verbosity) {
             std::cout << *it << ": " << spreadSheet.items.size() << _(" names, ") << spreadSheet.total << _(" items") << std::endl;
             for (auto bx = spreadSheet.boxItemCount.begin(); bx != spreadSheet.boxItemCount.end(); bx++) {
@@ -202,7 +203,7 @@ void importSpreadSheets(
             box = BoxName::extractFromFileName(boxName + " " + *it); //  <- add if filename contains boxes
         else
             box = BoxName::extractFromFileName(boxName);
-        SpreadSheetHelper spreadSheet(*it);
+        SpreadSheetHelper spreadSheet(*it, symbol);
         // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
         std::cerr << *it << std::endl;
         int r = rpc.saveSpreadsheet(box, symbol, spreadSheet.items, user);
@@ -444,10 +445,10 @@ int main(int argc, char** argv)
 
     if (config.command.find("xlsx") == 0) {
         if (config.command.find("xlsx-sheet") == 0) {
-            viewSpreadSheets(config.request, "D", "", true);
+            viewSpreadSheets(config.request, config.componentSymbol, "", true);
         } else {
             printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
-                config.numberInFileName);
+                config.numberInFileName, config.componentSymbol);
             if (config.command.find("xlsx-add") == 0) {
                 std::string cs;
                 if (config.command.size() > 9)
@@ -467,7 +468,6 @@ int main(int argc, char** argv)
             cs = config.command.substr(7);
         if (cs == "query") {
             std::string line;
-            std::string symbol;
             std::cerr << _("Enter help to see command list") << std::endl;
 
             std::string lastQuery;
@@ -486,14 +486,15 @@ int main(int argc, char** argv)
                 if (cliCmd == "SYMBOL") {
                     std::string symbolParam = toUpperCase(nextWord(line, start));
                     if (symbolParam.empty()) {
+                        std::cout << "current symbol: " << config.componentSymbol << "\n\n";
                         rpc.printSymbols(std::cout, config.locale);
                         std::cout << std::endl;
                         continue;
                     } else {
                         if (symbolParam == "*")
-                            symbol = "";
+                            config.componentSymbol = "";
                         else
-                            symbol = trim(symbolParam);
+                            config.componentSymbol = trim(symbolParam);
                     }
                 }
                 if (cliCmd == "USER") {
@@ -579,7 +580,7 @@ int main(int argc, char** argv)
                         }
                     }
                     if (importSymbol.empty() || boxName.empty())
-                        printSpreadSheets(path, boxName, 1, numberInFilename);
+                        printSpreadSheets(path, boxName, 1, numberInFilename, config.componentSymbol);
                     else
                         importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename, &u);
                     continue;
@@ -612,7 +613,7 @@ int main(int argc, char** argv)
                     continue;
                 }
 
-                int32_t r = rpc.cardQuery(std::cout, u, line, symbol, config.offset, config.size, false);
+                int32_t r = rpc.cardQuery(std::cout, u, line, config.componentSymbol, config.offset, config.size, false);
                 std::cout << std::endl;
                 if (r)
                     exit(r);

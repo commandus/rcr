@@ -56,20 +56,22 @@ SpreadSheetHelper::SpreadSheetHelper()
 }
 
 SpreadSheetHelper::SpreadSheetHelper(
-    const std::string &aFileName
+    const std::string &aFileName,
+    const std::string &symbol
 )
     : total(0)
 {
-    int r = loadFile(aFileName);
+    int r = loadFile(aFileName, symbol);
 }
 
 SpreadSheetHelper::SpreadSheetHelper(
     const std::string &aFileName,
-    const std::string &content
+    const std::string &content,
+    const std::string &symbol
 )
     : total(0)
 {
-    int r = loadString(content);
+    int r = loadString(content, symbol);
 }
 
 /**
@@ -80,7 +82,8 @@ SpreadSheetHelper::SpreadSheetHelper(
  * @return
  */
 int SpreadSheetHelper::loadFile(
-    const std::string &fileName
+    const std::string &fileName,
+    const std::string &symbol
 ) {
     xlnt::workbook book;
     book.load(fileName);
@@ -89,6 +92,9 @@ int SpreadSheetHelper::loadFile(
         xlnt::worksheet wsheet = book.sheet_by_index(i);
         std::string uSheetName =  toUpperCase(wsheet.title());
         char symb = getSymbolFromSheetName(wsheet);
+        if (symb == '\0')
+            if (!symbol.empty())
+                symb = symbol[0];
         for (auto row : wsheet.rows()) {
             SheetRow sr;
             sr.symbol = symb;
@@ -147,7 +153,8 @@ int SpreadSheetHelper::loadFile(
  * @return
  */
 int SpreadSheetHelper::loadString(
-    const std::string &content
+    const std::string &content,
+    const std::string &symbol
 ) {
     xlnt::workbook book;
     std::vector<uint8_t> cont(content.begin(), content.end());
@@ -156,6 +163,9 @@ int SpreadSheetHelper::loadString(
     for (size_t i = 0; i < book.sheet_count(); i++) {
         xlnt::worksheet wsheet = book.sheet_by_index(i);
         char symb = getSymbolFromSheetName(wsheet);
+        if (symb == '\0')
+            if (!symbol.empty())
+                symb = symbol[0];
         for (auto row : wsheet.rows()) {
             bool isNewFormat = false;
             SheetRow sr;
@@ -316,6 +326,9 @@ char SpreadSheetHelper::getSymbolFromSheetName(
     else
         if (uSheetName.find("РЕЗИ") == 0)
             r = 'R';
+        else
+            if (uSheetName.find("МК") == 0)
+                r = 'D';
     return r;
 }
 
@@ -419,4 +432,47 @@ bool SpreadSheetHelper::parseR(
     vc = toUpperCase(value);
     vc = trim(vc);
     return false;
+}
+
+std::string SpreadSheetHelper::toJsonString() {
+    std::stringstream strm;
+    strm
+        << "{\"total\": " << total
+        << ", \"itemCount\": [";
+
+    bool isFirst = true;
+    for (auto it(boxItemCount.begin()); it != boxItemCount.end(); it++) {
+        if (isFirst)
+            isFirst = false;
+        else
+            strm << ", ";
+        strm << "{\"index\": "
+            << it->first << ", \"count\": "
+            << it->second << "}";
+
+    }
+    strm << "], \"rows\": [";
+
+    isFirst = true;
+    for (auto it(items.begin()); it != items.end(); it++) {
+        if (isFirst)
+            isFirst = false;
+        else
+            strm << ", ";
+        strm << "{\"name\": \""
+            << it->name << "\", \"nominal\": "
+            << it->nominal << ", \"property_dip\": \""
+            << it->property_dip << "\", \"remarks\": \""
+            << it->remarks << "\", \"symbol\": \""
+            << it->symbol << "\", \"qty\": "
+            << it->qty << ", \"properties\": [";
+        for (auto itp(it->properties.begin()); itp != it->properties.end(); itp++) {
+            strm << "{\"property\": " << itp->first
+                    << ", \"value\": " << itp->second << "}";
+        }
+        strm << "]";
+        strm << "}";
+    }
+    strm << "]}";
+    return strm.str();
 }

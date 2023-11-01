@@ -55,17 +55,21 @@ private:
 public:
     explicit SpreadSheetHelper();
     explicit SpreadSheetHelper(
-        const std::string &fileName
+        const std::string &fileName,
+        const std::string &symbol
     );
     explicit SpreadSheetHelper(
         const std::string &fileName,
-        const std::string &content
+        const std::string &content,
+        const std::string &symbol
     );
     int loadFile(
-        const std::string &fileName
+        const std::string &fileName,
+        const std::string &symbol
     );
     int loadString(
-        const std::string &content
+        const std::string &content,
+        const std::string &symbol
     );
     static int loadCards(
         xlnt::workbook &book,
@@ -79,6 +83,8 @@ public:
     // statistics
     size_t total;   // total items count
     std::map<int, size_t> boxItemCount;
+
+    std::string toJsonString();
 };
 
 #endif //RCR_SPREADSHEETHELPER_H

@@ -1157,6 +1157,9 @@ scp /usr/lib/x86_64-linux-gnu/libabsl_spinlock_wait.so.20210324 nocmicroadmin@mi
 
 Скопировать бинарные файлы, файл базы данных и плагин(ы)
 ```
+export LANG=ru_RU.UTF-8
+./mddb
+strip rcr-cli rcr-svc mkdb box
 scp rcr-cli rcr-svc mkdb box rcr.db user@kb-srv.ysn.ru:~/rcr
 scp liblogin-ad.so user@kb-srv.ysn.ru:~/rcr/plugins
 ```
@@ -1168,6 +1171,7 @@ scp /home/andrei/src/rct-web/dist/rcr/* user@kb-srv.ysn.ru:/var/www/html
 Запустить с указанием URL сервера домена (Active Directory)
 ```
 ssh user@kb-srv.ysn.ru
+export LANG=ru_RU.UTF-8
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 ./rcr-svc -jvd -u plugins -U "ldap://ad.ysn.ru"
 ```

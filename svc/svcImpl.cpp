@@ -124,8 +124,11 @@ std::string logString (
 
 #define CHECK_PERMISSION(db, user, lvl) \
     int rights = checkUserRights(nullptr, db, user); \
-    if (rights < lvl) \
-        return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
+    if (rights < lvl) { \
+        LOG(ERROR) << ERR_SVC_PERMISSION_DENIED << " id: " << user.id() << " name: " << user.name() \
+        << " password: " << user.password() << " token: " << user.token(); \
+        return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED); \
+    }
 
 #define BEGIN_GRPC_METHOD(signature, requestMessage, transact) \
 		odb::transaction transact; \
@@ -841,7 +844,10 @@ size_t RcrImpl::importExcelFile(
     } else {
         box = prefixBox;
     }
-    SpreadSheetHelper spreadSheet(file.name(), file.content());
+    SpreadSheetHelper spreadSheet(file.name(), file.content(), symbol);
+
+    // LOG(INFO) << "user id: " << userId << std::endl;
+    // LOG(INFO) << spreadSheet.toJsonString();
 
     for (auto item = spreadSheet.items.begin(); item != spreadSheet.items.end(); item++) {
         rcr::CardRequest cardRequest;
@@ -901,7 +907,13 @@ bool RcrImpl::setCredentialsNSetToken(
         return false;
     try {
         retVal->set_token(generateNewToken());
-        db->persist(*retVal);   // save token
+        odb::result<rcr::User> qu(mDb->query<rcr::User>(odb::query<rcr::User>::name == retVal->name()));
+        odb::result<rcr::User>::iterator itu(qu.begin());
+        if (itu != qu.end()) {
+            db->update(*retVal);
+        } else {
+            db->persist(*retVal);   // save token
+        }
         return true;
     } catch (const odb::exception &e) {
         LOG(ERROR) << _("Set credentials error: ") << e.what();
