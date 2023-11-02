@@ -35,6 +35,19 @@ public:
     }
 };
 
+static void setSessionTimeouts(LDAPSession *session, int secs) {
+    struct timeval optTimeout;
+    optTimeout.tv_usec = 0;
+    optTimeout.tv_sec = secs;
+
+    ldap_set_option(session->handle, LDAP_OPT_TCP_USER_TIMEOUT, (void *)&optTimeout);
+    ldap_set_option(session->handle, LDAP_OPT_TIMEOUT, (void *)&optTimeout);
+    // Set LDAP operation timeout
+    ldap_set_option(session->handle, LDAP_OPT_TIMELIMIT, (void *)&optTimeout);
+    // Set LDAP network operation timeout(connection attempt)
+    ldap_set_option(session->handle, LDAP_OPT_NETWORK_TIMEOUT, (void *)&optTimeout);
+}
+
 EXPORT_PLUGIN_FUNC void *pluginInit(
     const std::string &path,
     void *options
@@ -60,19 +73,23 @@ extern "C" bool pluginLogin(
     const std::string &password
 )
 {
-    LDAPSession *session = (LDAPSession *) env;
-    if (!session->handle)
+    if (login.empty())
         return false;
+    LDAPSession *session = (LDAPSession *) env;
+    if (!session->handle) {
+        session->connect();
+        if (!session->handle)
+            return false;
+        setSessionTimeouts(session, 5);
+    }
     berval cred;
     cred.bv_val = (char*) password.c_str();
     cred.bv_len = password.length();
     int rc = ldap_sasl_bind_s(session->handle, login.c_str(), LDAP_SASL_SIMPLE, &cred, nullptr, nullptr, nullptr);
-    if (rc == 0) {
-        ldap_unbind_ext(session->handle, nullptr, nullptr);
-    }
     if (!(rc == 0 || rc == 49)) {
         session->disconnect();
         session->connect();
+        setSessionTimeouts(session, 5);
     }
-    return rc == LDAP_SUCCESS;
+    return (rc == LDAP_SUCCESS) && cred.bv_len > 0;
 }

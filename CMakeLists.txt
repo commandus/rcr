@@ -16,7 +16,7 @@ set(VCPKG_INC "/git/vcpkg/installed/x64-windows/include")
 
 cmake_minimum_required(VERSION 3.9)
 set(PROJECT_NAME "rcr")
-project(${PROJECT_NAME} VERSION 1.3)
+project(${PROJECT_NAME} VERSION 1.4)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 

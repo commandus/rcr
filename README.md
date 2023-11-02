@@ -1174,4 +1174,17 @@ ssh user@kb-srv.ysn.ru
 export LANG=ru_RU.UTF-8
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 ./rcr-svc -jvd -u plugins -U "ldap://ad.ysn.ru"
+
+или
+
+./rcr-svc -jvd -u plugins -U "ldap://ad.ysn.ru" -l 50051 -p 8050 --db kb.db
+./rcr-svc -jvd -u plugins -U "ldap://ad.ysn.ru" -l 50052 -p 8052 --db lmii.db
+
+```
+
+## Баги
+
+На kb-srv при переключении пользователя возникает ошибка 
+```
+kernel: [7296666.659926] MHD-worker[228290]: segfault at 55795c735 ip 00007f93333f42e5 sp 00007f93331b7f70 error 4 in libldap-2.5.so.0.1.10[7f93333e7000+3a000]
 ```

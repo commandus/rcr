@@ -415,3 +415,40 @@ TEST(RCQuery, ParseAsterisk) {
     ASSERT_EQ(q.measure, COMPONENT_D);
     ASSERT_EQ(q.nominal, 0);
 }
+
+extern "C" void *pluginInit(
+    const std::string &path,
+    void *options
+);
+
+extern "C" void pluginDone(
+    void *env
+);
+
+extern "C" bool pluginLogin(
+    void *env,
+    const std::string &login,
+    const std::string &password
+);
+
+TEST(LDAP, login) {
+    const std::string u = "ldap://ad.ysn.ru";
+    void *e = pluginInit("", (void *) &u);
+    bool y = pluginLogin(e, "andrey.ivanov@ikfia.ysn.ru", "");
+    ASSERT_EQ(y, false);
+    y = pluginLogin(e, "andrey.ivanov@ikfia.ysn.ru", "vjhlthktyl");
+    ASSERT_EQ(y, true);
+    y = pluginLogin(e, "", "");
+    ASSERT_EQ(y, false);
+
+    for (int i = 0; i < 3; i++) {
+        y = pluginLogin(e, "andrey.ivanov@ikfia.ysn.ru", "***");
+        ASSERT_EQ(y, false);
+        y = pluginLogin(e, "", "");
+        ASSERT_EQ(y, false);
+    }
+    y = pluginLogin(e, "andrey.ivanov@ikfia.ysn.ru", "vjhlthktyl");
+    ASSERT_EQ(y, true);
+
+    pluginDone(e);
+}
