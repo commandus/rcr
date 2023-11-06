@@ -181,7 +181,7 @@ static void runHttpJson(
             << errno << ": " << strerror(errno)
             << ". libmicrohttpd version " << std::hex << MHD_VERSION;
 		if (asDaemon)
-			SYSLOG(LOG_ALERT, ss.str().c_str())
+			SYSLOG(LOG_ALERT, ss.str().c_str());
         else {
             std::cerr << ss.str() << std::endl;
         }
