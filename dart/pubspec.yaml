@@ -1,0 +1,14 @@
+name: rcr
+description: Dart gRPC RCR client.
+publish_to: none
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+
+dependencies:
+  async: ^2.2.0
+  grpc:
+  protobuf: ^3.0.0
+
+dev_dependencies:
+  lints: ^2.0.0
