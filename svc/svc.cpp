@@ -180,9 +180,9 @@ static void runHttpJson(
         ss << "Can not start web service errno "
             << errno << ": " << strerror(errno)
             << ". libmicrohttpd version " << std::hex << MHD_VERSION;
-		if (asDaemon)
+		if (asDaemon) {
 			SYSLOG(LOG_ALERT, ss.str().c_str());
-        else {
+        } else {
             std::cerr << ss.str() << std::endl;
         }
     } else {
