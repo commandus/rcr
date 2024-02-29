@@ -562,10 +562,6 @@ property = A точность
 
 ## Замечания разработчикам
 
-### API
-
-#### Карточки
-
 Удаленный вызов cardQuery() производит большинство манипуляция с карточками.
 
 - user имя пользователя, производящего манипуляцию
@@ -581,7 +577,7 @@ property = A точность
 Если в запросе задан агрегат count или sum, результат возвращается
 в OperationResponse в count и sum.
 
-#### Список мест хранения
+### Список мест хранения
 
 getBox()
 
@@ -595,26 +591,9 @@ getBox()
 Первоначальная диаграмма объектов находится в файле diagram.uxf. Для просмотра и редактирования нужно установить плагин
 Visual Code UMLet.
 
-Таблицы базы данных:
-
-- Component Компонент (номенклатура) - Микросхема
-- Card Карточка учета номенклатуры - микросхема с учетом исполнения(корпуса) и запасы в разных местах хранения
-- Package Место хранения. Место хранения может хранить несколько типов компонент
-- Property Дополнительные свойства - описание особенностей исполнения, например, тип корпуса, или номинальное напряжение.
-
-Словари:
-
-- Symbol Условное обозначение компонента (R, C, ...) и единица измерения номинала (для пассивных элементов)
-- Operation '+'- добавление,  '-'- уменьшение, '='- установка значения '/'- разделение (перемещение части компонент из одной коробки в другую) 
-- PropertyType Типы свойств ('A'- тип корпуса, 'V'- номинальное напряжение, 'A'- максимальный ток, 'P'- рассеиваемая мощность, '%'- точность) 
-- Card Карточка учета номенклатуры - микросхема с учетом исполнения(корпуса) и запасы в разных местах хранения
-- Package Место хранения. Место хранения может хранить несколько типов компонент
-- Property Описание особенностей исполнения, например, тип корпуса
-
-Вспомогательные таблицы:
-
-- User
-- GroupUser
+Для разделения прав между группами пользователей в веб приложении выбираются разные серввисы по номерам портов, хотя в
+приложении есть понятие групп, проверка полномочий в операциях над принадлежащими и не принадлежащими группам коробками
+не реализована.
 
 Пример списка компонент:
 
@@ -645,6 +624,154 @@ User
 
 Общее количество подсчитывается суммированием количеств в каждом месте хранения
 
+#### Таблицы
+
+Таблицы базы данных:
+
+- Box Коробка
+- BoxGroup Принадлежность коробок группам пользователей
+- Card Карточка учета номенклатуры - микросхема с учетом исполнения(корпуса) и запасы в разных местах хранения                    
+- Group Группа пользователей
+- Journal Журнал операций
+- Package Место хранения. Место хранения может хранить несколько типов компонент
+- Property Дополнительные свойства - описание особенностей исполнения, например, тип корпуса, или номинальное напряжение.
+- ServiceSettings настройки для интеерфейса пользователя, связанный с сервисом, например, последняя строка запроса
+
+Словари:
+
+- Symbol Условное обозначение компонента (R, C, ...) и единица измерения номинала (для пассивных элементов)
+- Operation '+'- добавление,  '-'- уменьшение, '='- установка значения '/'- разделение (перемещение части компонент из одной коробки в другую) 
+- PropertyType Типы свойств ('A'- тип корпуса, 'V'- номинальное напряжение, 'A'- максимальный ток, 'P'- рассеиваемая мощность, '%'- точность) 
+
+Вспомогательные таблицы:
+
+- User Пользователи и их права
+- GroupUser Пользователи в группе
+
+Схема базы данных сгененирована скриптом, вызываемым в момент сборки приложения по .proto файлу.
+
+При работе с базой данных нужно учитывать, что логика реализована в приложении сервиса. Например,
+при прямой работе с базой данных при добавлении карточки, нужно проверить наличие коробки, если ее нет,
+создать, в журнале отметить эти события.
+
+##### Box
+
+CREATE TABLE IF NOT EXISTS "Box" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "box_id" INTEGER NOT NULL,
+  "name" TEXT NOT NULL,
+  "uname" TEXT NOT NULL);
+CREATE INDEX "Box_box_id_i"
+  ON "Box" ("box_id");
+
+box_id типа Int64 приложение интепретирует как четыре двухбайтных слова, страшее слово- знаковое, остальные- баззнаковые.
+
+Для перевода box_id в читаемую последовательность вида 119-1-2 и наоборот используйте утилиту box.
+
+##### BoxGroup
+
+CREATE TABLE IF NOT EXISTS "BoxGroup" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "group_id" INTEGER NOT NULL,
+  "box_id" INTEGER NOT NULL);
+
+##### Card
+
+CREATE TABLE IF NOT EXISTS "Card" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "uname" TEXT NOT NULL,
+  "symbol_id" INTEGER NOT NULL,
+  "nominal" INTEGER NOT NULL);
+
+##### Group
+
+CREATE TABLE IF NOT EXISTS "Group" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL);
+
+##### GroupUser
+
+CREATE TABLE IF NOT EXISTS "GroupUser" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "group_id" INTEGER NOT NULL,
+  "user_id" INTEGER NOT NULL);
+
+##### Journal
+
+CREATE TABLE IF NOT EXISTS "Journal" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "dt" INTEGER NOT NULL,
+  "user_id" INTEGER NOT NULL,
+  "package_id" INTEGER NOT NULL,
+  "operation_symbol" TEXT NOT NULL,
+  "value" INTEGER NOT NULL);
+
+##### Operation
+
+CREATE TABLE IF NOT EXISTS "Operation" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "symbol" TEXT NOT NULL,
+  "description" TEXT NOT NULL);
+
+##### Package
+
+CREATE TABLE IF NOT EXISTS "Package" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "card_id" INTEGER NOT NULL,
+  "box" INTEGER NOT NULL,
+  "qty" INTEGER NOT NULL);
+CREATE INDEX "Package_card_id_i"
+  ON "Package" ("card_id");
+CREATE INDEX "Package_box_i"
+  ON "Package" ("box");
+
+##### Property
+
+CREATE TABLE IF NOT EXISTS "Property" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "card_id" INTEGER NOT NULL,
+  "property_type_id" INTEGER NOT NULL,
+  "value" TEXT NOT NULL);
+
+##### PropertyType
+
+CREATE TABLE IF NOT EXISTS "PropertyType" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "key" TEXT NOT NULL,
+  "description" TEXT NOT NULL);
+CREATE UNIQUE INDEX "PropertyType_key_i"
+  ON "PropertyType" ("key");
+
+##### ServiceSettings
+
+CREATE TABLE IF NOT EXISTS "ServiceSettings" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "addr" TEXT NOT NULL,
+  "port" INTEGER NOT NULL,
+  "last_component_symbol" TEXT NOT NULL,
+  "last_box" INTEGER NOT NULL,
+  "last_query" TEXT NOT NULL);
+
+##### Symbol
+
+CREATE TABLE IF NOT EXISTS "Symbol" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "sym" TEXT NOT NULL,
+  "description" TEXT NOT NULL,
+  "unit" TEXT NOT NULL,
+  "pow10" INTEGER NOT NULL);
+
+##### User
+
+CREATE TABLE IF NOT EXISTS "User" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "password" TEXT NOT NULL,
+  "token" INTEGER NOT NULL,
+  "rights" INTEGER NOT NULL);
+
 #### Особенности исполнения Property
 
 Словарь Property содержит дополнительные свойства, которые могут быть отмечены в карточке:
@@ -665,7 +792,7 @@ User
 | P   | рассеиваемая мощность  |
 | %   | точность в %           |
 
-## Формальное описание строки запроса в cardQuery
+### Формальное описание строки запроса в cardQuery
 
 ```
 
@@ -704,7 +831,7 @@ User
 
 операнд 2 применятся только в операции "/".
 
-## Инструменты
+### Инструменты
 
 - CMake
 - Visual Studio 2022 17.4.5 (Visual C++)
@@ -762,7 +889,7 @@ cd vcpkg
 ./vcpkg integrate install
 ```
 
-## Зависимости
+### Зависимости
 
 - ICU / Intl
 - Xlnt
@@ -915,7 +1042,7 @@ gRPC depends on c-ares
 sudo apt install libc-ares-dev
 ```
 
-## Создание решения в Windows
+### Создание решения в Windows
 
 Для создания решения Visual Studio воспользуйтесь CMake:
 
@@ -961,13 +1088,13 @@ protoc's grpc c++ plugin.
 
 by the proto/rcr.proto 
 
-## Tools
+### Tools
 
 - .\tools\generate-code.ps1 - Generate
 - .\tools\clean-code.ps1 - Clean
 
 
-##### Linux
+#### Linux
 
 Check grpc_cpp_plugin is installed
 ```
@@ -1237,8 +1364,6 @@ Linux web-hosting 4.18.0-497.el8.x86_64 #1 SMP Sat Jun 10 12:24:53 UTC 2023 x86_
 
 ### Зависимости
 
-
-
 /mkdb: /lib64/libc.so.6: version `GLIBC_2.34' not found (required by ./mkdb)
 ./mkdb: /lib64/libc.so.6: version `GLIBC_2.32' not found (required by ./mkdb)
 ./mkdb: /lib64/libstdc++.so.6: version `GLIBCXX_3.4.29' not found (required by ./mkdb)
@@ -1334,3 +1459,4 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 ```
 kernel: [7296666.659926] MHD-worker[228290]: segfault at 55795c735 ip 00007f93333f42e5 sp 00007f93331b7f70 error 4 in libldap-2.5.so.0.1.10[7f93333e7000+3a000]
 ```
+Кажется, устранен
