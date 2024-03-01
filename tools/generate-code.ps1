@@ -3,7 +3,8 @@ $GRPC_PLUGIN = "c:\bin\grpc_cpp_plugin.exe"
 # -------------------------- Do not edit below this line --------------------------
 $WORK_DIR = $($args[0])
 $ODB_DATABASE_NAME = $($args[1])
-$PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows\include"
+# $PROTOBUF_INC = "C:\git\vcpkg\packages\protobuf_x64-windows\include"
+$PROTOBUF_INC = "C:\git\vcpkg\installed\x64-windows\include"
 $DEST = "."
 $GEN = "gen"
 $ODB_OPT_DIR = "odb"
