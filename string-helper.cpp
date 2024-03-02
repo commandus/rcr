@@ -13,12 +13,11 @@
 
 std::string toUpperCase(const std::string &value)
 {
-#ifdef _MSC_VER
-    std::string r = value;
-    CharUpperA((LPSTR) r.c_str());
-#else
     std::string r;
     icu::UnicodeString::fromUTF8(value).toUpper().toUTF8String(r);
+#ifdef _MSC_VER
+    if (r.empty())
+        CharUpperA((LPSTR)r.c_str());
 #endif        
     if (r.empty())
         return value;
