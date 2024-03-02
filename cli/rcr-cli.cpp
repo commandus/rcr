@@ -250,7 +250,7 @@ int parseCmd
 	// commands
 	// struct arg_file *a_niceclassfn = arg_file0(nullptr, "class", "<file>", "add NICE classes from JSON file");
 	struct arg_str *a_command = arg_str0(nullptr, nullptr, _("<command>"),
-            "card|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-sheet|xlsx-add-u");
+            "card[A-Z]|box|login|boxes|users|dictionaries|xlsx|xlsx-list|xlsx-sheet|xlsx-add-u");
     struct arg_str *a_request = arg_str0(nullptr, nullptr, _("<params>"), _("command parameter(params)"));
     struct arg_str *a_user_name = arg_str0("u", "user", _("<user-name>"), _("User login"));
     struct arg_str *a_user_password = arg_str0("p", "password", _("<password>"), _("User password"));
@@ -354,6 +354,254 @@ int parseCmd
 	return 0;
 }
 
+static int streamExpression(
+    ClientConfig& config,
+    RcrClient& rpc,
+    rcr::User u
+)
+{
+    int r = 0;
+    std::string cs;
+    if (config.command.size() > 7)
+        cs = config.command.substr(7);
+    if (cs == "query") {
+        std::string line;
+        std::cerr << _("Enter help to see command list") << std::endl;
+
+        std::string lastQuery;
+        while (std::getline(std::cin, line)) {
+            // nothing to do
+            if (line.empty())
+                continue;
+            size_t start = 0;
+            std::string cliCmd = toUpperCase(nextWord(line, start));
+            if (cliCmd == "HELP") { // "help"
+                std::cerr << HELP_STRING << std::endl;
+                continue;
+            }
+            if (cliCmd == "QUIT")  // "quit"
+                break;
+            if (cliCmd == "SYMBOL") {
+                std::string symbolParam = toUpperCase(nextWord(line, start));
+                if (symbolParam.empty()) {
+                    std::cout << "current symbol: " << config.componentSymbol << "\n\n";
+                    rpc.printSymbols(std::cout, config.locale);
+                    std::cout << std::endl;
+                    continue;
+                }
+                else {
+                    if (symbolParam == "*")
+                        config.componentSymbol = "";
+                    else {
+                        config.componentSymbol = symbolParam[0];
+                        std::cout << "current symbol: " << config.componentSymbol << std::endl;
+                    }
+                }
+            }
+            if (cliCmd == "USER") {
+                std::string userParam = toUpperCase(nextWord(line, start));
+                if (userParam.empty()) {
+                    rpc.printUser(std::cout, &u);
+                    std::cout << std::endl;
+                    continue;
+                }
+            }
+            if (cliCmd == "PROPERTY") {
+                std::string propertyManipStr = nextWord(line, start);
+                char propertyManip = 'l';
+                if (!propertyManipStr.empty())
+                    propertyManip = propertyManipStr[0];
+                switch (propertyManip) {
+                case '+':
+                case '-':
+                case '=':
+                    rpc.changeProperty(line.substr(8), &u);
+                    break;
+                default:
+                    rpc.printProperty(std::cout);
+                    std::cout << std::endl;
+                    break;
+                }
+                continue;
+            }
+
+            if (cliCmd == "BOX") {
+                std::string boxCmdStr = nextWord(line, start);
+                char boxCmd = 'l';
+                if (!boxCmdStr.empty())
+                    boxCmd = boxCmdStr[0];
+                uint64_t srcBox;
+                uint64_t destBox;
+                std::string p;
+                std::string name;
+                switch (boxCmd) {
+                case '+':
+                    p = nextWord(line, start);
+                    StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                    name = remainText(line, start);
+                    break;
+                case '-':
+                    p = nextWord(line, start);
+                    StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                    break;
+                case '=':
+                    p = nextWord(line, start);
+                    StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                    name = remainText(line, start);
+                    break;
+                case '/':
+                    p = nextWord(line, start);
+                    StockOperation::parseBoxes(srcBox, p, 0, p.size());
+                    p = nextWord(line, start);
+                    StockOperation::parseBoxes(destBox, p, 0, p.size());
+                    name = remainText(line, start);
+                    break;
+                default:    // box listing
+                    rpc.printBoxes(std::cout, config.offset, config.size, &u);
+                    std::cout << std::endl;
+                    continue;
+                }
+                rpc.chBox(boxCmd, srcBox, destBox, name, &u);
+                continue;
+            }
+            if (cliCmd == "IMPORT") {
+                std::string path = nextWord(line, start);
+                std::string importSymbol = nextWord(line, start);
+                std::string boxName = nextWord(line, start);
+                std::string sNumberInFilename = nextWord(line, start);
+                bool numberInFilename = true;
+                if (!sNumberInFilename.empty()) {
+                    switch (sNumberInFilename[0]) {
+                    case 'F':
+                    case 'f':
+                    case 'N':
+                    case 'n':
+                        numberInFilename = false;
+                        break;
+                    }
+                }
+                if (importSymbol.empty() || boxName.empty())
+                    printSpreadSheets(path, boxName, 1, numberInFilename, config.componentSymbol);
+                else
+                    importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename, &u);
+                continue;
+            }
+
+            if (cliCmd == "EXPORT") {
+                std::string path = nextWord(line, start);
+                std::string importSymbol = nextWord(line, start);
+                exportSpreadSheets(rpc, path, lastQuery, importSymbol, &u);
+                continue;
+            }
+
+            if (cliCmd == "SHEET") {
+                std::string path = nextWord(line, start);
+                std::string importSymbol = nextWord(line, start);
+                std::string boxName = nextWord(line, start);
+                std::string sNumberInFilename = nextWord(line, start);
+                bool numberInFilename = true;
+                if (!sNumberInFilename.empty()) {
+                    switch (sNumberInFilename[0]) {
+                    case 'F':
+                    case 'f':
+                    case 'N':
+                    case 'n':
+                        numberInFilename = false;
+                        break;
+                    }
+                }
+                viewSpreadSheets(path, importSymbol, boxName, numberInFilename);
+                continue;
+            }
+
+            r = rpc.cardQuery(std::cout, u, line, config.componentSymbol, config.offset, config.size, false);
+            std::cout << std::endl;
+            if (r)
+                break;
+            lastQuery = line;
+        }
+    }
+    return r;
+}
+
+static int processExpression(
+    std::ostream &strm,
+    ClientConfig &config,
+    RcrClient &rpc,
+    rcr::User u
+)
+{
+    int r = 0;
+    if (config.command.find("card") == 0) {
+        // component symbol card-d -> D card-r -> R card-c -> C card-l -> L
+        std::string cs;
+        if (config.command.size() > 5)
+            cs = config.command.substr(5);
+        else
+            if (config.command.size() > 4)
+                cs = config.command.substr(4);
+        if (cs.empty())
+            cs = config.componentSymbol;
+        cs = toUpperCase(cs);
+        int32_t r = rpc.cardQuery(strm, u, config.request, cs, config.offset, config.size, true);
+        if (r) {
+            return r;
+        }
+    }
+
+    if (config.command.find("box") == 0) {
+        // component symbol card-219 -> 219 card-219-1 -> 219-1 card-219-1-2 -> 219-1-2
+        std::string cs;
+        if (config.command.size() > 4)
+            cs = config.command.substr(4);
+        if (cs.empty())
+            cs = config.componentSymbol;
+        uint64_t minBox = 0;
+        StockOperation::parseBoxes(minBox, cs, 0, cs.size());
+        // strm<< rpc.getBoxJson(minBox, config.offset, config.size) << std::endl;;
+        rpc.printBox(strm, minBox, config.offset, config.size);
+        strm << std::endl;;
+        if (r)
+            return r;
+    }
+
+    if (config.command == "login") {
+        strm << (rpc.login(&u) ? _("success") : _("fail")) << std::endl;
+    }
+    if (config.command == "users") {
+        rpc.printUser(strm, &u);
+        strm << std::endl;
+    }
+    if (config.command == "boxes") {
+        rpc.printBoxes(strm, config.offset, config.size, &u);
+        strm << std::endl;
+    }
+    if (config.command == "dictionaries") {
+        strm << rpc.getDictionariesJson() << std::endl;
+    }
+
+    if (config.command.find("xlsx") == 0) {
+        if (config.command.find("xlsx-sheet") == 0) {
+            viewSpreadSheets(config.request, config.componentSymbol, "", true);
+        }
+        else {
+            printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
+                config.numberInFileName, config.componentSymbol);
+            if (config.command.find("xlsx-add") == 0) {
+                std::string cs;
+                if (config.command.size() > 9)
+                    cs = config.command.substr(9);
+                if (cs.empty())
+                    cs = config.componentSymbol;
+                cs = toUpperCase(cs);
+                // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
+                importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName, &u);
+            }
+        }
+    }
+    return r;
+}
+
 int main(int argc, char** argv)
 {
     // I18N
@@ -397,229 +645,9 @@ int main(int argc, char** argv)
     u.set_name(config.username);
     u.set_password(config.password);
 
-    if (config.command.find("card") == 0) {
-        // component symbol card-d -> D card-r -> R card-c -> C card-l -> L
-        std::string cs;
-        if (config.command.size() > 5)
-            cs = config.command.substr(5);
-        if (cs.empty())
-            cs = config.componentSymbol;
-        cs = toUpperCase(cs);
-        int32_t r = rpc.cardQuery(std::cout, u, config.request, cs, config.offset, config.size, true);
-        if (r) {
-            exit(r);
-        }
-    }
-
-    if (config.command.find("box") == 0) {
-        // component symbol card-219 -> 219 card-219-1 -> 219-1 card-219-1-2 -> 219-1-2
-        std::string cs;
-        if (config.command.size() > 4)
-            cs = config.command.substr(4);
-        if (cs.empty())
-            cs = config.componentSymbol;
-        uint64_t minBox = 0;
-        StockOperation::parseBoxes(minBox, cs, 0, cs.size());
-        // std::cout << rpc.getBoxJson(minBox, config.offset, config.size) << std::endl;;
-        rpc.printBox(std::cout, minBox, config.offset, config.size);
-        std::cout << std::endl;;
-        if (r) {
-            exit(r);
-        }
-    }
-
-    if (config.command == "login") {
-        std::cout << (rpc.login(&u) ? _("success") : _("fail")) << std::endl;
-    }
-    if (config.command == "users") {
-        rpc.printUser(std::cout, &u);
-        std::cout << std::endl;
-    }
-    if (config.command == "boxes") {
-        rpc.printBoxes(std::cout, config.offset, config.size, &u);
-        std::cout << std::endl;
-    }
-    if (config.command == "dictionaries") {
-        std::cout << rpc.getDictionariesJson() << std::endl;
-    }
-
-    if (config.command.find("xlsx") == 0) {
-        if (config.command.find("xlsx-sheet") == 0) {
-            viewSpreadSheets(config.request, config.componentSymbol, "", true);
-        } else {
-            printSpreadSheets(config.request, config.box, config.command.find("xlsx-list") == 0 ? 2 : 1,
-                config.numberInFileName, config.componentSymbol);
-            if (config.command.find("xlsx-add") == 0) {
-                std::string cs;
-                if (config.command.size() > 9)
-                    cs = config.command.substr(9);
-                if (cs.empty())
-                    cs = config.componentSymbol;
-                cs = toUpperCase(cs);
-                // component symbol xlsx-add-u -> U xlsx-add-r -> R xlsx-add-c -> C xlsx-add-l -> L
-                importSpreadSheets(rpc, config.request, cs, config.box, config.numberInFileName, &u);
-            }
-        }
-    }
-
-    if (config.command.find("stream") == 0) {
-        std::string cs;
-        if (config.command.size() > 7)
-            cs = config.command.substr(7);
-        if (cs == "query") {
-            std::string line;
-            std::cerr << _("Enter help to see command list") << std::endl;
-
-            std::string lastQuery;
-            while (std::getline(std::cin, line)) {
-                // nothing to do
-                if (line.empty())
-                    continue;
-                size_t start = 0;
-                std::string cliCmd = toUpperCase(nextWord(line, start));
-                if (cliCmd == "HELP") { // "help"
-                    std::cerr << HELP_STRING << std::endl;
-                    continue;
-                }
-                if (cliCmd == "QUIT")  // "quit"
-                    break;
-                if (cliCmd == "SYMBOL") {
-                    std::string symbolParam = toUpperCase(nextWord(line, start));
-                    if (symbolParam.empty()) {
-                        std::cout << "current symbol: " << config.componentSymbol << "\n\n";
-                        rpc.printSymbols(std::cout, config.locale);
-                        std::cout << std::endl;
-                        continue;
-                    } else {
-                        if (symbolParam == "*")
-                            config.componentSymbol = "";
-                        else
-                            config.componentSymbol = trim(symbolParam);
-                    }
-                }
-                if (cliCmd == "USER") {
-                    std::string userParam = toUpperCase(nextWord(line, start));
-                    if (userParam.empty()) {
-                        rpc.printUser(std::cout, &u);
-                        std::cout << std::endl;
-                        continue;
-                    }
-                }
-                if (cliCmd == "PROPERTY") {
-                    std::string propertyManipStr = nextWord(line, start);
-                    char propertyManip = 'l';
-                    if (!propertyManipStr.empty())
-                        propertyManip = propertyManipStr[0];
-                    switch (propertyManip) {
-                        case '+':
-                        case '-':
-                        case '=':
-                            rpc.changeProperty(line.substr(8), &u);
-                            break;
-                        default:
-                            rpc.printProperty(std::cout);
-                            std::cout << std::endl;
-                            break;
-                    }
-                    continue;
-                }
-
-                if (cliCmd == "BOX") {
-                    std::string boxCmdStr = nextWord(line, start);
-                    char boxCmd = 'l';
-                    if (!boxCmdStr.empty())
-                        boxCmd = boxCmdStr[0];
-                    uint64_t srcBox;
-                    uint64_t destBox;
-                    std::string p;
-                    std::string name;
-                    switch(boxCmd) {
-                        case '+':
-                            p = nextWord(line, start);
-                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
-                            name = remainText(line, start);
-                            break;
-                        case '-':
-                            p = nextWord(line, start);
-                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
-                            break;
-                        case '=':
-                            p = nextWord(line, start);
-                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
-                            name = remainText(line, start);
-                            break;
-                        case '/':
-                            p = nextWord(line, start);
-                            StockOperation::parseBoxes(srcBox, p, 0, p.size());
-                            p = nextWord(line, start);
-                            StockOperation::parseBoxes(destBox, p, 0, p.size());
-                            name = remainText(line, start);
-                            break;
-                        default:    // box listing
-                            rpc.printBoxes(std::cout, config.offset, config.size, &u);
-                            std::cout << std::endl;
-                            continue;
-                    }
-                    rpc.chBox(boxCmd, srcBox, destBox, name, &u);
-                    continue;
-                }
-                if (cliCmd == "IMPORT") {
-                    std::string path = nextWord(line, start);
-                    std::string importSymbol = nextWord(line, start);
-                    std::string boxName = nextWord(line, start);
-                    std::string sNumberInFilename = nextWord(line, start);
-                    bool numberInFilename = true;
-                    if (!sNumberInFilename.empty()) {
-                        switch(sNumberInFilename[0]) {
-                            case 'F':
-                            case 'f':
-                            case 'N':
-                            case 'n':
-                                numberInFilename = false;
-                                break;
-                        }
-                    }
-                    if (importSymbol.empty() || boxName.empty())
-                        printSpreadSheets(path, boxName, 1, numberInFilename, config.componentSymbol);
-                    else
-                        importSpreadSheets(rpc, path, importSymbol, boxName, numberInFilename, &u);
-                    continue;
-                }
-
-                if (cliCmd == "EXPORT") {
-                    std::string path = nextWord(line, start);
-                    std::string importSymbol = nextWord(line, start);
-                    exportSpreadSheets(rpc, path, lastQuery, importSymbol, &u);
-                    continue;
-                }
-
-                if (cliCmd == "SHEET") {
-                    std::string path = nextWord(line, start);
-                    std::string importSymbol = nextWord(line, start);
-                    std::string boxName = nextWord(line, start);
-                    std::string sNumberInFilename = nextWord(line, start);
-                    bool numberInFilename = true;
-                    if (!sNumberInFilename.empty()) {
-                        switch(sNumberInFilename[0]) {
-                            case 'F':
-                            case 'f':
-                            case 'N':
-                            case 'n':
-                                numberInFilename = false;
-                                break;
-                        }
-                    }
-                    viewSpreadSheets(path, importSymbol, boxName, numberInFilename);
-                    continue;
-                }
-
-                int32_t r = rpc.cardQuery(std::cout, u, line, config.componentSymbol, config.offset, config.size, false);
-                std::cout << std::endl;
-                if (r)
-                    exit(r);
-                lastQuery = line;
-            }
-        }
-    }
-    return 0;
+    if (config.command.find("stream") == 0)
+        r = streamExpression(config, rpc, u);
+    else
+        r = processExpression(std::cout, config, rpc, u);
+    return r;
 }
