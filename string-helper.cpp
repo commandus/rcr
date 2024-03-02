@@ -7,11 +7,23 @@
 #include <unicode/unistr.h>
 #include <google/protobuf/util/json_util.h>
 
+#ifdef _MSC_VER
+ #include <windows.h>
+#endif
+
 std::string toUpperCase(const std::string &value)
 {
+#ifdef _MSC_VER
+    std::string r = value;
+    CharUpperA((LPSTR) r.c_str());
+#else
     std::string r;
     icu::UnicodeString::fromUTF8(value).toUpper().toUTF8String(r);
-    return r;
+#endif        
+    if (r.empty())
+        return value;
+    else
+        return r;    
 }
 
 //

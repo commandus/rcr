@@ -378,7 +378,6 @@ int parseCmd(
         value->httpJsonPort = *a_http_json_port->ival;
 #endif
 	value->daemonize = a_daemonize->count > 0;
-	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 
 #ifdef _MSC_VER
 	char wd[MAX_PATH];
@@ -394,7 +393,8 @@ int parseCmd(
     if (value->pluginDirPath.empty()) {
         value->pluginDirPath = value->path + "/plugins";
     }
-    return 0;
+	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
+	return 0;
 }
 
 void setSignalHandler(

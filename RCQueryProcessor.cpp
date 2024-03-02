@@ -879,6 +879,7 @@ size_t RCQueryProcessor::setCards(
             uint64_t symbId = RCQueryProcessor::measure2symbolId(dictionaries, query->measure);
             card.set_symbol_id(symbId);
             card.set_name(query->componentName);
+            card.set_uname(toUpperCase(query->componentName));
             card.set_nominal(query->nominal);
             uint64_t cid = db->persist(card);
 
