@@ -262,7 +262,7 @@ int RCQueryProcessor::saveCard(
     card.set_uname(toUpperCase(cardRequest.name()));
 
     // find out card
-    uint64_t foundCardId = findCardByNameNominalProperties(cardRequest, db, t, dictionaries);
+    uint64_t foundCardId = findCardByNameNominalProperties(cardRequest, db, dictionaries);
 
     // Check does operation supported
     const rcr::Operation *oper = findOperation(dictionaries, cardRequest.operation_symbol());
@@ -500,25 +500,24 @@ void RCQueryProcessor::copyKnownProperties(
 }
 
 uint64_t RCQueryProcessor::findCardByNameNominalProperties(
-    const rcr::CardRequest &cardRequest,
-    odb::database *db,
-    odb::transaction *transaction,
-    const rcr::DictionariesResponse *dictionaries
+        const std::string &name,
+        uint64_t symbolId,
+        uint64_t nominal,
+        const google::protobuf::RepeatedPtrField<rcr::Property> &properties,
+        odb::database *db,
+        const rcr::DictionariesResponse *dictionaries
 )
 {
-    const rcr::Symbol *symbolId = findSymbol(dictionaries, cardRequest.symbol_name());
-    if (!symbolId)
-        return 0;
     try {
         odb::result<rcr::Card> q(db->query<rcr::Card>(
-            odb::query<rcr::Card>::name == cardRequest.name()
-            &&
-            odb::query<rcr::Card>::nominal == cardRequest.nominal()
-            &&
-            odb::query<rcr::Card>::symbol_id == symbolId->id()
+                odb::query<rcr::Card>::name == name
+                &&
+                odb::query<rcr::Card>::nominal == nominal
+                &&
+                odb::query<rcr::Card>::symbol_id == symbolId
         ));
         for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
-            bool foundAllproperties = hasAllProperties2(db, transaction, cardRequest.properties(), itCard->id(), dictionaries);
+            bool foundAllproperties = hasAllProperties3(db, properties, itCard->id(), dictionaries);
             if (foundAllproperties) {
                 return itCard->id();
             }
@@ -529,6 +528,50 @@ uint64_t RCQueryProcessor::findCardByNameNominalProperties(
         LOG(ERROR) << "findCardByNameNominalProperties unknown error";
     }
     return 0;
+}
+
+uint64_t RCQueryProcessor::findCardByNameNominalProperties(
+    const std::string &name,
+    uint64_t symbolId,
+    uint64_t nominal,
+    const google::protobuf::RepeatedPtrField<rcr::PropertyRequest> &properties,
+    odb::database *db,
+    const rcr::DictionariesResponse *dictionaries
+)
+{
+    try {
+        odb::result<rcr::Card> q(db->query<rcr::Card>(
+            odb::query<rcr::Card>::name == name
+            &&
+            odb::query<rcr::Card>::nominal == nominal
+            &&
+            odb::query<rcr::Card>::symbol_id == symbolId
+        ));
+        for (odb::result<rcr::Card>::iterator itCard(q.begin()); itCard != q.end(); itCard++) {
+            bool foundAllproperties = hasAllProperties2(db, properties, itCard->id(), dictionaries);
+            if (foundAllproperties) {
+                return itCard->id();
+            }
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "findCardByNameNominalProperties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "findCardByNameNominalProperties unknown error";
+    }
+    return 0;
+}
+
+uint64_t RCQueryProcessor::findCardByNameNominalProperties(
+    const rcr::CardRequest &cardRequest,
+    odb::database *db,
+    const rcr::DictionariesResponse *dictionaries
+)
+{
+    const rcr::Symbol *symbolId = findSymbol(dictionaries, cardRequest.symbol_name());
+    if (!symbolId)
+        return 0;
+    return findCardByNameNominalProperties(cardRequest.name(), symbolId->id(), cardRequest.nominal(),
+        cardRequest.properties(), db, dictionaries);
 }
 
 uint64_t RCQueryProcessor::getQuantity(
@@ -694,7 +737,6 @@ bool RCQueryProcessor::hasAllProperties(
 
 bool RCQueryProcessor::hasAllProperties2(
     odb::database *db,
-    odb::transaction *transaction,
     const google::protobuf::RepeatedPtrField<rcr::PropertyRequest> &props,
     uint64_t cardIdWhere,
     const rcr::DictionariesResponse *dictionaries
@@ -712,6 +754,37 @@ bool RCQueryProcessor::hasAllProperties2(
                     if (!pt)
                         return false;
                     return itProperty->property_type_id() == pt->id();
+                } );
+            if (fit != props.end()) {
+                if (itProperty->value() == fit->value())
+                    cnt++;
+                break;
+            }
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "hasAllProperties error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "hasAllProperties unknown error";
+    }
+    return cnt == props.size();
+}
+
+bool RCQueryProcessor::hasAllProperties3(
+    odb::database *db,
+    const google::protobuf::RepeatedPtrField<rcr::Property> &props,
+    uint64_t cardIdWhere,
+    const rcr::DictionariesResponse *dictionaries
+)
+{
+    int cnt = 0;
+    try {
+        odb::result<rcr::Property> q(db->query<rcr::Property>(
+                odb::query<rcr::Property>::card_id == cardIdWhere
+        ));
+        for (odb::result<rcr::Property>::iterator itProperty(q.begin()); itProperty != q.end(); itProperty++) {
+            auto fit = std::find_if(props.begin(), props.end(),
+                [itProperty, dictionaries](auto v) {
+                    return itProperty->property_type_id() == v.property_type_id();
                 } );
             if (fit != props.end()) {
                 if (itProperty->value() == fit->value())

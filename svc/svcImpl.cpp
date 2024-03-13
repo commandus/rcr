@@ -456,16 +456,38 @@ grpc::Status RcrImpl::chCard(
                 if (v.id())
                     v.clear_id();
                 v.set_uname(toUpperCase(v.name()));
-                uint64_t card_id = mDb->persist(v);
-                for (auto pr = request->properties().begin(); pr != request->properties().end(); pr++) {
-                    rcr::Property prv = *pr;
-                    prv.set_card_id(card_id);
-                    mDb->persist(prv);
-                }
-                for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
-                    rcr::Package p = *pack;
-                    p.set_card_id(card_id);
-                    mDb->persist(p);
+
+                // check does card exists
+                rcr::DictionariesResponse dictionaries;
+                r = loadDictionaries(&dictionaries, ML_INTL);
+
+                uint64_t card_id = RCQueryProcessor::findCardByNameNominalProperties(
+                    request->value().name(),
+                    request->value().symbol_id(),
+                    request->value().nominal(),
+                    request->properties(),
+                    mDb,
+                    &dictionaries
+                );
+
+                if (card_id == 0) {
+                    // a new one
+                    card_id = mDb->persist(v);
+
+                    for (auto pr = request->properties().begin(); pr != request->properties().end(); pr++) {
+                        rcr::Property prv = *pr;
+                        prv.set_card_id(card_id);
+                        mDb->persist(prv);
+                    }
+                    for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
+                        rcr::Package p = *pack;
+                        p.set_card_id(card_id);
+                        mDb->persist(p);
+                    }
+                } else {
+                    // card exists
+                    // just add a new package
+                    addPackages(card_id, request->packages(), request->user(), mDb);
                 }
                 response->set_id(card_id);
                 response->set_code(0);
@@ -483,9 +505,8 @@ grpc::Status RcrImpl::chCard(
             case '=': {
                 rcr::Card v = request->value();
                 uint64_t id = v.id();
-                if (!id) {
+                if (!id)
                     return grpc::Status(StatusCode::INVALID_ARGUMENT, "");
-                }
                 v.set_uname(toUpperCase(v.name()));
                 mDb->update(v);
                 // update property if changed
@@ -493,7 +514,7 @@ grpc::Status RcrImpl::chCard(
                 std::vector <uint64_t> updatedPropertyIds;
                 for (odb::result<rcr::Property>::iterator it(q.begin()); it != q.end(); it++) {
                     auto qit = std::find_if(request->properties().begin(), request->properties().end(),
-                                  [it] (auto v) {
+                        [it] (auto v) {
                         return it->id() == v.id();
                     });
                     if (qit == request->properties().end()) {
@@ -513,7 +534,7 @@ grpc::Status RcrImpl::chCard(
                 // insert a new ones
                 for (auto it = request->properties().begin(); it != request->properties().end(); it++) {
                     auto alreadyIt = std::find_if(updatedPropertyIds.begin(), updatedPropertyIds.end(),
-                                                  [it] (auto v) {
+                        [it] (auto v) {
                             return it->id() == v;
                         });
                     if (alreadyIt == updatedPropertyIds.end()) {
@@ -584,7 +605,8 @@ grpc::Status RcrImpl::cardQuery(
             p.exec(mDb, &t, userId, rights, &dictionaries, request->list(),
                response->mutable_rslt(), response->mutable_cards(),
                componentFlags,
-               cnt, sum);
+               cnt, sum
+            );
             response->mutable_rslt()->set_count(cnt);
             response->mutable_rslt()->set_sum(sum);
         } else {
@@ -1517,4 +1539,57 @@ int RcrImpl::exportExcelFile(
     }
 
     return 0;
+}
+
+void RcrImpl::addPackages(
+    uint64_t cardId,
+    const google::protobuf::RepeatedPtrField<::rcr::Package> &packages,
+    const rcr::User &user,
+    odb::database *db
+) {
+
+    odb::result<rcr::Package> qPackage(db->query<rcr::Package>(odb::query<rcr::Package>::card_id == cardId));
+    std::vector <uint64_t> updatedPackageIds;
+    updatedPackageIds.reserve(8);
+    for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
+        auto qit = std::find_if(packages.begin(), packages.end(),
+            [it] (auto v) {
+                return it->box() == v.box();
+        });
+
+        if (qit != packages.end()) {
+            updatedPackageIds.push_back(qit->id());
+            // remove if qty = 0
+            if (qit->qty() == 0) {
+                db->erase(*qit);
+            } else {
+                rcr::Package p;
+                p.set_id(it->id());
+                p.set_card_id(cardId);
+                p.set_box(qit->box());
+                p.set_qty(qit->qty());
+                db->update(p);
+            }
+        }
+    }
+    // insert a new ones
+    for (auto it = packages.begin(); it != packages.end(); it++) {
+        auto alreadyIt = std::find_if(updatedPackageIds.begin(), updatedPackageIds.end(),
+            [it] (auto v) {
+                return it->id() == v;
+        });
+        if (alreadyIt == updatedPackageIds.end()) {
+            // not updatedPackageIds yet, insert a new one if qty is not zero
+            rcr::Package p = *it;
+            p.set_card_id(cardId);
+            if (p.qty() != 0) {
+                uint64_t pid = db->persist(p);
+                LOG(INFO) << _("Added package id: ") << pid
+                    << _(" to card id: ") << p.card_id()
+                    << _(" box: ") << p.box()
+                    << _(" qty: ") << p.qty()
+                    << std::endl;
+            }
+        }
+    }
 }

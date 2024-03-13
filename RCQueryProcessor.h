@@ -115,10 +115,27 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    uint64_t findCardByNameNominalProperties(
+    static uint64_t findCardByNameNominalProperties(
+            const std::string &name,
+            uint64_t symbolId,
+            uint64_t nominal,
+            const google::protobuf::RepeatedPtrField<rcr::Property> &properties,
+            odb::database *db,
+            const rcr::DictionariesResponse *dictionaries
+    );
+
+    static uint64_t findCardByNameNominalProperties(
+        const std::string &name,
+        uint64_t symbolId,
+        uint64_t nominal,
+        const google::protobuf::RepeatedPtrField<rcr::PropertyRequest> &properties,
+        odb::database *db,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
+    static uint64_t findCardByNameNominalProperties(
         const rcr::CardRequest &cardRequest,
         odb::database *db,
-        odb::transaction *transaction,
         const rcr::DictionariesResponse *dictionaries
     );
 
@@ -160,10 +177,16 @@ public:
         const rcr::DictionariesResponse *dictionaries
     );
 
-    bool hasAllProperties2(
+    static bool hasAllProperties2(
         odb::database *db,
-        odb::transaction *transaction,
         const google::protobuf::RepeatedPtrField<rcr::PropertyRequest> &what,
+        uint64_t cardIdWhere,
+        const rcr::DictionariesResponse *dictionaries
+    );
+
+    static bool hasAllProperties3(
+        odb::database *db,
+        const google::protobuf::RepeatedPtrField<rcr::Property> &props,
         uint64_t cardIdWhere,
         const rcr::DictionariesResponse *dictionaries
     );

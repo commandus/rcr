@@ -1162,6 +1162,7 @@ Generate files:
 
 - rcr.grpc.pb.cc
 - rcr.grpc.pb.h
+- rcr.grpc.pb.h
 - rcr.pb-odb.cxx
 - rcr.pb-odb.hxx
 - rcr.pb-odb.ixx
@@ -1379,7 +1380,7 @@ docker rm $(docker ps -qa --no-trunc --filter "status=exited")
 ### Копируем файлы в Centos 8
 
 ```
-ssh nocmicroadmin@micro.ikfia.ysn.ru
+ssh user@kb-srv.ysn.ru
 uname -a
 Linux web-hosting 4.18.0-497.el8.x86_64 #1 SMP Sat Jun 10 12:24:53 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
 ```
@@ -1482,3 +1483,4 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 kernel: [7296666.659926] MHD-worker[228290]: segfault at 55795c735 ip 00007f93333f42e5 sp 00007f93331b7f70 error 4 in libldap-2.5.so.0.1.10[7f93333e7000+3a000]
 ```
 Кажется, устранен
+

@@ -35,8 +35,8 @@ using grpc::ServerWriter;
 class UserIds {
 public:
 	UserIds() : id(0), oid(0), roleflags(0) {};
-	uint64_t	id;		///< User identifier. 0- not identified
-	uint64_t	oid;	///< Group identifier. Reserved. Must be set to 0.
+	uint64_t id;		///< User identifier. 0- not identified
+	uint64_t oid;   	///< Group identifier. Reserved. Must be set to 0.
 	int roleflags;		///< User role. 0- not identified. Must be set to 1.
 };
 
@@ -153,6 +153,10 @@ protected:
         odb::transaction &t,
         const rcr::ChCardRequest *request
     );
+
+    void static addPackages(uint64_t cardId, const google::protobuf::RepeatedPtrField<::rcr::Package> &packages,
+        const rcr::User &user, odb::database *db);
+
     /**
      * Return true if card is empty, false-
      * @param db
