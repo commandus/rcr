@@ -1593,3 +1593,100 @@ void RcrImpl::addPackages(
         }
     }
 }
+
+int RcrImpl::loadSettings(
+    rcr::Settings *retVal,
+    const std::string &user
+) {
+    try {
+        odb::result<rcr::SymbolProperty> qs(mDb->query<rcr::SymbolProperty>(odb::query<rcr::SymbolProperty>::id != 0));
+        for (odb::result<rcr::SymbolProperty>::iterator i(qs.begin()); i != qs.end(); i++) {
+            rcr::SymbolProperty *op = retVal->add_symbol_property();
+            op->CopyFrom(*i);
+        }
+        odb::result<rcr::ServiceSettings> ss(mDb->query<rcr::ServiceSettings>(odb::query<rcr::ServiceSettings>::id != 0));
+        for (odb::result<rcr::ServiceSettings>::iterator i(ss.begin()); i != ss.end(); i++) {
+            rcr::ServiceSettings *op = retVal->add_service();
+            op->CopyFrom(*i);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("get service settings error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("get service settings unknown error");
+    }
+    return 0;
+}
+
+int RcrImpl::saveSettings(
+    const rcr::Settings *value,
+    const std::string &user
+)
+{
+    try {
+        // clear
+        odb::result<rcr::ServiceSettings> ss(mDb->query<rcr::ServiceSettings>(
+                odb::query<rcr::ServiceSettings>::id != 0
+        ));
+        for (odb::result<rcr::ServiceSettings>::iterator it(ss.begin()); it != ss.end(); it++) {
+            mDb->erase(*it);
+        }
+        // set
+        for(auto p = value->service().begin(); p != value->service().end(); p++) {
+            rcr::ServiceSettings ss;
+            ss.CopyFrom(*p);
+            mDb->persist(ss);
+        }
+
+        // clear
+        odb::result<rcr::SymbolProperty> sp(mDb->query<rcr::SymbolProperty>(
+            odb::query<rcr::SymbolProperty>::id != 0
+        ));
+        for (odb::result<rcr::SymbolProperty>::iterator it(sp.begin()); it != sp.end(); it++) {
+            mDb->erase(*it);
+        }
+        // set
+        for(auto p = value->symbol_property().begin(); p != value->symbol_property().end(); p++) {
+            rcr::SymbolProperty sp;
+            sp.CopyFrom(*p);
+            mDb->persist(sp);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << _("set service settings error: ") << e.what();
+    } catch (...) {
+        LOG(ERROR) << _("set service settings unknown error");
+    }
+    return 0;
+}
+
+grpc::Status RcrImpl::getSettings(
+    grpc::ServerContext* context,
+    const rcr::Settings* request,
+    rcr::Settings* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("getSettings", request, t)
+        r = loadSettings(response, request->user().name());
+    END_GRPC_METHOD("getSettings", request, response, t)
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}
+
+grpc::Status RcrImpl::setSettings(
+    grpc::ServerContext* context,
+    const rcr::Settings* request,
+    rcr::Settings* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("setSettings", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
+    r = saveSettings(request, request->user().name());
+    END_GRPC_METHOD("setSettings", request, response, t)
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}

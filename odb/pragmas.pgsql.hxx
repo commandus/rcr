@@ -129,14 +129,6 @@ namespace rcr {
 		ODB_STRING(Box, uname)
 		#pragma db index(Box) members(box_id)
 
-	ODB_TABLE(ServiceSettings)
-		ODB_STRING(ServiceSettings, name)
-		ODB_STRING(ServiceSettings, addr)
-		ODB_NUMBER(ServiceSettings, port, uint32_t)
-		ODB_STRING(ServiceSettings, last_component_symbol)
-		ODB_NUMBER(ServiceSettings, last_box, uint64_t)
-		ODB_STRING(ServiceSettings, last_query)
-
 	ODB_TABLE(User)
 		ODB_STRING(User, name)
 		ODB_STRING(User, password)
@@ -161,4 +153,20 @@ namespace rcr {
         ODB_STRING(Journal, operation_symbol)
         ODB_NUMBER(Journal, value, int64_t)
 
+    ODB_TABLE(SymbolProperty)
+        ODB_NUMBER(SymbolProperty, property_type_id, uint64_t)
+        ODB_NUMBER(SymbolProperty, symbol_id, uint64_t)
+
+    ODB_TABLE(ServiceSettings)
+        ODB_STRING(ServiceSettings, name)
+        ODB_STRING(ServiceSettings, addr)
+        ODB_NUMBER(ServiceSettings, port, uint32_t)
+        ODB_STRING(ServiceSettings, last_component_symbol)
+        ODB_NUMBER(ServiceSettings, last_box, uint64_t)
+        ODB_STRING(ServiceSettings, last_query)
+        ODB_BOOL(ServiceSettings, number_in_filename)
+        ODB_STRING(ServiceSettings, last_excel_file)
+        ODB_STRING(ServiceSettings, last_excel_dir)
+        ODB_NUMBER(ServiceSettings, last_import_box, uint64_t)
+        ODB_BOOL(ServiceSettings, show_dialog_on_import_finish)
 }

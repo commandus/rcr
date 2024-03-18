@@ -185,6 +185,14 @@ protected:
         const std::string &symbolName,
         const std::string &query
     );
+    int loadSettings(
+        rcr::Settings *retVal,
+        const std::string &user
+    );
+    int saveSettings(
+        const rcr::Settings *value,
+        const std::string &user
+    );
 
 public:
 	/// ODB database
@@ -212,6 +220,9 @@ public:
     grpc::Status lsUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::UserResponse* response) override;
     grpc::Status chUser(grpc::ServerContext* context, const rcr::UserRequest* request, rcr::OperationResponse* response) override;
     grpc::Status lsJournal(grpc::ServerContext* context, const rcr::JournalRequest* request, rcr::JournalResponse* response) override;
+    // settings
+    grpc::Status getSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
+    grpc::Status setSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
 };
 
 #endif

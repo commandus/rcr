@@ -319,6 +319,7 @@ message Settings
 {
     User user = 1;
     repeated ServiceSettings service = 2;
+    repeated SymbolProperty symbol_property = 3;
 }
 
 message UserRequest
@@ -358,6 +359,13 @@ message JournalRequest
 {
     User user = 1;
     List list = 2;
+}
+
+message SymbolProperty
+{
+    uint64 id = 1;                              ///< identifier
+    uint64 property_type_id = 2;
+    uint64 symbol_id = 3;
 }
 
 // ------------ RPC -------------

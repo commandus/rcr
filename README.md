@@ -1302,6 +1302,12 @@ sudo cp locale/ru/LC_MESSAGES/rcr-cli.mo /usr/local/share/locale/ru/LC_MESSAGES/
 sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 ```
 
+```
+scp locale/ru/LC_MESSAGES/*.mo user@kb-srv.ysn.ru:~/rcr/locale/ru/LC_MESSAGES
+ssh user@kb-srv.ysn.ru
+sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
+```
+
 Скрипт tools/l10n создает начальный файл. Файл уже существует в проекте, скрипт вызывать не надо.
 
 ### Сборка в Centos 8 в докере

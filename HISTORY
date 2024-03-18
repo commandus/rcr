@@ -1,1 +1,30 @@
 2023/03/01	Initial release
+
+2024/03/18 Add two tables
+
+CREATE TABLE IF NOT EXISTS "ServiceSettings" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "addr" TEXT NOT NULL,
+  "port" INTEGER NOT NULL,
+  "last_component_symbol" TEXT NOT NULL,
+  "last_box" INTEGER NOT NULL,
+  "last_query" TEXT NOT NULL,
+  "number_in_filename" INTEGER NOT NULL,
+  "last_excel_file" TEXT NOT NULL,
+  "last_excel_dir" TEXT NOT NULL,
+  "last_import_box" INTEGER NOT NULL,
+  "show_dialog_on_import_finish" INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS "SymbolProperty" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "property_type_id" INTEGER NOT NULL,
+  "symbol_id" INTEGER NOT NULL);
+
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(1,3);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(2,3);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(1,4);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(1,6);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(3,6);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(4,18);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(5,18);
+insert into SymbolProperty(property_type_id, symbol_id) VALUES(1,22);

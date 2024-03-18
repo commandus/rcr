@@ -131,25 +131,66 @@ static bool sqliteFillOutDatabase(
         operation.set_description("");
         db.persist(operation);
 
+        rcr::SymbolProperty symbolProperty;
+        // ABCDEFGHIJKLMNOPQRSTUVWXYZ
+        // 12345678901234567890123456
+        //          1         2
+        symbolProperty.set_symbol_id(3);        // C
+        symbolProperty.set_property_type_id(1); // K
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(3);        // C
+        symbolProperty.set_property_type_id(2); // V
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(4);        // D
+        symbolProperty.set_property_type_id(1); // K
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(6);        // F
+        symbolProperty.set_property_type_id(1); // K
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(6);        // F
+        symbolProperty.set_property_type_id(3); // A
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(18);        // R
+        symbolProperty.set_property_type_id(4); // P
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(18);        // R
+        symbolProperty.set_property_type_id(5);  // %
+        db.persist(symbolProperty);
+
+        symbolProperty.set_symbol_id(22);        // V
+        symbolProperty.set_property_type_id(1);  // K
+        db.persist(symbolProperty);
+
         rcr::PropertyType propertyType;
+
         propertyType.set_key("K");
-        propertyType.set_description(_("housing"));
+        propertyType.set_description(_("housing")); // 1
         db.persist(propertyType);
 
         propertyType.set_key("V");
-        propertyType.set_description(_("voltage"));
+        propertyType.set_description(_("voltage")); // 2
         db.persist(propertyType);
 
         propertyType.set_key("A");
-        propertyType.set_description(_("current"));
+        propertyType.set_description(_("current")); // 3
         db.persist(propertyType);
 
         propertyType.set_key("P");
-        propertyType.set_description(_("power"));
+        propertyType.set_description(_("power"));   // 4
         db.persist(propertyType);
 
         propertyType.set_key("%");
-        propertyType.set_description(_("precision"));
+        propertyType.set_description(_("precision"));   // 5
+        db.persist(propertyType);
+
+        propertyType.set_key("D");
+        propertyType.set_description(_("description")); // 6
         db.persist(propertyType);
 
         // user
