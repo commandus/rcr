@@ -34,7 +34,7 @@
 
 static LogIntf *logCB = nullptr;
 
-#define PATH_COUNT 17
+#define PATH_COUNT 18
 
 typedef enum {
     RT_LOGIN = 0,
@@ -55,6 +55,7 @@ typedef enum {
     RT_IMPORTEXCEL = 14,
     RT_EXPORTEXCEL = 15,
     RT_LJJOURNAL = 16,
+    RT_RMSYMBOLPROPERTY = 17,
     RT_UNKNOWN = 100	//< FILE params
 } RequestType;
 
@@ -82,7 +83,8 @@ static const char *paths[PATH_COUNT] = {
     "/chGroupUser",
     "/importExcel",
     "/exportExcel",
-    "/lsJournal"
+    "/lsJournal",
+    "/rmSymbolProperty"
 };
 
 const static char *CE_GZIP = "gzip";
@@ -431,6 +433,14 @@ static bool fetchJson(
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::JournalResponse response;
             config->svc->lsJournal(nullptr, &request, &response);
+            google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+        }
+        case RT_RMSYMBOLPROPERTY:
+        {
+            rcr::RmSymbolPropertyRequest request;
+            google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
+            rcr::OperationResponse response;
+            config->svc->rmSymbolProperty(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
         }
             break;
