@@ -1624,31 +1624,43 @@ int RcrImpl::saveSettings(
 {
     try {
         // clear
+        /*
         odb::result<rcr::ServiceSettings> ss(mDb->query<rcr::ServiceSettings>(
                 odb::query<rcr::ServiceSettings>::id != 0
         ));
         for (odb::result<rcr::ServiceSettings>::iterator it(ss.begin()); it != ss.end(); it++) {
             mDb->erase(*it);
         }
+         */
         // set
         for(auto p = value->service().begin(); p != value->service().end(); p++) {
             rcr::ServiceSettings ss;
             ss.CopyFrom(*p);
-            mDb->persist(ss);
+            if (ss.id() == 0) {
+                ss.clear_id();
+                mDb->persist(ss);
+            } else
+                mDb->update(ss);
         }
 
         // clear
+        /*
         odb::result<rcr::SymbolProperty> sp(mDb->query<rcr::SymbolProperty>(
             odb::query<rcr::SymbolProperty>::id != 0
         ));
         for (odb::result<rcr::SymbolProperty>::iterator it(sp.begin()); it != sp.end(); it++) {
             mDb->erase(*it);
         }
+         */
         // set
         for(auto p = value->symbol_property().begin(); p != value->symbol_property().end(); p++) {
             rcr::SymbolProperty sp;
             sp.CopyFrom(*p);
-            mDb->persist(sp);
+            if (sp.id() == 0) {
+                sp.clear_id();
+                mDb->persist(sp);
+            } else
+                mDb->update(sp);
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << _("set service settings error: ") << e.what();
@@ -1688,5 +1700,38 @@ grpc::Status RcrImpl::setSettings(
     CHECK_PERMISSION(mDb, request->user(), 1)
     r = saveSettings(request, request->user().name());
     END_GRPC_METHOD("setSettings", request, response, t)
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}
+
+grpc::Status RcrImpl::rmSymbolProperty(
+    grpc::ServerContext* context,
+    const rcr::RmSymbolPropertyRequest* request,
+    rcr::OperationResponse* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (!request->has_user() || !request->has_symbol_property())
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("rmSymbolProperty", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
+    try {
+        odb::result<rcr::SymbolProperty> ss(mDb->query<rcr::SymbolProperty>(
+                odb::query<rcr::SymbolProperty>::id == request->symbol_property().id()
+        ));
+        for (odb::result<rcr::SymbolProperty>::iterator it(ss.begin()); it != ss.end(); it++) {
+            mDb->erase(*it);
+        }
+        response->set_code(0);
+    } catch (const odb::exception &e) {
+        response->set_code(ERR_CODE_SVC_INVALID_ARGS);
+        LOG(ERROR) << _("remove symbol property error: ") << e.what();
+    } catch (...) {
+        response->set_code(ERR_CODE_SVC_INVALID_ARGS);
+        LOG(ERROR) << _("remove symbol property unknown error");
+    }
+    END_GRPC_METHOD("rmSymbolProperty", request, response, t)
     return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
 }

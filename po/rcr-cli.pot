@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-18 15:04+0900\n"
+"POT-Creation-Date: 2024-03-19 15:20+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -392,20 +392,28 @@ msgstr ""
 msgid " qty: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1608
+#: svc/svcImpl.cpp:1613
 msgid "get service settings error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1610
+#: svc/svcImpl.cpp:1615
 msgid "get service settings unknown error"
 msgstr ""
 
-#: svc/svcImpl.cpp:1649
+#: svc/svcImpl.cpp:1666
 msgid "set service settings error: "
 msgstr ""
 
-#: svc/svcImpl.cpp:1651
+#: svc/svcImpl.cpp:1668
 msgid "set service settings unknown error"
+msgstr ""
+
+#: svc/svcImpl.cpp:1730
+msgid "remove symbol property error: "
+msgstr ""
+
+#: svc/svcImpl.cpp:1733
+msgid "remove symbol property unknown error"
 msgstr ""
 
 #: SpreadSheetHelper.cpp:252

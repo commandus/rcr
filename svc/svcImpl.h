@@ -223,6 +223,7 @@ public:
     // settings
     grpc::Status getSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
     grpc::Status setSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
+    grpc::Status rmSymbolProperty(grpc::ServerContext* context, const rcr::RmSymbolPropertyRequest* request, rcr::OperationResponse* response) override;
 };
 
 #endif
