@@ -774,7 +774,9 @@ CREATE TABLE IF NOT EXISTS "ServiceSettings" (
   "port" INTEGER NOT NULL,
   "last_component_symbol" TEXT NOT NULL,
   "last_box" INTEGER NOT NULL,
-  "last_query" TEXT NOT NULL);
+  "last_query" TEXT NOT NULL,
+  number_in_filename INTEGER, last_excel_file TEXT, last_excel_dir TEXT, last_import_box INTEGER, show_dialog_on_import_finish INTEGER
+);
 
 ##### Symbol
 
@@ -1489,4 +1491,3 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 kernel: [7296666.659926] MHD-worker[228290]: segfault at 55795c735 ip 00007f93333f42e5 sp 00007f93331b7f70 error 4 in libldap-2.5.so.0.1.10[7f93333e7000+3a000]
 ```
 Кажется, устранен
-

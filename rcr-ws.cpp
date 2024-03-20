@@ -312,7 +312,7 @@ static bool fetchJson(
             break;
         case RT_SETSETTINGS:
         {
-            rcr::Settings request;
+            rcr::SettingsRequest request;
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::Settings response;
             config->svc->setSettings(nullptr, &request, &response);
@@ -437,7 +437,7 @@ static bool fetchJson(
         }
         case RT_RMSYMBOLPROPERTY:
         {
-            rcr::RmSymbolPropertyRequest request;
+            rcr::SymbolPropertyRequest request;
             google::protobuf::util::JsonStringToMessage(env->postData, &request, jsonParseOptions);
             rcr::OperationResponse response;
             config->svc->rmSymbolProperty(nullptr, &request, &response);

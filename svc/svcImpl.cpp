@@ -1618,49 +1618,79 @@ int RcrImpl::loadSettings(
 }
 
 int RcrImpl::saveSettings(
-    const rcr::Settings *value,
+    const rcr::SettingsRequest *value,
     const std::string &user
 )
 {
     try {
-        // clear
-        /*
-        odb::result<rcr::ServiceSettings> ss(mDb->query<rcr::ServiceSettings>(
-                odb::query<rcr::ServiceSettings>::id != 0
-        ));
-        for (odb::result<rcr::ServiceSettings>::iterator it(ss.begin()); it != ss.end(); it++) {
-            mDb->erase(*it);
-        }
-         */
+        // remember new set
+        std::vector <uint64_t> updatedIds;
+        updatedIds.reserve(128);
         // set
-        for(auto p = value->service().begin(); p != value->service().end(); p++) {
+        for(auto p = value->settings().service().begin(); p != value->settings().service().end(); p++) {
             rcr::ServiceSettings ss;
             ss.CopyFrom(*p);
-            if (ss.id() == 0) {
+            uint64_t id = ss.id();
+            if (id == 0) {
                 ss.clear_id();
-                mDb->persist(ss);
-            } else
-                mDb->update(ss);
+                id = mDb->persist(ss);
+            } else {
+                try {
+                    mDb->update(ss);
+                } catch (const odb::exception &e) {
+                    id = mDb->persist(ss);
+                }
+            }
+            updatedIds.push_back(id);
         }
 
-        // clear
-        /*
+        // clear old ones (not used)
+        odb::result<rcr::ServiceSettings> ss(mDb->query<rcr::ServiceSettings>(
+            odb::query<rcr::ServiceSettings>::id != 0
+        ));
+        for (odb::result<rcr::ServiceSettings>::iterator it(ss.begin()); it != ss.end(); it++) {
+            auto alreadyIt = std::find_if(updatedIds.begin(), updatedIds.end(),
+                [it] (auto v) {
+                  return it->id() == v;
+                }
+            );
+            if (alreadyIt == updatedIds.end()) {
+                mDb->erase(*it);
+            }
+        }
+
+        updatedIds.clear();
+        // set
+        for(auto p = value->settings().symbol_property().begin(); p != value->settings().symbol_property().end(); p++) {
+            rcr::SymbolProperty sp;
+            sp.CopyFrom(*p);
+            uint64_t id = sp.id();
+            if (id == 0) {
+                sp.clear_id();
+                id = mDb->persist(sp);
+            } else {
+                try {
+                    mDb->update(sp);
+                } catch (const odb::exception &e) {
+                    id = mDb->persist(sp);
+                }
+            }
+            updatedIds.push_back(id);
+        }
+
+        // clear old ones (not used)
         odb::result<rcr::SymbolProperty> sp(mDb->query<rcr::SymbolProperty>(
             odb::query<rcr::SymbolProperty>::id != 0
         ));
         for (odb::result<rcr::SymbolProperty>::iterator it(sp.begin()); it != sp.end(); it++) {
-            mDb->erase(*it);
-        }
-         */
-        // set
-        for(auto p = value->symbol_property().begin(); p != value->symbol_property().end(); p++) {
-            rcr::SymbolProperty sp;
-            sp.CopyFrom(*p);
-            if (sp.id() == 0) {
-                sp.clear_id();
-                mDb->persist(sp);
-            } else
-                mDb->update(sp);
+            auto alreadyIt = std::find_if(updatedIds.begin(), updatedIds.end(),
+                [it] (auto v) {
+                  return it->id() == v;
+                }
+            );
+            if (alreadyIt == updatedIds.end()) {
+                mDb->erase(*it);
+            }
         }
     } catch (const odb::exception &e) {
         LOG(ERROR) << _("set service settings error: ") << e.what();
@@ -1688,7 +1718,7 @@ grpc::Status RcrImpl::getSettings(
 
 grpc::Status RcrImpl::setSettings(
     grpc::ServerContext* context,
-    const rcr::Settings* request,
+    const rcr::SettingsRequest* request,
     rcr::Settings* response
 ) {
     if (request == nullptr)
@@ -1705,7 +1735,7 @@ grpc::Status RcrImpl::setSettings(
 
 grpc::Status RcrImpl::rmSymbolProperty(
     grpc::ServerContext* context,
-    const rcr::RmSymbolPropertyRequest* request,
+    const rcr::SymbolPropertyRequest* request,
     rcr::OperationResponse* response
 ) {
     if (request == nullptr)
@@ -1719,7 +1749,7 @@ grpc::Status RcrImpl::rmSymbolProperty(
     CHECK_PERMISSION(mDb, request->user(), 1)
     try {
         odb::result<rcr::SymbolProperty> ss(mDb->query<rcr::SymbolProperty>(
-                odb::query<rcr::SymbolProperty>::id == request->symbol_property().id()
+            odb::query<rcr::SymbolProperty>::id == request->symbol_property().id()
         ));
         for (odb::result<rcr::SymbolProperty>::iterator it(ss.begin()); it != ss.end(); it++) {
             mDb->erase(*it);

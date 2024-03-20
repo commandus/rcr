@@ -190,7 +190,7 @@ protected:
         const std::string &user
     );
     int saveSettings(
-        const rcr::Settings *value,
+        const rcr::SettingsRequest *value,
         const std::string &user
     );
 
@@ -222,8 +222,8 @@ public:
     grpc::Status lsJournal(grpc::ServerContext* context, const rcr::JournalRequest* request, rcr::JournalResponse* response) override;
     // settings
     grpc::Status getSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
-    grpc::Status setSettings(grpc::ServerContext* context, const rcr::Settings* request, rcr::Settings* response) override;
-    grpc::Status rmSymbolProperty(grpc::ServerContext* context, const rcr::RmSymbolPropertyRequest* request, rcr::OperationResponse* response) override;
+    grpc::Status setSettings(grpc::ServerContext* context, const rcr::SettingsRequest* request, rcr::Settings* response) override;
+    grpc::Status rmSymbolProperty(grpc::ServerContext* context, const rcr::SymbolPropertyRequest* request, rcr::OperationResponse* response) override;
 };
 
 #endif

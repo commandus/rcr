@@ -368,10 +368,16 @@ message SymbolProperty
     uint64 symbol_id = 3;
 }
 
-message RmSymbolPropertyRequest
+message SymbolPropertyRequest
 {
     User user = 1;
     SymbolProperty symbol_property = 2;
+}
+
+message SettingsRequest
+{
+    User user = 1;
+    Settings settings = 2;
 }
 
 // ------------ RPC -------------
@@ -381,8 +387,8 @@ service Rcr
     rpc login(LoginRequest) returns (LoginResponse) {}
     rpc getDictionaries(DictionariesRequest) returns (DictionariesResponse) {}
     rpc getSettings(Settings) returns (Settings) {}
-    rpc setSettings(Settings) returns (Settings) {}
-    rpc rmSymbolProperty(RmSymbolPropertyRequest) returns(OperationResponse) {}
+    rpc setSettings(SettingsRequest) returns (Settings) {}
+    rpc rmSymbolProperty(SymbolPropertyRequest) returns(OperationResponse) {}
 
     rpc chPropertyType(ChPropertyTypeRequest) returns (OperationResponse) {}
     rpc getCard(GetItemRequest) returns (CardNPropetiesPackages) {}
