@@ -434,6 +434,7 @@ static bool fetchJson(
             rcr::JournalResponse response;
             config->svc->lsJournal(nullptr, &request, &response);
             google::protobuf::util::MessageToJsonString(response, &retval, jsonPrintOptions);
+            break;
         }
         case RT_RMSYMBOLPROPERTY:
         {
