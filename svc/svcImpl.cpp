@@ -432,6 +432,39 @@ grpc::Status RcrImpl::getCard(
     return grpc::Status::OK;
 }
 
+/**
+ * Update box reference
+ * @param db database
+ * @param boxId box to be updated
+ * @param name name of the box
+ * @return 0- success, != 0 - error
+ */
+void RcrImpl::updateBoxOnInsert(
+    odb::database *db,
+    uint64_t boxId,
+    const std::string &name
+) const
+{
+    try {
+        odb::result<rcr::Box> q(db->query<rcr::Box>(
+            odb::query<rcr::Box>::box_id == boxId
+        ));
+        odb::result<rcr::Box>::iterator itBox(q.begin());
+        if (itBox == q.end()) {
+            rcr::Box box;
+            box.set_box_id(boxId);
+            box.set_name(name);
+            box.set_uname(toUpperCase(name));
+            db->persist(box);
+        }
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "updateBoxOnInsert error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "updateBoxOnInsert unknown error";
+    }
+}
+
+
 grpc::Status RcrImpl::chCard(
     grpc::ServerContext* context,
     const rcr::ChCardRequest* request,
@@ -488,6 +521,11 @@ grpc::Status RcrImpl::chCard(
                     // card exists
                     // just add a new package
                     addPackages(card_id, request->packages(), request->user(), mDb);
+                }
+
+                // invalidate boxes
+                for (auto i(request->packages().begin()); i != request->packages().end(); i++) {
+                    updateBoxOnInsert(mDb, i->box(), i->box_name());
                 }
                 response->set_id(card_id);
                 response->set_code(0);

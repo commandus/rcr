@@ -76,6 +76,19 @@ private:
     );
     uint64_t generateNewToken();
 
+    /**
+     * Update box reference
+     * @param db database
+     * @param boxId box to be updated
+     * @param name name of the box
+     * @return 0- success, != 0 - error
+     */
+    void updateBoxOnInsert(
+        odb::database *db,
+        uint64_t boxId,
+        const std::string &name
+    ) const;
+
 protected:
 	/// return to client status: no permission
 	static const grpc::Status& STATUS_NO_GRANTS;
