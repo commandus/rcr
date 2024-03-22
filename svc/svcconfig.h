@@ -44,6 +44,7 @@ public:
 	std::string path;
     std::string pluginDirPath;
     std::string pluginOptions;
+    std::string pidfile;
 };
 
 #ifdef ENABLE_PG

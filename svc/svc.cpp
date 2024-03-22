@@ -266,6 +266,7 @@ int parseCmd(
 #endif
     struct arg_str *a_pluginDirPath = arg_str0("u", "plugin", _("<directory>"), _("plugins directory, default ./plugins"));
     struct arg_str *a_pluginOptions = arg_str0("U", "plugin-options", _("<string>"), _("plugins options, default none"));
+    struct arg_str *a_pidfile = arg_str0("p", "pidfile", _("<file>"), _("Check whether a process has created the file pidfile"));
     struct arg_lit *a_verbosity = arg_litn("v", "verbosity", 0, 1, _("-v- verbose"));
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
@@ -285,6 +286,7 @@ int parseCmd(
         a_ssl,
         a_pluginDirPath, a_pluginOptions,
         a_daemonize,
+        a_pidfile,
         a_verbosity,
         a_help, a_end
     };
@@ -319,6 +321,11 @@ int parseCmd(
 		value->port = *a_port->ival;
 	else
 		value->port = DEF_PORT;
+    if (a_pidfile->count)
+        value->pidfile = *a_pidfile->sval;
+    else
+        value->pidfile = "";
+
     value->sslOn = a_ssl->count > 0;
     value->verbosity = a_verbosity->count;
 
@@ -430,7 +437,7 @@ int main(int argc, char* argv[])
 			std::cerr << _("Start as daemon, use syslog") << std::endl;
         OPEN_SYSLOG(progname)
         SYSLOG(LOG_ALERT, _("Start as daemon"))
-        Daemonize daemonize(progname, currentPath, run, stopNWait, done);
+        Daemonize daemonize(progname, currentPath, run, stopNWait, done, 0, config.pidfile);
 	}
 	else {
         run();
