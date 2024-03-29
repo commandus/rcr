@@ -359,6 +359,8 @@ message JournalRequest
 {
     User user = 1;
     List list = 2;
+    uint64 box_id = 3;                              ///< filter by box
+    uint64 card_id = 4;                             ///< filter by card
 }
 
 message SymbolProperty

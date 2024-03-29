@@ -1454,15 +1454,33 @@ grpc::Status RcrImpl::lsJournal(
     rcr::DictionariesResponse dictionaries;
     loadDictionaries(&dictionaries, ML_INTL);
     try {
-        odb::result<rcr::JournalCount> qc(mDb->query<rcr::JournalCount>(true));
-        odb::result<rcr::JournalCount>::iterator itc(qc.begin());
+        // get count
         size_t cnt = 0;
+        odb::result<rcr::JournalCount> qc;
+        std::stringstream ssClause;
+        if (request->box_id() == 0 && request->card_id() == 0)
+            ssClause << "id > 0";
+        else {
+            if (request->box_id() && request->card_id())
+                ssClause << "box_id = " << request->box_id() << " and card_id = " << request->card_id();
+            else
+                if (request->box_id() && request->card_id())
+                    ssClause << "box_id = " << request->box_id();
+                else
+                    ssClause << "card_id = " << request->card_id();
+        }
+        std::string sClause = ssClause.str();
+        qc = mDb->query<rcr::JournalCount>(odb::query<rcr::JournalCount>(sClause));
+        odb::result<rcr::JournalCount>::iterator itc(qc.begin());
         if (itc != qc.end())
             cnt = itc->count;
 
+        // set count
         response->mutable_rslt()->set_count(cnt);
 
-        odb::result<rcr::JournalQuery> qs(mDb->query<rcr::JournalQuery>(true));
+        // query
+        odb::result<rcr::JournalQuery> qs(mDb->query<rcr::JournalQuery>(sClause));
+
         size_t c = 0;
         size_t sz = 0;
         size_t size = request->list().size();
