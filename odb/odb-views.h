@@ -24,7 +24,8 @@ struct CardQuery {
     uint64_t nominal;
 };
 
-#pragma db view query("SELECT id, dt, user_id, package_id, operation_symbol, value FROM \"Journal\" WHERE (?) order by id desc")
+// MUST include j.package_id = p.id
+#pragma db view query("SELECT j.id, j.dt, j.user_id, j.package_id, j.operation_symbol, j.value FROM Journal j, Package p WHERE (?) order by j.id desc")
 struct JournalQuery {
     uint64_t id;
     uint64_t dt;
@@ -34,7 +35,8 @@ struct JournalQuery {
     int64_t value = 6;                            ///< amount
 };
 
-#pragma db view query("SELECT count(id) FROM \"Journal\" WHERE (?)")
+// MUST include j.package_id = p.id
+#pragma db view query("SELECT count(j.id) FROM Journal j, Package p WHERE (?)")
 struct JournalCount {
     std::size_t count;
 };

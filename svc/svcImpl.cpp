@@ -1458,17 +1458,13 @@ grpc::Status RcrImpl::lsJournal(
         size_t cnt = 0;
         odb::result<rcr::JournalCount> qc;
         std::stringstream ssClause;
-        if (request->box_id() == 0 && request->card_id() == 0)
-            ssClause << "id > 0";
-        else {
-            if (request->box_id() && request->card_id())
-                ssClause << "box_id = " << request->box_id() << " and card_id = " << request->card_id();
-            else
-                if (request->box_id() && request->card_id())
-                    ssClause << "box_id = " << request->box_id();
-                else
-                    ssClause << "card_id = " << request->card_id();
-        }
+        ssClause << "j.package_id = p.id";
+
+        if (request->box_id())
+            ssClause << " and p.box = " << request->box_id();
+        if (request->card_id())
+            ssClause << " and p.card_id = " << request->card_id();
+
         std::string sClause = ssClause.str();
         qc = mDb->query<rcr::JournalCount>(odb::query<rcr::JournalCount>(sClause));
         odb::result<rcr::JournalCount>::iterator itc(qc.begin());

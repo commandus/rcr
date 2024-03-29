@@ -383,7 +383,13 @@ wget -q -S -O - --post-data '{"user":{"id":"4","token":"931400716","name":"andre
 
 ##### Загрузка файла Excel
 ```
-wget -q -S -O - --post-data '{"user":{"id":"4","token":"931400716","name":"andrey.ivanov@ikfia.ysn.ru","password":"x","rights":1},"symbol":"C","prefix_box":"62205969853054976","number_in_filename":true,"operation":"+","file":[{"name":"27 Конденсаторы  электролиты_Золотовский.xlsx","content":"UEsDBBQABgAIAAAA...' http://localhost:8050/importExcel
+wget -q -S -O - --post-data '{"user":{"id":"4","token":"931400716","name":"SYSDBA","password":"x","rights":1},"symbol":"C","prefix_box":"62205969853054976","number_in_filename":true,"operation":"+","file":[{"name":"27 Конденсаторы  электролиты_Золотовский.xlsx","content":"UEsDBBQABgAIAAAA...' http://localhost:8050/importExcel
+```
+
+##### Журнан карточки 1010
+```
+wget -q -S -O - --post-data '{"user":{"id":"2","token":"956247633","name":"SYSDBA","password":"x","rights":1},
+"list":{"offset":0,"size":20},"box_id":0,"card_id":1010}' http://localhost:8050/lsJournal
 ```
 
 ### Загрузка перечня из файлов книги Excel
@@ -476,7 +482,7 @@ import ../data
 ```
 
 Просмотр как будут добавлены компоненты из файла с префиксом коробки 119 и компонентогми по умолчанию- резистор
-без долбавления в базу данных
+без добавления в базу данных
 
 ```
 sheet ../data R 119
