@@ -515,7 +515,8 @@ grpc::Status RcrImpl::chCard(
                     for (auto pack = request->packages().begin(); pack != request->packages().end(); pack++) {
                         rcr::Package p = *pack;
                         p.set_card_id(card_id);
-                        mDb->persist(p);
+                        uint64_t packageId = mDb->persist(p);
+                        add2log(mDb, p.qty() < 0 ? "+" : "-", request->user().id(), packageId, p.qty());
                     }
                 } else {
                     // card exists
@@ -1276,17 +1277,19 @@ void RcrImpl::updateCardPackages(
     updatedPackageIds.reserve(8);
     for (odb::result<rcr::Package>::iterator it(qPackage.begin()); it != qPackage.end(); it++) {
         auto qit = std::find_if(request->packages().begin(), request->packages().end(),
-                                [it] (auto v) {
-                                    return it->id() == v.id();
-                                });
+            [it] (auto v) {
+                return it->id() == v.id();
+            });
         if (qit == request->packages().end()) {
             // delete from database, because it removed
             mDb->erase(*it);
+            add2log(mDb, "-", request->user().id(), qit->id(), qit->qty());
         } else {
             updatedPackageIds.push_back(qit->id());
             // remove if qty = 0
             if (qit->qty() == 0) {
                 mDb->erase(*qit);
+                add2log(mDb, "-", request->user().id(), qit->id(), qit->qty());
             } else {
                 // update if it changed
                 if (!(it->card_id() == qit->card_id()
@@ -1295,6 +1298,7 @@ void RcrImpl::updateCardPackages(
                       && it->box_name() == qit->box_name())) {
                     // update
                     mDb->update(*qit);
+                    add2log(mDb, request->operationsymbol(), request->user().id(), qit->id(), qit->qty());
                 }
             }
         }
@@ -1302,14 +1306,15 @@ void RcrImpl::updateCardPackages(
     // insert a new ones
     for (auto it = request->packages().begin(); it != request->packages().end(); it++) {
         auto alreadyIt = std::find_if(updatedPackageIds.begin(), updatedPackageIds.end(),
-                                      [it] (auto v) {
-                                          return it->id() == v;
-                                      });
+              [it] (auto v) {
+                  return it->id() == v;
+              });
         if (alreadyIt == updatedPackageIds.end()) {
             // not updatedPackageIds yet, insert a new one if qty is not zero
             rcr::Package p = *it;
             if (p.qty() != 0) {
                 uint64_t pid = mDb->persist(p);
+                add2log(mDb, request->operationsymbol(), request->user().id(), pid, p.qty());
             }
         }
     }
@@ -1346,6 +1351,7 @@ void RcrImpl::updateCardPackage(
         *it = *request->packages().begin(); // just one package
         it->set_card_id(request->value().id());
         mDb->update(*it);
+        add2log(mDb, request->operationsymbol(), request->user().id(), it->id(), it->qty());
         return;
     }
 
@@ -1404,6 +1410,7 @@ bool RcrImpl::removeCard(
     odb::result<rcr::Package> qp(mDb->query<rcr::Package>(odb::query<rcr::Package>::card_id == request->value().id()));
     for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
         mDb->erase(*itp);
+        add2log(mDb, request->operationsymbol(), request->user().id(), itp->id(), itp->qty());
     }
     mDb->erase(request->value());
     return true;
@@ -1429,6 +1436,7 @@ bool RcrImpl::removePackage(
     ));
     for (odb::result<rcr::Package>::iterator itp(qp.begin()); itp != qp.end(); itp++) {
         mDb->erase(*itp);
+        add2log(mDb, "-", request->user().id(), itp->id(), itp->qty());
     }
     // check does card has any packages
     odb::result<rcr::Package> qExists(mDb->query<rcr::Package>(
@@ -1436,6 +1444,28 @@ bool RcrImpl::removePackage(
     ));
     odb::result<rcr::Package>::iterator itExists(qExists.begin());
     return (itExists == qExists.end());
+}
+
+void RcrImpl::add2log(
+    odb::database *db,
+    const std::string &operationSymbol,
+    uint64_t userId,
+    uint64_t packageId,
+    int64_t qty
+) {
+    try {
+        rcr::Journal entry;
+        entry.set_dt(time(nullptr));
+        entry.set_operation_symbol(operationSymbol);
+        entry.set_package_id(packageId);
+        entry.set_user_id(userId);
+        entry.set_value(qty);
+        db->persist(entry);
+    } catch (const odb::exception &e) {
+        LOG(ERROR) << "log error: " << e.what();
+    } catch (...) {
+        LOG(ERROR) << "log unknown error";
+    }
 }
 
 grpc::Status RcrImpl::lsJournal(
@@ -1620,6 +1650,7 @@ void RcrImpl::addPackages(
                 p.set_card_id(cardId);
                 p.set_box(qit->box());
                 p.set_qty(qit->qty());
+                add2log(db, p.qty() < 0 ? "+" : "-", user.id(), p.id(), p.qty());
                 db->update(p);
             }
         }
@@ -1641,6 +1672,7 @@ void RcrImpl::addPackages(
                     << _(" box: ") << p.box()
                     << _(" qty: ") << p.qty()
                     << std::endl;
+                add2log(db, p.qty() < 0 ? "+" : "-", user.id(), pid, p.qty());
             }
         }
     }

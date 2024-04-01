@@ -89,6 +89,14 @@ private:
         const std::string &name
     ) const;
 
+    static void add2log(
+        odb::database *db,
+        const std::string &operationSymbol,
+        uint64_t userId,
+        uint64_t packageId,
+        int64_t qty
+    );
+
 protected:
 	/// return to client status: no permission
 	static const grpc::Status& STATUS_NO_GRANTS;
