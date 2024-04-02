@@ -1341,10 +1341,10 @@ void RcrImpl::updateCardPackage(
         return; // nothing to update.
     // find out old one
     odb::result<rcr::Package> qPackage(mDb->query<rcr::Package>(
-            odb::query<rcr::Package>::card_id == request->value().id()
-            &&
-            odb::query<rcr::Package>::id == packageId
-            ));
+        odb::query<rcr::Package>::card_id == request->value().id()
+        &&
+        odb::query<rcr::Package>::id == packageId
+    ));
     // trying to update
     odb::result<rcr::Package>::iterator it(qPackage.begin());
     if (it != qPackage.end()) {
@@ -1360,6 +1360,7 @@ void RcrImpl::updateCardPackage(
     rcr::Package p = *p1;
     p.set_card_id(request->value().id());
     uint64_t pid = mDb->persist(p);
+    add2log(mDb, request->operationsymbol(), request->user().id(), pid, p.qty());
 }
 
 bool RcrImpl::loadPackage(

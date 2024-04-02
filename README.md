@@ -286,7 +286,7 @@ type t.rcr | rcr-cli -u SYSDBA -p masterkey
 - -v детализированный вывод в консоль
 - -j включает встроенный веб сервис, 
 - -l <номер порта> назначает порт gRPC сервиса (по умолчанию 50051)
-- -p <номер порта> назначает порт HTTP/1.1 сервиса (по умолчанию 8050)
+- -P <номер порта> назначает порт HTTP/1.1 сервиса (по умолчанию 8050)
 - -r <путь папки> назначает корневой каталог, где размещены файлы. По умолчанию- html 
 
 #### JSON запросы встроенного веб сервиса
@@ -1497,3 +1497,58 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/rcr
 kernel: [7296666.659926] MHD-worker[228290]: segfault at 55795c735 ip 00007f93333f42e5 sp 00007f93331b7f70 error 4 in libldap-2.5.so.0.1.10[7f93333e7000+3a000]
 ```
 Кажется, устранен
+
+## Вспомогательные скрипты
+
+### Запуск
+
+start-rcr.sh
+```
+#!/bin/sh
+H=/home/user/rcr
+export LANG=ru_RU.UTF-8;export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$H
+$H/rcr-svc -jvd --pidfile /var/run/rcr.pid -u plugins -U "ldap://ad.ysn.ru" -l 50051 -P 8050 --db $H/kb.db
+#./rcr-svc -jvd -p /var/run/lmii.pid -u plugins -U "ldap://ad.ysn.ru" -l 50052 -P 8052 --db lmii.db
+exit 0
+```
+
+### Сервис Systemd
+
+etc/systemd/system/rcr.service
+
+```
+[Unit]
+Description=RCR web service
+
+[Service]
+Type=forking
+# The PID file is optional, but recommended in the manpage
+# "so that systemd can identify the main process of the daemon"
+PIDFile=/var/run/rcr.pid
+ExecStart=/home/user/start-rcr.sh
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Создать сервис
+
+```
+sudo systemctl enable rcr.service
+sudo systemctl daemon-reloa
+```
+
+Запустить сервис
+
+```
+sudo systemctl start rcr.service
+sudo systemctl status rcr.service
+```
+
+Остановить сервис
+
+```
+sudo systemctl stop rcr.service
+sudo systemctl status rcr.service
+```

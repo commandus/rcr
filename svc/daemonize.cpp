@@ -11,8 +11,8 @@
 #include <strsafe.h>
 #pragma comment(lib, "advapi32.lib")
 
-SERVICE_STATUS        g_ServiceStatus = {0}; 
-SERVICE_STATUS_HANDLE g_StatusHandle = NULL;
+SERVICE_STATUS        gServiceStatus = { 0 };
+SERVICE_STATUS_HANDLE gStatusHandle = nullptr;
 #define DEF_PID_PATH ""
 
 #define	LOG(msg) {}
@@ -35,24 +35,24 @@ static TDaemonRunner daemonRun;
 static TDaemonRunner daemonStopRequest;
 static TDaemonRunner daemonDone;
 
-#define DEF_FD_LIMIT			1024*10
+#define DEF_FD_LIMIT			(1024 * 10)
 
-Daemonize::Daemonize(
+Daemonize::	Daemonize(
     const std::string &daemonName,
-    const std::string &aworking_directory,
-    TDaemonRunner runner,
-    TDaemonRunner stopRequest,
-    TDaemonRunner done,
-    const int maxfile_descriptors,
-    const std::string pid_file_name
+    const std::string &aWorkingDirectory,
+    TDaemonRunner runner,					///< function to run as deamon
+    TDaemonRunner stopRequest, 				///< function to stop
+    TDaemonRunner done,						///< function to clean after runner exit
+    const int aMaxFileDescriptors,  		///< 0- default 1024
+    const std::string &aPidFileName     	///< if empty, /var/run/program_name.pid is used
 )
-	: working_directory(aworking_directory), maxFileDescriptors(maxfile_descriptors)
+    : workingDirectory(aWorkingDirectory), maxFileDescriptors(aMaxFileDescriptors)
 {
 	serviceName = daemonName;
-	if (pidFileName.empty())
+	if (aPidFileName.empty())
 		pidFileName = DEF_PID_PATH + daemonName + ".pid";
 	else
-		pidFileName = pid_file_name;
+		pidFileName = aPidFileName;
 	daemonRun = runner;
 	daemonStopRequest = stopRequest;
 	daemonDone = done;
@@ -69,14 +69,14 @@ Daemonize::~Daemonize()
 
 void statusStartPending()
 {
-	g_ServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
-	g_ServiceStatus.dwControlsAccepted = 0;
-	g_ServiceStatus.dwCurrentState = SERVICE_START_PENDING;
-	g_ServiceStatus.dwWin32ExitCode = 0;
-	g_ServiceStatus.dwServiceSpecificExitCode = 0;
-	g_ServiceStatus.dwCheckPoint = 0;
+    gServiceStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+    gServiceStatus.dwControlsAccepted = 0;
+    gServiceStatus.dwCurrentState = SERVICE_START_PENDING;
+    gServiceStatus.dwWin32ExitCode = 0;
+    gServiceStatus.dwServiceSpecificExitCode = 0;
+    gServiceStatus.dwCheckPoint = 0;
 
-	if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+	if (SetServiceStatus(gStatusHandle, &gServiceStatus) == FALSE)
 	{
 		OutputDebugString(_T(
 			"ServiceMain: SetServiceStatus returned error"));
@@ -85,11 +85,11 @@ void statusStartPending()
 
 void statusStarted()
 {
-	g_ServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
-	g_ServiceStatus.dwCurrentState = SERVICE_RUNNING;
-	g_ServiceStatus.dwWin32ExitCode = 0;
-	g_ServiceStatus.dwCheckPoint = 0;
-	if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    gServiceStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+    gServiceStatus.dwCurrentState = SERVICE_RUNNING;
+    gServiceStatus.dwWin32ExitCode = 0;
+    gServiceStatus.dwCheckPoint = 0;
+	if (SetServiceStatus(gStatusHandle, &gServiceStatus) == FALSE)
 	{
 		OutputDebugString(_T(
 			"ServiceMain: SetServiceStatus returned error"));
@@ -98,12 +98,12 @@ void statusStarted()
 
 void statusStopPending()
 {
-	g_ServiceStatus.dwControlsAccepted = 0;
-	g_ServiceStatus.dwCurrentState = SERVICE_STOP_PENDING;
-	g_ServiceStatus.dwWin32ExitCode = 0;
-	g_ServiceStatus.dwCheckPoint = 4;
+    gServiceStatus.dwControlsAccepted = 0;
+    gServiceStatus.dwCurrentState = SERVICE_STOP_PENDING;
+    gServiceStatus.dwWin32ExitCode = 0;
+    gServiceStatus.dwCheckPoint = 4;
 
-	if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+	if (SetServiceStatus(gStatusHandle, &gServiceStatus) == FALSE)
 	{
 		OutputDebugString(_T(
 			"ServiceCtrlHandler: SetServiceStatus returned error"));
@@ -112,11 +112,11 @@ void statusStopPending()
 
 void statusStopped()
 {
-	g_ServiceStatus.dwControlsAccepted = 0;
-	g_ServiceStatus.dwCurrentState = SERVICE_STOPPED;
-	g_ServiceStatus.dwWin32ExitCode = 0;
-	g_ServiceStatus.dwCheckPoint = 3;
-	if (SetServiceStatus(g_StatusHandle, &g_ServiceStatus) == FALSE)
+    gServiceStatus.dwControlsAccepted = 0;
+    gServiceStatus.dwCurrentState = SERVICE_STOPPED;
+    gServiceStatus.dwWin32ExitCode = 0;
+    gServiceStatus.dwCheckPoint = 3;
+	if (SetServiceStatus(gStatusHandle, &gServiceStatus) == FALSE)
 	{
 		OutputDebugString(_T(
 			"ServiceMain: SetServiceStatus returned error"));
@@ -125,10 +125,9 @@ void statusStopped()
 
 VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 {
-	switch (CtrlCode)
-	{
+	switch (CtrlCode) {
 	case SERVICE_CONTROL_STOP:
-		if (g_ServiceStatus.dwCurrentState != SERVICE_RUNNING)
+		if (gServiceStatus.dwCurrentState != SERVICE_RUNNING)
 			break;
 		statusStopPending();
 		daemonStopRequest();
@@ -143,11 +142,11 @@ VOID WINAPI ServiceCtrlHandler(DWORD CtrlCode)
 VOID WINAPI ServiceMain(DWORD argc, LPTSTR *argv)
 {
 	// Register our service control handler with the SCM
-	g_StatusHandle = RegisterServiceCtrlHandlerA((LPCSTR) serviceName.c_str(), ServiceCtrlHandler);
-	if (g_StatusHandle == NULL)
+	gStatusHandle = RegisterServiceCtrlHandlerA((LPCSTR) serviceName.c_str(), ServiceCtrlHandler);
+	if (gStatusHandle == nullptr)
 		goto EXIT;
 	// Tell the service controller we are starting
-	ZeroMemory(&g_ServiceStatus, sizeof(g_ServiceStatus));
+	ZeroMemory(&gServiceStatus, sizeof(gServiceStatus));
 	statusStartPending();
 	// Tell the service controller we are started
 	statusStarted();
@@ -225,7 +224,7 @@ int Daemonize::init()
 
 	// Change the working directory to the root directory
 	// or another appropriated directory
-	x = chdir(working_directory.c_str());
+	x = chdir(workingDirectory.c_str());
 
 	// Close all open file descriptors
 	for (x = sysconf(_SC_OPEN_MAX); x>0; x--)	{

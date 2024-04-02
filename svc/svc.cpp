@@ -255,7 +255,7 @@ int parseCmd(
 	struct arg_lit *a_daemonize = arg_lit0("d", "daemonize", _("start as daemon/service"));
 #ifdef ENABLE_HTTP
     struct arg_lit *a_http_json_on = arg_lit0("j", "json", _("run JSON HTTP service"));
-    struct arg_int *a_http_json_port = arg_int0("p", "port", "_(<number>)", _("HTTP service port number. Default 8050"));
+    struct arg_int *a_http_json_port = arg_int0("P", "port", "_(<number>)", _("HTTP service port number. Default 8050"));
 
     if (a_http_json_dirroot->count)
         wsConfig.dirRoot = *a_http_json_dirroot->sval;
