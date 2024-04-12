@@ -910,18 +910,20 @@ size_t RCQueryProcessor::setCards(
                 case SO_SET:
                     packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
-                    add2log(db, "=", userId, packageId, q);
+                    add2log(db, "=", userId, packageId, query->count);
                     break;
-                case SO_ADD:
+                case SO_ADD: {
                     packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, q + query->count);
                     updateBoxOnInsert(db, t, query->boxes, "");
-                    add2log(db, "+", userId, packageId, q);
+                    add2log(db, "+", userId, packageId, query->count);
+                }
                     break;
-                case SO_SUB:
-                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes,
-                    q > query->count ? q - query->count : 0);
+                case SO_SUB: {
+                    uint64_t mc = q > query->count ? q - query->count : 0;
+                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, mc);
                     updateBoxOnRemove(db, t, query->boxes);
-                    add2log(db, "-", userId, packageId, q);
+                    add2log(db, "-", userId, packageId, mc);
+                }
                     break;
                 case SO_MOV: {
                     // remove from the source box
