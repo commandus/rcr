@@ -925,20 +925,18 @@ size_t RCQueryProcessor::setCards(
                     break;
                 case SO_MOV: {
                     // remove from the source box
-                    {
-                        uint64_t mc = q > query->count ? q - query->count : 0;
-                        packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, mc);
-                        updateBoxOnRemove(db, t, query->boxes);
-                        const rcr::Operation *op = findOperation(dictionaries, "-");
-                        add2log(db, "-", userId, packageId, mc);
-                    }
+                    uint64_t qc = query->count > q  ? q : query->count;
+                    uint64_t mc = q - qc;
+                    packageId = setQuantity(db, t, packageId, itCard->id, query->boxes, mc);
+                    updateBoxOnRemove(db, t, query->boxes);
+                    add2log(db, "-", userId, packageId, qc);
                     // put to destination box
                     uint64_t destCardId = itCard->id; // same card
                     // get destination packageId, if not, ret 0
                     uint64_t qDest = getQuantity(db, t, packageId, destCardId, query->destinationBox);
-                    packageId = setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + query->count);
+                    packageId = setQuantity(db, t, packageId, destCardId, query->destinationBox, qDest + qc);
                     updateBoxOnInsert(db, t, query->destinationBox, "");
-                    add2log(db, "", userId, packageId, query->count);
+                    add2log(db, "/", userId, packageId, qc);
                 }
                     break;
                 default:
