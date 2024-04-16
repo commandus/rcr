@@ -850,6 +850,15 @@ grpc::Status RcrImpl::importExcel(
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
 }
 
+/**
+ * XLSX "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+ * CSV "text/csv"
+ * @param context
+ * @param request
+ * @param response
+ * @return
+ */
+
 grpc::Status RcrImpl::exportExcel(
     grpc::ServerContext* context,
     const rcr::ExportExcelRequest* request,
@@ -863,7 +872,10 @@ grpc::Status RcrImpl::exportExcel(
     int r = 0;
     BEGIN_GRPC_METHOD("exportExcel", request, t)
     CHECK_PERMISSION(mDb, request->user(), 1)
-    exportExcelFiles(response, t, mDb, request->symbol_name(), request->query());
+    if (request->mime_type() == "text/csv")
+        exportCSVFiles(response, t, mDb, request->symbol_name(), request->query());
+    else
+        exportExcelFiles(response, t, mDb, request->symbol_name(), request->query());
     END_GRPC_METHOD("exportExcel", response, response, t)
     return (r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, "");
 }
@@ -881,6 +893,23 @@ int RcrImpl::exportExcelFiles(
     if (!r) {
         time_t ct = time(nullptr);
         r = exportExcelFile(retVal, t, mDb, query, symbolName, ct, &dictionaries);
+    }
+    return r;
+}
+
+int RcrImpl::exportCSVFiles(
+    rcr::ExportExcelResponse *retVal,
+    odb::transaction &t,
+    odb::database *db,
+    const std::string &symbolName,
+    const std::string &query
+)
+{
+    rcr::DictionariesResponse dictionaries;
+    int r = loadDictionaries(&dictionaries, ML_INTL);
+    if (!r) {
+        time_t ct = time(nullptr);
+        r = exportCSVFile(retVal, t, mDb, query, symbolName, ct, &dictionaries);
     }
     return r;
 }
@@ -1620,7 +1649,65 @@ int RcrImpl::exportExcelFile(
         ofs += 32768;
         fileCount++;
     }
+    return 0;
+}
 
+int RcrImpl::exportCSVFile(
+    rcr::ExportExcelResponse *retVal,
+    odb::transaction &t,
+    odb::database *db,
+    const std::string &query,
+    const std::string &symbolName,
+    time_t timeStamp,
+    rcr::DictionariesResponse *dictionaries
+) {
+    const rcr::Symbol *measureSym = RCQueryProcessor::findSymbol(dictionaries, symbolName);
+    uint32_t componentFlags;
+    if (measureSym)
+        componentFlags = FLAG_COMPONENT(measureSym->id() - 1);
+    else
+        componentFlags = FLAG_ALL_COMPONENTS;
+
+    size_t position = 0;
+    RCQuery q;
+    COMPONENT c = firstComponentInFlags(componentFlags);
+    int r = q.parse(ML_RU, query, position, c);
+    if (r)
+        return ERR_CODE_SVC_INVALID_ARGS;
+    RCQueryProcessor p(q);
+    rcr::List list;
+    std::string name = dateStamp(timeStamp);
+
+    if (componentFlags == FLAG_ALL_COMPONENTS)
+        name += "A_Z";
+    else
+        name += MeasureUnit::sym(c);
+
+    size_t ofs = 0;
+    int fileCount = 1;
+    while(true) {
+        auto f = retVal->add_file();
+        auto pname = name + "_" + std::to_string(fileCount);
+        f->set_name(pname + ".csv");
+        rcr::List list;
+        list.set_offset(ofs);
+        list.set_size(32768);
+        rcr::OperationResponse operationResponse;
+        rcr::CardResponse cards;
+        uint64_t cnt = 0;
+        uint64_t sum = 0;
+        p.exec(mDb, &t, 0, 0, dictionaries, list, &operationResponse, &cards, componentFlags, cnt, sum);
+
+        SpreadSheetHelper spreadSheetHelper;
+        std::stringstream ss;
+        spreadSheetHelper.loadCards2CSV(ss, cards);
+        f->set_content(ss.str());
+        f->set_mime_type("text/csv");
+        if (cnt < list.size())
+            break;
+        ofs += 32768;
+        fileCount++;
+    }
     return 0;
 }
 

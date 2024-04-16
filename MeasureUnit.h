@@ -80,7 +80,7 @@ public:
         COMPONENT measure
     );
     static int pow10(
-            COMPONENT measure
+        COMPONENT measure
     );
     static std::string value(
         MEASURE_LOCALE locale,

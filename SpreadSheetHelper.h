@@ -75,6 +75,10 @@ public:
         xlnt::workbook &book,
         const rcr::CardResponse &cards
     );
+    static int loadCards2CSV(
+        std::ostream &strm,
+        const rcr::CardResponse &cards
+    );
     static std::string toString(
         xlnt::workbook &book
     );

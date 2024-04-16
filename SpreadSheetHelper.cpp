@@ -252,7 +252,7 @@ int SpreadSheetHelper::loadCards(
         wsheets[i].cell("A1").value(_("Box"));
         wsheets[i].cell("B1").value(_("Name"));
         wsheets[i].cell("C1").value(_("Quantity"));
-        wsheets[i].cell("D1").value(_("Label"));
+        wsheets[i].cell("D1").value(_("Properties"));
         wsheets[i].cell("E1").value(_("Card #"));
         wsheets[i].cell("F1").value(_("Package #"));
     }
@@ -264,12 +264,18 @@ int SpreadSheetHelper::loadCards(
         auto componentIdx = c.card().symbol_id();
         if (componentIdx > 0)
             componentIdx--;
+        COMPONENT component = (COMPONENT) componentIdx;
+        std::string nameOrNominal;
+        if (MeasureUnit::hasNominal(component)) {
+            nameOrNominal = MeasureUnit::value(ML_RU, component, c.card().nominal());
+        } else
+            nameOrNominal = c.card().name();
         xlnt::worksheet &w = wsheets[componentIdx];
         auto lr = lastRow[componentIdx];
         for (int p = 0; p < c.packages_size(); p++) {
             auto pack = c.packages(p);
             w.cell(xlnt::cell_reference(1, lr)).value(StockOperation::boxes2string(pack.box())); // A box
-            w.cell(xlnt::cell_reference(2, lr)).value(c.card().name());    // B
+            w.cell(xlnt::cell_reference(2, lr)).value(nameOrNominal);    // B
             w.cell(xlnt::cell_reference(3, lr)).value(std::to_string(pack.qty())); // C
             std::stringstream ss;
             for (int pr = 0; pr < c.properties_size(); pr++) {
@@ -299,6 +305,68 @@ int SpreadSheetHelper::loadCards(
 #ifndef _WINDOWS
     book.active_sheet(firstSheet);
 #endif
+    return 0;
+}
+
+static void escapeDoubleQuotes(
+    std::string &str
+)
+{
+    size_t startPos = 0;
+    while((startPos = str.find("\"", startPos)) != std::string::npos) {
+        str.replace(startPos, 1, "\\\"");
+        startPos += 2;
+    }
+}
+
+int SpreadSheetHelper::loadCards2CSV(
+    std::ostream &strm,
+    const rcr::CardResponse &cards
+)
+{
+    strm
+        << _("Symbol")
+        << ","
+        << _("Box")
+        << ","
+        << _("Name")
+        << ","
+        << _("Quantity")
+        << ","
+        << _("Properties")
+        << "\n";
+    for (int cardNo = 0; cardNo < cards.cards_size(); cardNo++) {
+        rcr::CardNPropetiesPackages c = cards.cards(cardNo);
+        auto componentIdx = c.card().symbol_id();
+        if (componentIdx > 0)
+            componentIdx--;
+        COMPONENT component = (COMPONENT) componentIdx;
+        std::string nameOrNominal;
+        if (MeasureUnit::hasNominal(component)) {
+            nameOrNominal = MeasureUnit::value(ML_RU, component, c.card().nominal());
+        } else
+            nameOrNominal = c.card().name();
+        escapeDoubleQuotes(nameOrNominal);
+        for (int p = 0; p < c.packages_size(); p++) {
+            auto pack = c.packages(p);
+            strm
+                << (char) ((int) component + 'A')
+                << ",\""
+                << StockOperation::boxes2string(pack.box()) // A box
+                << "\",\""
+                << nameOrNominal
+                << "\","
+                << pack.qty();
+            for (int pr = 0; pr < c.properties_size(); pr++) {
+                std::string p = c.properties(pr).value();
+                escapeDoubleQuotes(p);
+                strm << ",\"" << c.properties(pr).property_type() << ": "
+                    << p
+                    << "\"";
+            }
+            strm << "\n";
+        }
+    }
     return 0;
 }
 
