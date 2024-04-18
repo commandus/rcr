@@ -597,7 +597,7 @@ GoogleTest only prints them when the death test has failed.
 If you really need to see such LOG messages, a workaround is to temporarily
 break the death test (e.g. by changing the regex pattern it is expected to
 match). Admittedly, this is a hack. We'll consider a more permanent solution
-after the fork-and-exec-style death tests are implemented.
+after the fork-and-execSqliteStmt-style death tests are implemented.
 
 ## The compiler complains about `no match for 'operator<<'` when I use an assertion. What gives?
 

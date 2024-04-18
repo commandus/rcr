@@ -1552,3 +1552,19 @@ sudo systemctl status rcr.service
 sudo systemctl stop rcr.service
 sudo systemctl status rcr.service
 ```
+
+## Cleanup
+
+```
+DELETE FROM 'Card';
+DELETE FROM 'Property';
+DELETE FROM 'Package';
+DELETE FROM 'Box';
+DELETE FROM 'Journal';
+
+UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Card';
+UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Property';
+UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Package';
+UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Box';
+UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Journal';
+```

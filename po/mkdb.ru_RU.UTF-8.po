@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-18 14:59+0900\n"
+"POT-Creation-Date: 2024-04-18 15:57+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -18,75 +18,83 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: cli/mkdb.cpp:47
+#: cli/mkdb.cpp:54
 msgid "<connection-string>"
 msgstr "<соединение>"
 
-#: cli/mkdb.cpp:48
+#: cli/mkdb.cpp:55
 msgid "Set database connection string"
 msgstr "Строка соединения с СУБД"
 
-#: cli/mkdb.cpp:50
+#: cli/mkdb.cpp:57
 msgid "Set locale. Default ru"
 msgstr "Задать локаль. По умолчанию ru"
 
-#: cli/mkdb.cpp:51
+#: cli/mkdb.cpp:58
+msgid "Clean existing database"
+msgstr "Очистить базу данных"
+
+#: cli/mkdb.cpp:59
 msgid "Verbose level"
 msgstr "Детализация вывода"
 
-#: cli/mkdb.cpp:52
+#: cli/mkdb.cpp:60
 msgid "Show this help"
 msgstr "Показать этот экран справки"
 
-#: cli/mkdb.cpp:70
+#: cli/mkdb.cpp:78
 msgid "Usage: "
 msgstr "Применение: "
 
-#: cli/mkdb.cpp:72
+#: cli/mkdb.cpp:80
 msgid "make database utility"
 msgstr "утилита создания базы данных"
 
-#: cli/mkdb.cpp:173
+#: cli/mkdb.cpp:184
 msgid "housing"
 msgstr "корпус"
 
-#: cli/mkdb.cpp:177
+#: cli/mkdb.cpp:188
 msgid "voltage"
 msgstr "напряжение"
 
-#: cli/mkdb.cpp:181
+#: cli/mkdb.cpp:192
 msgid "current"
 msgstr "ток"
 
-#: cli/mkdb.cpp:185
+#: cli/mkdb.cpp:196
 msgid "power"
 msgstr "мощность"
 
-#: cli/mkdb.cpp:189
+#: cli/mkdb.cpp:200
 msgid "precision"
 msgstr "точность"
 
-#: cli/mkdb.cpp:193
+#: cli/mkdb.cpp:204
 msgid "description"
-msgstr ""
+msgstr "описание"
 
-#: cli/mkdb.cpp:216
+#: cli/mkdb.cpp:227
 msgid "Error filling schema :"
 msgstr "Ошибка заполнения схемы: "
 
-#: cli/mkdb.cpp:219
+#: cli/mkdb.cpp:230
 msgid "Unknown error filling schema"
 msgstr "Неизвестная ошибка заполнения схемы"
 
-#: cli/mkdb.cpp:241
+#: cli/mkdb.cpp:316
 msgid "Error create schema: "
 msgstr "Ошибка создания схемы: "
 
-#: cli/mkdb.cpp:243
+#: cli/mkdb.cpp:318
 msgid "Unknown error create schema"
 msgstr "Неизвестная  ошибка создания схемы"
 
-#: cli/mkdb.cpp:272
+#: cli/mkdb.cpp:348
 msgid "Admin user SYSDBA created with password \"masterkey\""
 msgstr ""
 "Пользователь SYSDBA с правами администратора создан с паролем \"masterkey\""
+
+#: cli/mkdb.cpp:351
+msgid "Database is not supported"
+msgstr "СУБД не поддерживается"

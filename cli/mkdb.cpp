@@ -11,7 +11,6 @@
 #include "gen/rcr.pb.h"
 #include "gen/rcr.pb-odb.hxx"
 
-#include <odb/query.hxx>
 #include <odb/schema-catalog.hxx>
 #include <odb/sqlite/database.hxx>
 
@@ -21,15 +20,23 @@
 #include <libintl.h>
 #define _(String) gettext (String)
 
+#include <sqlite3.h>
+
 const char* progname = "mkdb";
 const char* DEF_CONNECTION = "rcr.db";
 const MEASURE_LOCALE DEF_LOCALE = ML_RU;
 
 class ClientConfig {
 public:
+    bool cleanup;
     int verbosity;                ///< verbose level: 0- error only, 1- warning, 2- info, 3- debug
     std::string connection;
     MEASURE_LOCALE locale;
+    ClientConfig()
+        : cleanup(false), verbosity(0), locale(ML_RU)
+    {
+
+    }
 };
 
 /**
@@ -48,11 +55,12 @@ int parseCmd(
         _("Set database connection string"));
     struct arg_str *a_locale = arg_str0("l", "locale", "intl|ru",
         _("Set locale. Default ru"));
-    struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
+    struct arg_lit *a_clean = arg_lit0("0", "clean", _("Clean existing database"));
+	struct arg_lit *a_verbose = arg_litn("v", "verbose", 0, 5, _("Verbose level"));
 	struct arg_lit *a_help = arg_lit0("h", "help", _("Show this help"));
 	struct arg_end *a_end = arg_end(20);
 
-	void* argtable[] = { a_connection, a_locale, a_verbose, a_help, a_end };
+	void* argtable[] = { a_connection, a_locale, a_clean, a_verbose, a_help, a_end };
 	int nerrors;
 
 	// verify the argtable[] entries were allocated successfully
@@ -82,7 +90,8 @@ int parseCmd(
         value.locale = pchar2MEASURE_LOCALE(*a_locale->sval);
     else
         value.locale = DEF_LOCALE;
-	value.verbosity = a_verbose->count;
+	value.cleanup = a_clean->count;
+    value.verbosity = a_verbose->count;
 	arg_freetable(argtable, sizeof(argtable) / sizeof(argtable[0]));
 	return 0;
 }
@@ -90,7 +99,9 @@ int parseCmd(
 /**
  * Open file to read, skip UTF-8 BOM if exists.
  */
-std::ifstream *openUtf8BOM(const std::string &fn)
+std::ifstream *openUtf8BOM(
+    const std::string &fn
+)
 {
 	std::ifstream *ret = new std::ifstream(fn, std::ifstream::in);
 	// remove byte order mark (BOM) 0xef 0xbb 0xbf
@@ -222,6 +233,70 @@ static bool sqliteFillOutDatabase(
     return r;
 }
 
+#define CLEAN_STMT_SIZE 10
+
+static const char* CLEAN_STMT[CLEAN_STMT_SIZE] {
+    "DELETE FROM 'Card'",
+    "DELETE FROM 'Property'",
+    "DELETE FROM 'Package'",
+    "DELETE FROM 'Box'",
+    "DELETE FROM 'Journal'",
+    "UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Card'",
+    "UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Property'",
+    "UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Package'",
+    "UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Box'",
+    "UPDATE sqlite_sequence SET seq = 1 WHERE name = 'Journal'"
+};
+
+static int sqlite3Callback(
+    void *env,
+    int columns,
+    char **value,
+    char **column
+)
+{
+    if (!env)
+        return 0;
+    std::vector<std::vector<std::string>> *retval = (std::vector<std::vector<std::string>> *) env;
+    std::vector<std::string> line;
+    for (int i = 0; i < columns; i++) {
+        line.push_back(value[i] ? value[i] : "");
+    }
+    retval->push_back(line);
+    return 0;
+}
+
+static int execSqliteStmt(
+    sqlite3 *dbSqlite3,
+    const char *statement
+)
+{
+    char *zErrMsg = nullptr;
+    int r = sqlite3_exec(dbSqlite3, statement, sqlite3Callback, nullptr, &zErrMsg);
+    if (r != SQLITE_OK) {
+        if (zErrMsg) {
+            std::cerr << zErrMsg << std::endl;
+        }
+    }
+    return r;
+}
+
+static bool sqliteUpdate(ClientConfig &config)
+{
+    sqlite3 *dbSqlite3;
+    int r = sqlite3_open(config.connection.c_str(), &dbSqlite3);
+    if (r)
+        return false;
+    for (int i = 0; i < CLEAN_STMT_SIZE; i++) {
+        std::cout << CLEAN_STMT[i] << std::endl;
+        r = execSqliteStmt(dbSqlite3, CLEAN_STMT[i]);
+        if (r)
+            break;
+    }
+    r = sqlite3_close(dbSqlite3);
+    return r;
+}
+
 static bool sqliteCreateSchemaIfExists(ClientConfig &config)
 {
     auto db = new odb::sqlite::database(config.connection, SQLITE_OPEN_CREATE | SQLITE_OPEN_READWRITE);
@@ -266,9 +341,15 @@ int main(int argc, char** argv) {
 	if (config.verbosity > 1) {
 	}
 #ifdef ENABLE_SQLITE
-    sqliteCreateSchemaIfExists(config);
+    if (config.cleanup)
+        sqliteUpdate(config);
+    else {
+        sqliteCreateSchemaIfExists(config);
+        std::cout << _("Admin user SYSDBA created with password \"masterkey\"") << std::endl;
+    }
 #else
+    std::cerr << _("Database is not supported") << std::endl;
 #endif
-    std::cout << _("Admin user SYSDBA created with password \"masterkey\"") << std::endl;
+
     return 0;
 }

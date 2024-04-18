@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-18 14:59+0900\n"
+"POT-Creation-Date: 2024-04-18 15:57+0900\n"
 "PO-Revision-Date: 2023-04-19 15:23+0900\n"
 "Last-Translator: andrei <andrei@office221>\n"
 "Language-Team: Russian <gnu@d07.ru>\n"
@@ -220,21 +220,21 @@ msgstr "Администратор"
 msgid "Invalid arguments"
 msgstr "Неверные аргументы"
 
-#: SpreadSheetHelper.cpp:252
+#: SpreadSheetHelper.cpp:252 SpreadSheetHelper.cpp:330
 msgid "Box"
 msgstr "Коробка"
 
-#: SpreadSheetHelper.cpp:253
+#: SpreadSheetHelper.cpp:253 SpreadSheetHelper.cpp:332
 msgid "Name"
 msgstr "Наименование"
 
-#: SpreadSheetHelper.cpp:254
+#: SpreadSheetHelper.cpp:254 SpreadSheetHelper.cpp:334
 msgid "Quantity"
 msgstr "Количество"
 
-#: SpreadSheetHelper.cpp:255
-msgid "Label"
-msgstr "Марка"
+#: SpreadSheetHelper.cpp:255 SpreadSheetHelper.cpp:336
+msgid "Properties"
+msgstr ""
 
 #: SpreadSheetHelper.cpp:256
 msgid "Card #"
@@ -243,3 +243,10 @@ msgstr "Карточка №"
 #: SpreadSheetHelper.cpp:257
 msgid "Package #"
 msgstr "Пакет №"
+
+#: SpreadSheetHelper.cpp:328
+msgid "Symbol"
+msgstr ""
+
+#~ msgid "Label"
+#~ msgstr "Марка"
