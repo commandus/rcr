@@ -389,6 +389,26 @@ message SettingsRequest
     Settings settings = 2;
 }
 
+message EndPoint
+{
+    string url = 1;
+    string name = 2;
+    bool selected = 3;
+}
+
+message EndPointRequest
+{
+    User user = 1;
+    Operation operation = 2;    // + - add, - - delete(reserved), default- list (skip endpoint property)
+    EndPoint endPoint = 3;
+}
+
+message EndPointResponse
+{
+    OperationResponse rslt = 1;
+    repeated EndPoint endPoint = 2;
+}
+
 // ------------ RPC -------------
 
 service Rcr
@@ -422,4 +442,6 @@ service Rcr
     rpc lsJournal(JournalRequest) returns (JournalResponse) {}
     //
     rpc clean(CleanRequest) returns (OperationResponse) {}
+    //
+    rpc lsEndPoint(EndPointRequest) returns (EndPointResponse) {}
 }

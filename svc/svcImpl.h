@@ -263,6 +263,8 @@ public:
     grpc::Status rmSymbolProperty(grpc::ServerContext* context, const rcr::SymbolPropertyRequest* request, rcr::OperationResponse* response) override;
     // clean
     grpc::Status clean(grpc::ServerContext* context, const rcr::CleanRequest* request, rcr::OperationResponse* response) override;
+    // lsit, add, remove  database
+    grpc::Status lsEndPoint(grpc::ServerContext* context, const rcr::EndPointRequest* request, rcr::EndPointResponse* response) override;
 };
 
 #endif

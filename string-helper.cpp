@@ -4,6 +4,7 @@
 #include "string-helper.h"
 
 #include <sstream>
+#include <fstream>
 #include <unicode/unistr.h>
 #include <google/protobuf/util/json_util.h>
 

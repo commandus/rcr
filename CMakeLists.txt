@@ -212,6 +212,7 @@ add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp
 	svc/svc.cpp svc/svcImpl.cpp
 	svc/login-plugin.cpp
 	sqlite-helper.cpp
+	DatabaseList.cpp
 	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
 )
 target_link_libraries(rcr-svc PRIVATE

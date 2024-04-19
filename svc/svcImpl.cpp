@@ -39,13 +39,16 @@
 #include <libintl.h>
 #define _(String) gettext (String)
 
+#include "DatabaseList.h"
+
 using grpc::StatusCode;
 using odb::query;
 
 const int DEF_LIST_SIZE = 1000;
 const std::string ERR_SVC_INVALID_ARGS = _("Invalid arguments");
+#define ERR_CODE_SVC_PERMISSION_DENIED (-50009)
 const std::string ERR_SVC_PERMISSION_DENIED = _("Permission denied");
-#define ERR_CODE_SVC_INVALID_ARGS -505
+#define ERR_CODE_SVC_INVALID_ARGS (-505)
 
 // default list size
 #define DEF_LABEL_LIST_SIZE		100
@@ -403,8 +406,10 @@ grpc::Status RcrImpl::getCard(
     try {
         odb::result<rcr::Card> qc = mDb->query<rcr::Card>(odb::query<rcr::Card>::id == request->id());
         odb::result<rcr::Card>::iterator it(qc.begin());
-        if (it == qc.end())
+        if (it == qc.end()) {
+            t.commit();
             return grpc::Status::OK;
+        }
         *response->mutable_card() = *it;
         // properties
         odb::result<rcr::Property> qp = mDb->query<rcr::Property>(odb::query<rcr::Property>::card_id == request->id());
@@ -544,8 +549,10 @@ grpc::Status RcrImpl::chCard(
             case '=': {
                 rcr::Card v = request->value();
                 uint64_t id = v.id();
-                if (!id)
+                if (!id) {
                     return grpc::Status(StatusCode::INVALID_ARGUMENT, "");
+                    t.commit();
+                }
                 v.set_uname(toUpperCase(v.name()));
                 mDb->update(v);
                 // update property if changed
@@ -1960,5 +1967,50 @@ grpc::Status RcrImpl::clean(
     response->set_code(r);
     response->set_description(mConfig->sqliteDbName);
 
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}
+
+grpc::Status RcrImpl::lsEndPoint(
+    grpc::ServerContext* context,
+    const rcr::EndPointRequest* request,
+    rcr::EndPointResponse* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("clean", request, t)
+    std::string symbol;
+    if (request->has_operation()) {
+        symbol = request->operation().symbol();
+    }
+    response->mutable_rslt()->set_description(mConfig->path);
+    DatabaseList dbl(mConfig->path);
+    if (symbol == "-" || symbol == "+") {
+        if (!request->has_endpoint()) {
+            LOG(ERROR) << ERR_SVC_INVALID_ARGS;
+            response->mutable_rslt()->set_code(ERR_CODE_SVC_INVALID_ARGS);
+            t.commit();
+            return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
+        }
+        int rights = checkUserRights(nullptr, mDb, request->user());
+        if (rights < 1) {
+            LOG(ERROR) << ERR_SVC_PERMISSION_DENIED << " id: " << request->user().id() << " name: " << request->user().name()
+                       << " password: " << request->user().password() << " token: " << request->user().token();
+            response->mutable_rslt()->set_code(ERR_CODE_SVC_PERMISSION_DENIED);
+            t.commit();
+            return grpc::Status(StatusCode::PERMISSION_DENIED, ERR_SVC_PERMISSION_DENIED);
+        }
+        if (symbol == "-") {
+            // not implemented yet
+        }
+        if (symbol == "+") {
+            rcr::EndPoint *a = dbl.list.mutable_endpoint()->Add();
+            *a = request->endpoint();
+        }
+    }
+    *response = dbl.list;
+    END_GRPC_METHOD("clean", request, response, t)
     return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
 }

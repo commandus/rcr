@@ -188,3 +188,10 @@ std::string replaceAll(std::string str, const std::string& from, const std::stri
 	}
 	return str;
 }
+
+std::string file2string(
+    const std::string &filename
+)
+{
+    return file2string(filename.c_str());
+}

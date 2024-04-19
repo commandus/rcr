@@ -127,8 +127,8 @@ const static char *MSG500[5] = {
 #pragma warning(disable: 4996)
 #endif
 
-google::protobuf::util::JsonParseOptions jsonParseOptions;
-google::protobuf::util::JsonPrintOptions jsonPrintOptions;
+static google::protobuf::util::JsonParseOptions jsonParseOptions;
+static google::protobuf::util::JsonPrintOptions jsonPrintOptions;
 
 static RequestType parseRequestType(const char *url)
 {

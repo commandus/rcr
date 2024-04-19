@@ -29,6 +29,7 @@ std::string hexString(const std::string &data);
 std::string hex2string(const std::string &hex);
 
 std::string file2string(const char *filename);
+std::string file2string(const std::string &filename);
 
 /**
  * Append string to file
