@@ -31,6 +31,7 @@
 #include "SpreadSheetHelper.h"
 #include "BoxName.h"
 #include "string-helper.h"
+#include "sqlite-helper.h"
 
 #include <xlnt/workbook/workbook.hpp>
 
@@ -188,7 +189,6 @@ RcrImpl::RcrImpl(ServiceConfig *config)
     srand((unsigned ) time(nullptr));    //
 	mConfig = config;
 	mDb = odbconnect(config);
-
     printJSONOptions.add_whitespace = true;
     printJSONOptions.always_print_primitive_fields = true;
     printJSONOptions.preserve_proto_field_names = true;
@@ -1935,5 +1935,30 @@ grpc::Status RcrImpl::rmSymbolProperty(
         LOG(ERROR) << _("remove symbol property unknown error");
     }
     END_GRPC_METHOD("rmSymbolProperty", request, response, t)
+    return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
+}
+
+grpc::Status RcrImpl::clean(
+    grpc::ServerContext* context,
+    const rcr::CleanRequest* request,
+    rcr::OperationResponse* response
+) {
+    if (request == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    if (response == nullptr)
+        return grpc::Status(StatusCode::INVALID_ARGUMENT, ERR_SVC_INVALID_ARGS);
+    int r;
+    BEGIN_GRPC_METHOD("clean", request, t)
+    CHECK_PERMISSION(mDb, request->user(), 1)
+    END_GRPC_METHOD("clean", request, response, t)
+
+    // hmm. Other operations fails
+    delete mDb;
+    r = sqliteClean(mConfig->sqliteDbName);
+    mDb = odbconnect(mConfig);
+
+    response->set_code(r);
+    response->set_description(mConfig->sqliteDbName);
+
     return ((r == 0) ? grpc::Status::OK : grpc::Status(StatusCode::UNKNOWN, ""));
 }

@@ -188,7 +188,7 @@ target_include_directories(rcr PRIVATE ${BACKEND_DB_INC} ${Protobuf_INCLUDE_DIRS
 # mkdb
 #
 set(MKDB_SRC 
-	cli/mkdb.cpp
+	cli/mkdb.cpp sqlite-helper.cpp
 	${GEN_SRC}
 	${ARGTABLE}
 )
@@ -209,9 +209,10 @@ target_link_libraries(box PRIVATE ${ICU_LIBS} ${LIBINTL})
 # rcr-svc
 #
 add_executable(rcr-svc svc/daemonize.cpp svc/passphrase.cpp svc/SSLValidator.cpp svc/svcconfig.cpp
-		svc/svc.cpp svc/svcImpl.cpp
-		svc/login-plugin.cpp
-		${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
+	svc/svc.cpp svc/svcImpl.cpp
+	svc/login-plugin.cpp
+	sqlite-helper.cpp
+	${GEN_SRC} ${ARGTABLE} ${SVC_EXTRA_SRC} gen/odb-views-odb.cxx
 )
 target_link_libraries(rcr-svc PRIVATE
 	rcr ${BACKEND_DB_LIB} ${OS_SPECIFIC_LIBS} ${ICU_LIBS} ${ODB_LIBODB_LIBRARIES} ${ODB_SQLITE_LIBRARIES}

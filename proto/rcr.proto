@@ -365,6 +365,11 @@ message JournalRequest
     uint64 card_id = 4;                             ///< filter by card
 }
 
+message CleanRequest
+{
+    User user = 1;
+}
+
 message SymbolProperty
 {
     uint64 id = 1;                              ///< identifier
@@ -415,4 +420,6 @@ service Rcr
     rpc exportExcel(ExportExcelRequest) returns (ExportExcelResponse) {}
     //
     rpc lsJournal(JournalRequest) returns (JournalResponse) {}
+    //
+    rpc clean(CleanRequest) returns (OperationResponse) {}
 }
