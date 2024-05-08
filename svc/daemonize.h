@@ -17,6 +17,7 @@ private:
 	bool setPidFile();
 	const std::string &workingDirectory;
 	int maxFileDescriptors;
+	bool closeFileDescriptors;
 public:
 	Daemonize(
 		const std::string &daemonName,
@@ -25,7 +26,8 @@ public:
 		TDaemonRunner stopRequest, 				///< function to stop
 		TDaemonRunner done,						///< function to clean after runner exit
 		const int aMaxFileDescriptors = 0,		///< 0- default 1024
-		const std::string &aPidFileName = ""	///< if empty, /var/run/program_name.pid is used
+		const std::string &aPidFileName = "",	///< if empty, /var/run/program_name.pid is used
+		const bool closeFileDescriptors = true
 	);
 	~Daemonize();
 	static int setFdLimit(int value);

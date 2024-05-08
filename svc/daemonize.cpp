@@ -36,6 +36,7 @@ static TDaemonRunner daemonStopRequest;
 static TDaemonRunner daemonDone;
 
 #define DEF_FD_LIMIT			(1024 * 10)
+const char *DEVNULL = "/dev/null";
 
 Daemonize::	Daemonize(
     const std::string &daemonName,
@@ -44,9 +45,10 @@ Daemonize::	Daemonize(
     TDaemonRunner stopRequest, 				///< function to stop
     TDaemonRunner done,						///< function to clean after runner exit
     const int aMaxFileDescriptors,  		///< 0- default 1024
-    const std::string &aPidFileName     	///< if empty, /var/run/program_name.pid is used
+    const std::string &aPidFileName,     	///< if empty, /var/run/program_name.pid is used
+    const bool aCloseFileDescriptors
 )
-    : workingDirectory(aWorkingDirectory), maxFileDescriptors(aMaxFileDescriptors)
+    : workingDirectory(aWorkingDirectory), maxFileDescriptors(aMaxFileDescriptors), closeFileDescriptors(aCloseFileDescriptors)
 {
 	serviceName = daemonName;
 	if (aPidFileName.empty())
@@ -185,59 +187,68 @@ bool Daemonize::setPidFile()
 //See http://stackoverflow.com/questions/17954432/creating-a-daemon-in-linux
 int Daemonize::init()
 {
-	pid_t pid;
-	// Fork off the parent process
-	pid = fork();
+    pid_t pid;
+    // Fork off the parent process
+    pid = fork();
 
-	// An error occurred
-	if (pid < 0)
-		exit(EXIT_FAILURE);
+    // An error occurred
+    if (pid < 0)
+        exit(EXIT_FAILURE);
 
-	// Success: Let the parent terminate
-	if (pid > 0)
-		exit(EXIT_SUCCESS);
+    // Success: Let the parent terminate
+    if (pid > 0)
+        exit(EXIT_SUCCESS);
 
-	// On success: The child process becomes session leader
-	if (setsid() < 0)
-		exit(EXIT_FAILURE);
+    // On success: The child process becomes session leader
+    if (setsid() < 0)
+        exit(EXIT_FAILURE);
 
-	// Catch, ignore and handle signals
-	//TODO: Implement a working signal handler */
-	signal(SIGCHLD, SIG_IGN);
-	signal(SIGHUP, SIG_IGN);
+    // Catch, ignore and handle signals
+    //TODO: Implement a working signal handler */
+    signal(SIGCHLD, SIG_IGN);
+    signal(SIGHUP, SIG_IGN);
 
-	// Fork off for the second time
-	pid = fork();
+    // Fork off for the second time
+    pid = fork();
 
-	// An error occurred
-	if (pid < 0)
-		exit(EXIT_FAILURE);
+    // An error occurred
+    if (pid < 0)
+        exit(EXIT_FAILURE);
 
-	// Success: Let the parent terminate
-	if (pid > 0)
-		exit(EXIT_SUCCESS);
+    // Success: Let the parent terminate
+    if (pid > 0)
+        exit(EXIT_SUCCESS);
 
-	// Set new file permissions
-	umask(0);
+    // Set new file permissions
+    umask(0);
 
-	int x;
+    int x;
 
-	// Change the working directory to the root directory
-	// or another appropriated directory
-	x = chdir(workingDirectory.c_str());
+    // Change the working directory to the root directory
+    // or another appropriated directory
+    x = chdir(workingDirectory.c_str());
 
-	// Close all open file descriptors
-	for (x = sysconf(_SC_OPEN_MAX); x>0; x--)	{
-		close(x);
-	}
+    // Close all open file descriptors
+    if (closeFileDescriptors) {
+        for (x = sysconf(_SC_OPEN_MAX); x>0; x--)	{
+            if (x > 2)
+                close(x);
+        }
+        // reopen stdin, stdout, stderr
+        /*
+        stdin = fopen(DEVNULL, "r");
+        stdout = fopen(DEVNULL, "w+");
+        stderr = fopen(DEVNULL, "w+");
+        */
+    }
 
-	if (maxFileDescriptors > 0)
-		setFdLimit(maxFileDescriptors);
+    if (maxFileDescriptors > 0)
+        setFdLimit(maxFileDescriptors);
 
-	setPidFile();
-	daemonRun();
-	daemonDone();
-	return 0;
+    setPidFile();
+    daemonRun();
+    daemonDone();
+    return 0;
 }
 
 /**
