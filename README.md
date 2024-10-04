@@ -982,6 +982,8 @@ ls /usr/local/include/xlnt/xlnt.hpp
 
 ### libicu
 
+Посдедний релиз C++11 не C++17 [ICU 73](https://github.com/unicode-org/icu/archive/refs/tags/release-73-2.tar.gz)
+
 Если в репозитории нет версии 61 и выше, собрать из исходников:
 ```
 git clone https://github.com/unicode-org/icu.git
@@ -1320,7 +1322,7 @@ sudo cp locale/ru/LC_MESSAGES/*.mo /usr/share/locale/ru/LC_MESSAGES/
 
 ### Сборка в Centos 8 в докере
 
-- пакет libicu-devel версия 60, нужна 61.
+- пакет libicu-devel версия 60, нужна 61 и не выше 73.
 - grpc нет в репозитории
 - нет заголовка /usr/include/xlocale.h
 
@@ -1391,12 +1393,165 @@ docker rm $(docker ps -qa --no-trunc --filter "status=exited")
 ```
 
 
-### Копируем файлы в Centos 8
+#### Копируем файлы в Centos 8
 
 ```
 ssh user@kb-srv.ysn.ru
 uname -a
 Linux web-hosting 4.18.0-497.el8.x86_64 #1 SMP Sat Jun 10 12:24:53 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
+```
+
+### Сборка для ubuntu 18.04 (bionic)
+
+Скачать образ в докер
+```
+docker create ubuntu:18.04
+```
+Запустить в докере оболочку
+```
+docker create ubuntu:18.04
+docker run -itv /home/andrei/src:/home/andrei/src ubuntu:18.04 bash
+```
+Обновить репозиторий и установить пакеты
+```
+apt install lsb-core software-properties-common git build-essential wget mc gcc clang  
+ libc-ares-dev odb libodb-sqlite-2.4 libmicrohttpd-dev gettext sqlite3 libsqlite3-dev libssl-dev
+```
+
+// apt remove libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev
+
+Проверьте версию компилятора odb
+
+```
+odb --version
+ODB object-relational mapping (ORM) compiler for C++ 2.4.0
+```
+
+Замените GCC на более раннюю версию 
+
+[ODB GCC7.5.0 -mtune bug](https://stackoverflow.com/questions/60762771/what-causes-gcc-invalid-option-for-mtune)
+
+```
+apt-get install gcc-7-base=7.3.0-16ubuntu3 cpp-7=7.3.0-16ubuntu3 gcc-7=7.3.0-16ubuntu3 libgcc-7-dev=7.3.0-16ubuntu3 libasan4=7.3.0-16ubuntu3 libubsan0=7.3.0-16ubuntu3 libcilkrts5=7.3.0-16ubuntu3
+apt-get install g++-7=7.3.0-16ubuntu3 libstdc++-7-dev=7.3.0-16ubuntu3 
+ln -s /usr/bin/g++-7 /usr/bin/g++
+ln -s /usr/bin/gcc-7 /usr/bin/gcc
+ln -s /usr/bin/gcc /usr/bin/cc
+```
+
+Установите новый CMake (в репозитории старый)):
+```
+wget -c https://github.com/Kitware/CMake/releases/download/v3.30.4/cmake-3.30.4-linux-x86_64.sh
+chmod a+x cmake-3.30.4-linux-x86_64.sh
+./cmake-3.30.4-linux-x86_64.sh
+ln -s /usr/local/bin/cmake /usr/bin/cmake
+```
+или соберите CMake вручную:
+```
+cd /home/andrei/src/git
+wget -c https://github.com/Kitware/CMake/releases/download/v3.30.4/cmake-3.30.4.tar.gz
+tar xvfz cmake-3.30.4.tar.gz
+cd cmake-3.30.4
+./configure
+make
+sudo make install
+```
+
+Установите bazel (необязательно):
+```
+wget -c https://github.com/bazelbuild/bazel/releases/download/7.3.2/bazel-7.3.2-installer-linux-x86_64.sh
+chmod a+x bazel-7.3.2-installer-linux-x86_64.sh
+./bazel-7.3.2-installer-linux-x86_64.sh
+```
+Соберите libicu вручную (в репозитории версия 60.2 а нужна >=61.0 и не выше 73):
+```
+cd /home/andrei/src/git
+# git clone https://github.com/unicode-org/icu.git
+wget -c https://github.com/unicode-org/icu/archive/refs/tags/release-73-2.tar.gz
+tar xvfz release-73-2.tar.gz
+cd icu-release-73-2/icu4c/source
+./configure
+make
+sudo make install
+```
+
+Или скачать zip файл, распаковать, собрать и установить
+```
+wget -c https://codeload.github.com/unicode-org/icu/zip/refs/heads/main
+cd icu-main/icu4c/source
+./configure
+make
+sudo make install
+```
+
+Соберите Xlnt вручную:
+
+```
+cd /home/andrei/src/git
+git clone https://github.com/tfussell/xlnt.git
+cd xlnt
+git submodule init
+git submodule update
+mkdir build
+cd build
+cmake ..
+make
+make install
+ls /usr/local/lib/libxlnt.so.1.5.0
+ls /usr/local/include/xlnt/xlnt.hpp
+```
+
+Соберите absl с поддержкой C++14 вручную:
+
+```
+cd /home/andrei/src/git
+git clone https://github.com/abseil/abseil-cpp.git
+cd /home/andrei/src/git/abseil-cpp
+mkdir -p build
+cd build
+cmake -DCMAKE_CXX_STANDARD=14 ..
+make
+make install
+```
+
+Соберите grpc++ версии 1.56 вручную:
+
+```
+cd /home/andrei/src/git
+git clone --recurse-submodules -b v1.56.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
+cd grpc
+mkdir -p cmake/build
+cd  cmake/build
+cmake -DgRPC_INSTALL=ON -DgRPC_BUILD_TESTS=OFF -DCMAKE_CXX_STANDARD=14 ../..
+make -j 1
+make install
+```
+
+Если protoc автоматически не собрался, соберите protoc вручную:
+
+```
+cd /home/andrei/src/git/grpc/third_party/protobuf
+mkdir -p build
+cd build
+cmake ..
+make
+make install
+```
+
+Очистите и сгененируйте файлы в папке gen заново
+```
+cd gen
+rm *
+cd ..
+tools/generate-code
+```
+Запустите сборку
+```
+cd /home/andrei/src/rcr
+mkdir -p build-ubuntu18
+cd build-ubuntu18
+cmake ..
+make
 ```
 
 ### Зависимости
