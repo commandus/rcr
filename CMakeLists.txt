@@ -91,8 +91,9 @@ find_package(Xlnt CONFIG REQUIRED)
 set(XLSX_LIBS xlnt::xlnt)
 
 #
-# ODB requires 11, 14?, not compile 17 (on Windows)
-# gRPC 1.24 requires 11, gRPC 1.53 requires 17
+# ODB requires 11, 14, not compile 17 (on MSVC for instance)
+# gRPC 1.24 requires C++11, gRPC 1.53 requires 17
+# odb does not work on C++17 (throw)
 # 
 set(CMAKE_CXX_STANDARD 14)
 
