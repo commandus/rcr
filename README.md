@@ -1509,7 +1509,7 @@ git clone https://github.com/abseil/abseil-cpp.git
 cd /home/andrei/src/git/abseil-cpp
 mkdir -p build
 cd build
-cmake -DCMAKE_CXX_STANDARD=14 ..
+cmake -DCMAKE_CXX_STANDARD=14 -DCMAKE_CXX_FLAGS='-D_GLIBCXX_USE_CXX11_ABI=0 ..
 make
 make install
 ```
