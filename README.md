@@ -929,12 +929,13 @@ cd vcpkg
 - or unofficial-postgresql/PostgreSQL(Windows)
 - Xlnt - есть в vcpkg для Windows, но нет в пакетах Ubuntu
 - libmicrohttpd (если включена опция ENABLE_HTTP)
+- libldap
 
 Установка в Linux зависимостей из пакетов:
 
 ```
 sudo apt install grpc-proto libgrpc++-dev libgrpc-dev protobuf-compiler-grpc protobuf-compiler libprotobuf-dev \
-libc-ares-dev odb libodb-sqlite-2.4 libicu-dev libmicrohttpd-dev gettext sqlite3 libsqlite3-dev
+libc-ares-dev odb libodb-sqlite-2.4 libicu-dev libmicrohttpd-dev gettext sqlite3 libsqlite3-dev libldap-dev
 ```
 
 [Install ODB unix](https://codesynthesis.com/products/odb/doc/install-unix.xhtml)
@@ -956,10 +957,20 @@ ODB object-relational mapping (ORM) compiler for C++ 2.4.0
 g++-10: error: No such file or directory
 ```
 
+или
+
+```
+g++-12: error: No such file or directory
+```
+
 Установите запрашиваемый компилятор g++-10:
 
 ```
 sudo apt install g++-10
+```
+или
+```
+sudo apt install g++-12
 ```
 
 ### Xlnt

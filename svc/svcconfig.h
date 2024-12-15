@@ -5,6 +5,7 @@
 #define SVCCONFIG_H
 
 #include <string>
+#include <cinttypes>
 
 #define DEF_PORT        50051
 #define DEF_ADDRESS     "0.0.0.0"

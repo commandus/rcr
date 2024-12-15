@@ -6,6 +6,7 @@
 #define RCR_STOCKOPERATION_H
 
 #include <string>
+#include <cinttypes>
 
 typedef struct {
     union {
