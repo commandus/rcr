@@ -991,6 +991,16 @@ ls /usr/local/lib/libxlnt.so.1.5.0
 ls /usr/local/include/xlnt/xlnt.hpp
 ```
 
+Если не собирается, добавьте в
+xlnt/include/xlnt/xlnt_config.hpp
+
+строку 
+
+```
+#include <cstdint>
+```
+
+
 ### libicu
 
 Посдедний релиз C++11 не C++17 [ICU 73](https://github.com/unicode-org/icu/archive/refs/tags/release-73-2.tar.gz)
