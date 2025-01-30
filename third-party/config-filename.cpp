@@ -10,16 +10,16 @@
 #endif
 
 #include "config-filename.h"
-#include "utilfile.h"
+#include "file-helper.h"
 
-#ifdef _MSC_VER
+#if defined(_MSC_VER) || defined(__MINGW32__)
 std::string getDefaultConfigFileName(
     const char *programPath,
     const std::string &filename
 )
 {
     // try to get in the current directory
-    if (util::fileExists(filename))
+    if (file::fileExists(filename))
         return filename;
     std::string r = filename;
 	// Need a process with query permission set
@@ -46,19 +46,19 @@ std::string getDefaultConfigFileName(
 )
 {
     // try to get in the current directory
-    if (util::fileExists(filename))
+    if (filel::fileExists(filename))
         return filename;
 
     // try to get in the /etc directory
     std::string r("/etc/" + filename);
-    if (util::fileExists(r))
+    if (filel::fileExists(r))
         return r;
 
     // try to get in the $HOME directory
     struct passwd *pw = getpwuid(getuid());
     const char *homedir = pw->pw_dir;
     r = std::string(homedir) + "/" + filename;
-    if (util::fileExists(r))
+    if (filel::fileExists(r))
         return r ;
 
     // try executable file folder
@@ -69,7 +69,7 @@ std::string getDefaultConfigFileName(
             last_slash_idx = p.rfind('\\');
         if (last_slash_idx != std::string::npos) {
             r = p.substr(0, last_slash_idx + 1) + filename;
-            if (util::fileExists(r)) {
+            if (filel::fileExists(r)) {
                 return r;
             }
         }
